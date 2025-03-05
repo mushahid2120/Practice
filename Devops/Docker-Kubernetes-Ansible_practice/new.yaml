@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myrs
+  labels:
+    app: web
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      name: mypod
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: myc
+          image: httpd

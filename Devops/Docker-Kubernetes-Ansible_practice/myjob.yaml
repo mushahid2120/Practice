@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: myjob
+  labels:
+    app: myj
+spec:
+  template:
+    metadata:
+      labels:
+        app: myj
+    spec:
+      containers:
+        - image: centos:7
+          name: myc
+          command: [ "expr" , "2" , "+" , "4"]
+      restartPolicy: Never

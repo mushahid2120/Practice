@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-app
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox-app
+  template:
+    metadata:
+      labels:
+        app: busybox-app
+    spec:
+      serviceAccountName: my-service-account
+      containers:
+        - name: my-busybox
+          image: busybox
+          command: ["sh", "-c", "cat /etc/secrets/my-key"]
+          volumeMounts:
+            - name: secret-volume
+              mountPath: /etc/secrets
+              readOnly: true
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: my-key
+

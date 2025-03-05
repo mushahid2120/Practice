@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mydeploy-mysql
+  name: mydeploy-sql
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mydeploy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mydeploy
+    spec:
+      containers:
+      - image: mysql
+        name: mydb
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: mypassword
+        resources: {}
+status: {}

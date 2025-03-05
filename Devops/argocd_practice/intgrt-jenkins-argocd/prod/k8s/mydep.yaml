@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mydp
+  name: mydp
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mydp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mydp
+    spec:
+      containers:
+      - image: mushahid144/docforargo-py:latest
+        name: docforargo-py
+        resources: {}
+status: {}

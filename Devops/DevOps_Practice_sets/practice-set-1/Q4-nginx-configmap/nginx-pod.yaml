@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myweb
+  labels:
+    app: web
+spec:
+  containers:
+    - name: web-con
+      image: nginx:latest
+      volumeMounts:
+        - name: c1
+          mountPath: /usr/share/nginx/html
+
+  volumes:
+    - name: c1
+      configMap:
+        name: myconmap

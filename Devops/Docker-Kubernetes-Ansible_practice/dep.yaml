@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydeploywordpress
+  labels:
+    app: wordpress
+    tier: frontend
+spec:
+  selector:
+    matchExpressions:
+      - { key: app, operator: In , values: [wordpress]}
+      - { key: tier, operator: In, values: [frontend]} 
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+        - name: mywordpress
+          image: wordpress
+            #          env:
+            #            - name: WORDPRESS_DB_HOST
+            # value: "mysql"            # deploy name
+            #- name: WORDPRESS_DB_PASSWORD
+            # value: "redhat"
+          ports:
+            - containerPort: 80
+          #          name: mywordpress
+            #volumeMounts: 
+            #- name: mywordpressdb
+            #mountPath: /var/www/html
+            #volumes:
+            #      - name: mywordpressdb
+            #        persistentVolumeClaim:
+            #          claimName: "mypvc"

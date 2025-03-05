@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mydb
+  labels:
+    app: db
+spec:
+  containers:
+    - name: mysql-con
+      image: mysql
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "redhat"  
+        - name: MYSQL_USER
+          value: "myuser"
+        - name: MYSQL_DATABASE
+          value: "myapp"
+        - name: MYSQL_PASSWORD
+          value: "redhat"

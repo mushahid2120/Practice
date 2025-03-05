@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mycrjob
+  labels:
+    app: mycrj
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      completions: 8      
+      parallelism: 2     
+      template:
+        metadata:
+          labels:
+            app: mycrj
+        spec:
+          containers:   
+            - name: myc
+              image: centos:7
+              command: ["expr", "5", "*", "10"]
+          restartPolicy: Never      
+

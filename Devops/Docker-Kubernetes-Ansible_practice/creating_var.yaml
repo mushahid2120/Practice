@@ -1,0 +1,23 @@
+- hosts: all
+  vars_files:
+    - 'var.yaml'
+  tasks:
+    - package:
+        name: '{{ webService }}'
+        state: present
+      ignore_errors: true
+      register: packageRegister
+    
+    - package:
+        name: nginx
+        state: present
+      when: packageRegister['failed']
+
+    - copy:
+        content: "Welcome to my web Page \n My name is Mushahid"
+        dest: "{{ docRoot}}/index.html"
+    - service:
+        name: '{{ webService }}'
+        state: '{{ status }}'
+    - debug:
+        msg: '{{ packageRegister }}'

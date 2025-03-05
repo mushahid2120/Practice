@@ -1,0 +1,3 @@
+docRoot: '/var/www/html/'
+status: started
+webService: 'httpd'

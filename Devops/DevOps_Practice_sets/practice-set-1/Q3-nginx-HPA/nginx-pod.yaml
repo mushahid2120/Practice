@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynginx
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx-web
+        image: nginx
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+

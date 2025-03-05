@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myhelm
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  source:
+    helm:
+      releaseName: myrelease-name
+      parameters:
+        - name: image.repository
+          value: 'nginx'
+    repoURL: https://github.com/mushahid2120/argocd_practice.git
+    path: mychart
+    targetRevision: main
+

@@ -1,0 +1,3 @@
+container_name: "docker run -idt --name db2 --network mynetwork -v /sharing:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=redhat -e MYSQL_USER=mushahid -e MYSQL_PASSWORD=redhat -e MYSQL_DATABASE=mydb1 mysql"
+
+docker run -idt --name wp2 -v 8080:80 wordpress

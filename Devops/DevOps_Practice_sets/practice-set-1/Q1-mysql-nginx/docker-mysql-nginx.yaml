@@ -1,0 +1,19 @@
+services:
+  database:
+    container_name: mydb
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=redhat
+      - MYSQL_USER=mushahid
+      - MYSQL_PASSWORD=redhat
+      - MYSQL_DATABASE=myapp
+
+  server:
+    container_name: myweb
+    image: nginx
+    ports:
+      - 80:80
+    expose:
+      - 80
+    
+

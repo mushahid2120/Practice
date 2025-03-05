@@ -1,0 +1,19 @@
+- hosts: all
+  tasks:
+    - file:
+        path: '/root/myfile/'
+        state: directory
+    - debug:
+        msg: '{{ ansible_facts.os_family }}'
+
+    - name: "installing webserver on RedHat"
+      package:
+        name: "httpd"
+        state: present
+      when: ansible_facts.os_family=='RedHat' or ansible_facts.os_family=='Centos' and ansible_facts.memfree_mb>=100
+
+    - name: "Intalling web server on Ubuntu"
+      package:
+        name: : "apache2"
+        state: present
+      when: ansible_facts.os_family=='Ubuntu'

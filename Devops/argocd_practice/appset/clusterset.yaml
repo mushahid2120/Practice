@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: myapp-set
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {}
+  template:
+    metadata:
+      name: "{{ name }}.app"
+    spec:
+      project: default
+      destination:
+        server: "{{ server }}"
+        namespace: default
+      source:
+        repoURL: https://github.com/mushahid2120/argocd_practice.git
+        path: prod
+        targetRevision: main

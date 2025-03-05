@@ -1,0 +1,15 @@
+- hosts: all
+  tasks:
+    - name: "Install webserver"
+      package:
+        name: "httpd"
+        state: present
+    - name: "copy web page"
+      copy: 
+        src: "index.html"
+        dest: "/var/www/html/index.html"
+    - name: "starting webserver"
+      service: 
+        name: "httpd"
+        state: started
+

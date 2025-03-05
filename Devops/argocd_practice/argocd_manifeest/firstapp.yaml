@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myproject
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  source:
+    repoURL: https://github.com/mushahid2120/argocd_practice.git
+    path: prod
+    targetRevision: main

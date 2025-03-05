@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: list-app-set
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: "argocluster"
+            url: "https://kubernetes.default.svc"
+            gitpath: "prod/kseal"
+          - cluster: "othercluster"
+            url: "https://172.31.44.16:6443"
+            gitpath: "prod"
+  template:
+    metadata:
+      name: "{{ cluster }}app"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/mushahid2120/argocd_practice.git
+        targetRevision: HEAD
+        path: "{{ gitpath }}"
+      destination:
+        server: "{{ url }}"
+        namespace: default

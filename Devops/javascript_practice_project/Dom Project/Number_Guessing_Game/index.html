@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=\, initial-scale=1.0">
+    <title>Guess the Number</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 h-screen grid place-content-center text-white">
+
+        <div class="text-4xl font-medium m-5 text-center">
+                Number Guessing Game
+        </div >
+
+        <div class="text-center bg-slate-800 rounded-2xl p-8" id="container">
+                <div class="text-xl">Try and guess a random number between 1 and 100.</div>
+                <div class="text-xl mb-4">You have 10 attempts to guess the right number</div>
+                <div class="text-6xl font-medium mb-10">Guess a number</div>
+
+                <form action="#" class="p-7">
+                        <input type="text " class="h-16 w-[90%] rounded-xl text-black text-xl p-3 text-center" id="input"> <br>
+                        <input type="submit" value="Submit Guess" class="text-4xl mt-8 border p-4 rounded-xl bg-black
+                         hover:text-slate-950 hover:bg-white font-medium" id="submit">
+                </form>
+
+                <div class="text-2xl text-left m-4">Previous Guesses:<span class="bg-slate-700 " id="preguess">  </span></div>
+                <div class="text-2xl text-left m-4">Guesses Remaining: <span id="remguess">10</span></div>
+                <div class="text-xl text-red-500" id="result"></div>
+        </div>
+
+</body>
+<script src="index.js"></script>
+</html>

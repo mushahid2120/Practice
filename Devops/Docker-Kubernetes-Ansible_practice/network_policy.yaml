@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mynp
+spec:
+  podSelector:
+    matchLabels:
+      app: myapp
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 90
+          protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  labels:
+    app: myapp
+spec:
+  containers:
+    - name: myc
+      image: httpd
+      ports:
+        - containersPort: 81

@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mynp
+spec:
+  policyTypes:
+    - Ingress
+  podSelector: {}
+    #    matchLabels:
+      #      app: myd1 # Change this to match your pod labels
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 80
+            #    - from:
+#        - podSelector: {}
