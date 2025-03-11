@@ -1,6 +1,6 @@
 pipeline {
     tools {
-        gradle "mygradle"
+        maven "mymaven"
     }
     agent any
 
@@ -12,16 +12,15 @@ pipeline {
         }
         stage('Build') {
             steps {
-                dir('Devops/Build/Gradle/myg/') {
-                    sh "ls"
-                    sh "./gradlew clean build"
+                dir('Devops/Build/Maven/my-app/') {
+                    sh "mvn clean package"
                 }
             }
         }
-        stage('Publish') {
+        stage('Sonar Scanning') {
             steps {
-                dir('Devops/Build/Gradle/myg/') {
-                    sh "./gradlew clean publish"
+                dir('Devops/Build/Maven/my-app/') {
+                    sh "mvn clean verify sonar:sonar -Dsonar.login=squ_21a7d944176a1b8e724512f25f1056d81a279126 -Dsonar.java.binarie=target -Dsonar.java.projectKey=myjenkinssonar"
                 }
             }
         }
