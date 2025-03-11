@@ -1,0 +1,32 @@
+pipeline {
+    tools { 
+        maven 'mymaven' 
+    }
+    agent any
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/mushahid2120/Practice'
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('Devops/Maven/my-app/') {
+                    sh "pwd"
+                    sh "mvn clean package"
+                }
+            }
+        }
+        stage('Push Artifact') {
+            steps {
+                dir('Devops/Maven/my-app/') {
+                    withMaven(globalMavenSettingsConfig: '9aff5388-7d90-4e4f-b65e-bc026bf54eb4', mavenSettingsConfig: '',) {
+                    
+                        sh "mvn deploy"
+                        
+                    }
+                }
+            }
+        }
+    }
+}

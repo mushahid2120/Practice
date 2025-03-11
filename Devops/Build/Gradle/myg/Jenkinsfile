@@ -1,0 +1,29 @@
+pipeline {
+    tools {
+        gradle "mygradle"
+    }
+    agent any
+
+    stages {
+        stage('Git CheckOut') {
+            steps {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/mushahid2120/Practice.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('Devops/Build/Gradle/myg/') {
+                    sh "ls"
+                    sh "./gradlew clean build"
+                }
+            }
+        }
+        stage('Publish') {
+            steps {
+                dir('Devops/Build/Gradle/myg/') {
+                    sh "./gradlew clean publish"
+                }
+            }
+        }
+    }
+}
