@@ -1,0 +1,161 @@
+Setting kubernetes- Kubeadm 
+
+
+     updating the repositories
+#sudo apt update && sudo apt upgrade -y  # Ubuntu/Debian
+#sudo yum update -y                      # CentOS/RHEL
+
+
+
+      Swap memory is used when RAM is full. The OS moves inactive memory pages from RAM to swap space (on the hard disk or SSD). 
+      When RAM has free space, it moves them back. The swapoff command disables swap, moving data back to RAM if possible.
+
+      If swap is enabled, the OS may move some processes (or parts of them) to swap space,
+      making it unpredictable for Kubernetes to determine the real available memory.
+	    This can lead to unexpected pod evictions or crashes due to incorrect memory calculations.
+		Kubernetes has its own OOM Killer to terminate pods when memory is exhausted.
+	If swap is enabled, the Linux kernel might move processes to swap instead of killing them, 
+	leading to unstable performance instead of freeing memory properly.
+
+#sudo swapoff -a
+#sudo sed -i '/swap/d' /etc/fstab  # Make it persistent
+
+
+
+      This setting is crucial for Kubernetes and other container networking setups that use network bridges. 
+	  By default, Linux bridges do not apply iptables rules, which can cause issues with packet filtering, NAT, and firewall rules. Enabling this setting ensures: 
+	  ✅ Traffic in Kubernetes clusters is properly filtered
+	✅ Firewalls and NAT rules apply to bridged traffic
+	✅ Security rules are enforced on container-to-container and external traffic
+	
+	sysctl is a command-line tool in Linux used to view and modify kernel parameters at runtime.
+	These parameters are stored in the /proc/sys/ directory and control various aspects of the Linux kernel, 
+	including networking, security, and performance.
+	iptables is a Linux firewall tool used to control network traffic by defining rules that allow, block, or modify packets.
+
+	🔹 Why is iptables Used?
+	Security → Blocks unauthorized access and prevents attacks.
+	Traffic Control → Allows specific packets while dropping others.
+	NAT (Network Address Translation) → Helps in routing packets between networks.
+	Packet Filtering → Ensures only trusted connections are allowed
+
+#cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+	overlay
+	br_netfilter
+	EOF
+
+
+
+					Package	Purpose
+		apt-transport-https	Enables apt to use HTTPS
+		ca-certificates	Ensures secure repository connections
+		curl	Downloads repo keys & setup scripts
+		gnupg	Verifies package signatures
+		lsb-release	Detects OS version for correct repositories
+
+#sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release  # Ubuntu/Debian
+#sudo yum install -y yum-utils device-mapper-persistent-data lvm2  # CentOS/RHEL
+
+
+				Container Runtime Choices:
+				containerd (recommended for Kubernetes).
+				CRI-O (for OpenShift users).
+				Docker (deprecated but still usable).
+				
+1. Containerd
+
+
+		install conatainerd or docker of containerd as cri
+#sudo apt install -y containerd
+#sudo systemctl enable --now containerd
+
+		
+
+		kubernetes can't automatically use conatainerd as cri we need to configure something 
+	containerd use cgroupfs for the docker but kubernetes cgroup in systemd so we need to change the configuration
+
+#sudo mkdir -p /etc/containerd
+			Generates the default containerd configuration and saves it to /etc/containerd/config.toml.	
+#containerd config default | sudo tee /etc/containerd/config.toml    
+			Changes the SystemdCgroup setting from false to true.
+			This is critical for Kubernetes because:
+			Kubernetes uses systemd as the cgroup driver.
+			If containerd uses the cgroupfs driver instead, Kubernetes will not work properly.
+#sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml 
+				restart containerd
+#sudo systemctl restart containerd
+
+
+
+2. cri-o
+
+#OS="xUbuntu_22.04"  # Change based on your OS
+#VERSION="1.29"  # Kubernetes version
+#echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+#echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.list
+#sudo apt update
+#sudo apt install -y cri-o cri-o-runc
+#sudo systemctl enable --now crio
+
+		kubernetes automatically use cri-o as cri no need to configure 
+		
+
+
+
+Disable Swap: Required for Kubernetes to manage memory properly.
+				Kernel Modules (overlay, br_netfilter): Required for Kubernetes networking.
+				Sysctl Settings (net.ipv4.ip_forward = 1): Required for pod communication.
+				Container Runtime Choices:
+				containerd (recommended for Kubernetes).
+				CRI-O (for OpenShift users).
+				Docker (deprecated but still usable).
+				
+				
+				
+$$$$$$$$$$$$$$$$$$$$$$$$$   INSTALLING KUBEADM KUBECTL KUBELET    $$$$$$$$$$$$$$$$$$$$$$$$$$$$
+				
+<For ubuntu/debian>				
+#curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
+#echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+#sudo apt update
+#sudo apt install -y kubeadm kubelet kubectl  # Ubuntu/Debian
+
+<For Redhat / centos>
+#cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+	[kubernetes]
+	name=Kubernetes
+	baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+	enabled=1
+	gpgcheck=1
+	gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+	EOF
+#sudo yum install -y kubeadm kubelet kubectl  # CentOS/RHEL
+
+
+
+$$$$$$$$$$$$$$$$$$$$$$$ INTIALIZING THE KUBEADM CLUSTER $$$$$$$$$$$$$$4
+
+								WEAVE
+								CALICO
+								FLANNUL
+
+For Weave
+#kubeadm init --pod-network-cidr=10.32.0.0/12  --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --node-name master
+for weave cni
+#kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+
+For Flannul 	
+#kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --node-name master
+for flannul cni
+#kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
+
+
+For Calico
+#kubeadm init--pod-network-cidr=92.168.0.0/16  --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --node-name master
+for calico  cni 
+		Install the Tigera operator and custom resource definitions.
+#kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/tigera-operator.yaml
+		Install Calico by creating the necessary custom resource. For more information on configuration options available in this manifest
+#kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml		
