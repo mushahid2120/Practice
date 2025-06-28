@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do List</title>
+    <link rel="stylesheet" href="style.css">
+   <script src="index.js" defer></script>
+</head>
+<body>
+    <div class="screen"> 
+    <!-- heading start -->
+
+        <h1 class="heading">
+            <span class="focus-on">Focus on </span> <span class="today-outside"> Today</span>
+        </h1>
+
+    <!-- heading End  -->
+
+    <!-- inner-block start  -->
+
+        <div class="inner-block">
+
+            <div class="today-inside">Today <img class="sun" src="./sun.svg" alt=""></div>
+            <p class="upper-para">Raise the bar by completing your goals! </p>
+            <div class="progress-bar">
+                <div class="progress"></div>    
+                <p class="warning ">Please set all the three goals!</p>
+            </div>
+
+            
+
+            <div class="task-border ">
+            <div class="tick-box"><img src="./tick.svg" alt="" ></div>
+            <input type="text" id="first" placeholder="Add new goal..." class="task-input">
+            </div>
+            <div class="task-border ">
+            <div class="tick-box"><img src="./tick.svg" alt="" ></div>
+            <input type="text" id="second" placeholder="Add new goal..." class="task-input">
+            </div>
+            <div class="task-border ">
+            <div class="tick-box"><img src="./tick.svg" alt="" ></div>
+            <input type="text" id="third" placeholder="Add new goal..." class="task-input">
+            </div>
+
+            <div class="lower-para">"Move one step ahead, today!"</div>
+            <div class="footer">Made by Mushahid</div>
+
+        </div>
+
+    <!-- inner block end  -->
+    </div>
+
+</body>
+</html>

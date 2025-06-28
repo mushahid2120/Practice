@@ -1,0 +1,213 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+</style>
+
+* {
+
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #48A30012;
+}
+
+/* outer screen  */
+
+
+.screen{
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Poppins", sans-serif;
+
+}
+
+/* outer screen ends  */
+
+
+/* heading  start*/
+    .heading{
+        font-size: 64px;
+        font-weight:700;
+        margin-block:30px;
+        text-align: center;
+    }
+
+    .focus-on{
+        color: #48A300;
+    }
+
+    .today-outside{
+        color: #61481C;
+    }
+/* heading ends  */
+
+
+/* inner block start  */
+
+    .inner-block{
+        background-color: #FBFBFB;
+        padding: 45px;
+        border-radius:15px;
+        max-width: 660px;
+        margin-bottom: 35px ;
+        box-shadow: 0 0 8px 0px rgb(0,0,0,0.1);
+    }
+
+    /* today section start  */
+        .today-inside{
+            color: black;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom:40px;
+        }
+
+        .sun{
+            vertical-align:middle;
+            width: 40px;
+        }
+    /* today section ends  */
+
+
+    /* upper para start  */
+        .upper-para{
+            font-size: 14px;
+            font-weight: 400;
+            color: #858585;
+
+        }
+    /* upper para ends */
+
+
+    /* progress bar start  */
+        .progress-bar{
+            background-color:#1153001f;
+            height: 30px;
+            width: 560px;
+            border-radius: 15px;
+            margin-bottom: 60px;
+            
+        }
+
+        .progress{
+            width:0%;
+            height:100%;
+            background-color:#48A300;
+            color:#ffff;
+            font-weight: 530;
+            border-radius: 5rem;
+            display:flex;
+            align-items: center;
+            text-indent: 2rem;
+            min-width: max-content;
+            transition: width 0.2s ease-in-out;
+        }
+
+        .warning{
+            color: #FF5151;
+            font-size: 14px;
+            font-weight: 400;
+            position: absolute;
+            display: none;
+        }
+
+        .show-error{
+            display: block;
+        }
+
+    /* progress bar ends  */
+
+
+    /* form starts  */
+        .task-border{
+            width: 560px;
+            height:60px;
+            color: #D9D9D9;
+            font-size: 16px;
+            border:1px solid #0000001A;
+            background-color: #ffff;
+            border-radius: 17px;
+            margin-bottom:46px;
+            display:flex;
+            align-items: center;
+
+            padding-inline: 14px;
+        }
+        
+        .tick-box{
+            border: 3px solid #61481C4D;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            flex-shrink: 0;
+            display: flex;   
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-input::placeholder{
+            font-size:16px;
+            color:#D9D9D9;
+        }
+
+        .task-border:hover{
+            box-shadow: 0 0 8px 0px rgb(0,0,0,0.1);
+        }
+
+        .task-input{
+            font-family: inherit;
+            border:none;
+            outline:none;
+            font-size:16px;
+            padding-left: 10px;
+            flex-grow: 1;
+            /* height:100%; */
+            align-self: stretch;
+        }
+        
+        .complete-task .tick-box{
+            border-color: #48A300;
+            background-color: #48A300;
+        }
+        .complete-task .tick{
+            
+           width: 20px;
+           height: 20px;
+           display: block;
+        }
+        .complete-task .task-input{
+            color:#48A300;
+            text-decoration: line-through;
+        }
+
+
+
+        
+    /* form ends  */
+
+
+    /* lower para start  */
+            .lower-para{
+                text-align:center;
+                font-size: 16px;
+                font-weight: 500;
+            }
+    /* lower para ends  */
+
+
+    /* footer start  */
+        .footer{
+            text-align:center;
+            font-size: 10px;
+            margin-top:15px;
+            color: #858585;
+
+        }
+    /* footer ends  */
+
+
+/* inner block ends  */
+
+
