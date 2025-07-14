@@ -1,0 +1,43 @@
+body{
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+    margin: 20px;
+}
+
+.count{
+    font-size: 3rem;
+    font-weight: 700;       
+}
+
+.minus-btn{
+    padding: 10px 16px;
+    background-color: #0ff;
+    border: 1px solid grey;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.plus-btn{
+    padding: 10px 16px;
+    background-color: #0ff;
+    border: 1px solid grey;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.inc-dec{
+    font-size: 16px;
+}
+
+.changed-by{
+    width: 5rem;
+    height: 2rem;
+    font-size: 1rem;
+}
+
+.reset-btn{
+    padding: 10px 16px;
+    background-color: #0ff;
+    border: 1px solid grey;
+    border-radius: 4px;
+    cursor: pointer;
+}
