@@ -1,0 +1,169 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    background-color: #202124;
+    font-family: sans-serif;
+    color: #E8EAED;
+    font-weight: 200;
+}
+
+
+
+.box-container{
+    position: absolute;
+    bottom: 1px;
+    right: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.square-1{
+    height: 40px;
+    width: 40px;
+    background-color: #34A853;
+}
+
+.circle{
+    height: 70px;
+    width: 70px;
+    background-color: #EA4235;
+    border-radius: 100%;
+}
+
+.square-2{
+     height: 92px;
+    width: 92px;
+    background-color: #4286F5;
+
+}
+
+.triangle{
+
+    width: 0;
+    height: 0;
+    border-bottom: 90px solid #FABC06;
+    border-left: 60px solid  transparent;
+    border-right: 60px solid transparent ;
+}
+
+.doodle-container{
+    min-height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1rem;  
+}
+
+h1{
+    font-size: 4rem;
+    font-weight: 400;
+    margin-block: 0 24px;
+}
+
+span:nth-child(3n+1){
+    color: blueviolet;
+}
+span:nth-child(2),
+span:nth-child(6),
+span:nth-child(8),
+span:nth-child(12){
+    color: red;
+}
+span:nth-child(3),
+span:nth-child(9){
+    color: yellow;
+}
+
+span:nth-child(5),
+span:nth-child(11){
+    color: green;
+}
+
+span:nth-child(7){
+    margin-left: 2rem;
+}
+
+.input-suggs{
+    width:100%;
+    max-width: 800px;
+    font-size: 1.5rem;
+    position: relative;
+}
+
+
+
+.search-bar{
+
+    border: 2.5px solid #5F6368;
+    border-radius: 40px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-bar,.suggestions-menu{
+        padding-inline: 32px;
+            width: 100%;
+}
+
+.search-bar:hover,.search-bar:focus-within{
+    background-color: #303134;
+    border-color: #303134;
+}
+
+.search-bar:focus-within{
+    border-radius: 40px 40px 0 0;   
+}
+
+.search-bar>input{
+    width: 100%;
+
+    font-size: inherit;
+    color: inherit;
+    padding-inline: 20px;
+    padding-block: 16px;
+
+    background-color: inherit;
+    border:none;
+    outline: none;
+}
+
+.input-suggs img{
+    width: 22px;
+    cursor: pointer;
+}
+
+.suggestions-menu{
+    position: absolute;
+    background-color: #303134;
+    border-radius: 0 0 40px 40px;
+    display: none;
+}
+
+.search-bar:focus-within + .suggestions-menu{
+    display: block;
+}
+
+.only-for-border{
+    border-top: 3px solid #5F6368;
+}
+
+.suggestions-menu div{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 16px;
+}
+
+.suggestions-menu p :hover{
+    background-color: #3C4043;;
+}
+
