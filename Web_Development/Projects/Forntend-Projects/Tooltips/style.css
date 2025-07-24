@@ -1,0 +1,110 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #191919;
+    font-family: "Nunito", sans-serif;
+}
+
+.tooltip-container{
+    border: 1px solid   white;
+    border-radius: 20px;
+    width: 600px;
+    height: 300px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding:40px 60px 10px;
+}
+
+.stacks{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+    gap: 40px;
+    position: relative;
+
+}
+
+.tooltip{
+    color: black;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 24px;
+    position: absolute;
+    top: -10px;
+    opacity:0;
+    transition: all 0.1s ease-out;
+}
+
+.tooltip::after{
+    content:'';
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    background-color: inherit;
+    left: 50%;
+    transform: rotate(45deg) translateX(-50%);
+    bottom: -9px;
+}
+
+.stacks:has(.logo:hover) .tooltip,.stacks:has(span:hover) .tooltip{
+    opacity: 1;
+    top: -70px;
+}
+
+
+.mongo-tooltip{
+    background-color: #47A248 ;
+    color: white;
+}
+
+.express-tooltip{
+    background-color:#FFFFFF ;
+}
+
+.react-tooltip{
+    background-color: #61DAFB;
+}
+
+.node-tooltip{
+    background-color: #8CC84B;
+}
+
+.tooltip ~ span{
+    font-size: 36px;
+    font-weight: 700;
+    cursor: default;
+}
+
+.logo{
+    display: flex;
+    height: 50px;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.mongo{
+    color:#47A248;
+}
+
+.express{
+    color:#FFFFFF;
+}
+
+.react{
+    color:#61DAFB;
+}
+
+.node{
+    color:#8CC84B;
+}
