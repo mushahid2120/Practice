@@ -8,15 +8,22 @@ body{
     font-weight: 700;
 }
 
+header{
+        box-shadow: 0 1px 4px 0 #0000001A;
+
+        width: 100vw;
+}
+
 
 .close-container{
-    width: 100%;
+        margin-inline: auto;
+    max-width: 950px;
     display: flex;
     justify-content: space-between;
 
-    box-shadow: 0 1px 4px 0 #0000001A;
-    padding-inline: 30px 40px;
-    padding-block: 18px;
+
+    padding-inline: 16px 30px;
+    padding-block: 8px;
 }
 
 .close-container>.logo-name{
@@ -34,6 +41,8 @@ body{
     position: relative;
     display:flex;
     align-items: center;
+
+
 }
 
 /* 
@@ -141,7 +150,6 @@ body{
         border: none;
         box-shadow: none;
         width: 100%;
-        gap: 20px;
     }
  .menu-open > .user-profile{
         border-bottom:none;
@@ -154,6 +162,7 @@ body{
         justify-content: center ;
         gap: 16px;
         position:relative;
+        margin-inline: auto;
     }
 
     .courses{
@@ -166,12 +175,12 @@ body{
         padding: 10px 14px;
     }
 
-    .menu-items + .menu-items{
-        padding:0;
+    .menu-bar{
+            flex-grow: 1;
     }
 
-    .menu-list .menu-items:nth-child(2){
-        posi
+    .menu-items + .menu-items{
+        padding:0;
     }
 
     .menu-items>label>img{
