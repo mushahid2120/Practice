@@ -1,0 +1,105 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    font-family: "Roboto", sans-serif;
+    min-height: 100vh;
+    margin: 0;  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container{
+    max-width: 540px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+}
+
+.upper-inner-container{
+    color:rgb(30, 41, 59);
+    font-weight: 400;
+    font-size: 1rem;
+    text-align: center;
+}
+form{
+    padding-block: 16px;
+}
+
+form>.your-guess{
+    color: rgb(30, 41, 59);
+    font-size: 1rem;
+    font-weight: 500;
+    display: block;
+}
+
+form>#enter-number{
+    margin-block: 10px;
+    padding: 16px 12px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid rgb(226, 232, 240);
+    font-size: 16px;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+form>#enter-number:focus{
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #2563eb1a;
+}
+
+form>#enter-number:hover:disabled{
+    cursor:not-allowed;
+}
+
+form>p{
+    font-size: 14px;
+    color:rgb(30, 41, 59);
+    margin: 0;
+    font-weight: 400;
+    margin-bottom: 30px;
+
+}
+
+.submit-button,.restart-button{
+    margin-right: 10px;
+    padding: 14px; 
+    background-color: #0d6efd;
+    font-size: 1rem;
+    color: white;
+    border:none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.button:disabled,.button[disabled]{
+    background-color: #eceff5;
+    color: rgb(148, 163, 184);
+    cursor:not-allowed;
+}
+
+.button:hover:not(:disabled){
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+.lower-inner-container{
+    background-color: #f7fafc;
+    min-height: 96px;
+    border-radius: 6px;
+    margin-block: 10px;
+    padding: 10px;
+}
+
+.lower-inner-container>h2{
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.lower-inner-container>p{
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500px;
+}
