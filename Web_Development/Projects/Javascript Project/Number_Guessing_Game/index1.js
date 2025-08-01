@@ -1,17 +1,19 @@
-const remaining_guess=document.querySelector(".remaining-guess-no");
+(function project(){
+    const remaining_guess=document.querySelector(".remaining-guess-no");
 const user_input=document.querySelector("#enter-number");
 const feedback=document.querySelector(".feedback");
 const record=document.querySelector(".previous-record");
 const submit_button=document.querySelector(".submit-button");
 const restart_button=document.querySelector(".restart-button");
-
+const form =document.querySelector('form')
 
 let random_number=parseInt(Math.random()*100);
 let count=0;
 const recordArray=[];
 
-submit_button.addEventListener('click',
-                                ()=>{
+form.addEventListener('submit',
+                                (e)=>{
+                                        e.preventDefault=false;
                                         count++;
                                         const user_input_number=parseInt(user_input.value);
                                         recordArray.push(user_input_number);
@@ -45,3 +47,5 @@ restart_button.addEventListener('click',
                                     count=0;
                                     remaining_guess.innerHTML=10;
                                 })
+
+})();
