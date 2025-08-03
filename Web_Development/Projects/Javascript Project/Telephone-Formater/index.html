@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Telephone Formater</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+        <header class="heading">Telephone Formater</header>
+        <div class="card">
+            <label for="number">
+                <h1>Phone Number</h1>
+                <div class="input-field">
+                    <input type="tel" id="phone" name="phone"  inputmode="tel" autocomplete="off" maxlength="15" placeholder="+(123) 456-7890" aria-describedby="phone-format" aria-invalid="false" required="" autofocus="">
+                    <span class="phone-icon">📞</span>
+                </div>
+            </label>
+                <p class="caption">Enter a 10-digit phone number. Format: +(123) 456-7890</p>
+                <p class="error-message" ></p>
+        </div>
+</body>
+</html>
