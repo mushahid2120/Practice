@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Toast Snackbar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+</head>
+
+<body>
+    <header class="heading">Toast Snackbar</header>
+    <div class="container">
+        <form action="">
+            <select name="position" id="horizontal-position">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>
+            <select name="position" id="vertical-position">
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+            </select>
+            <select name="Type" id="type">
+                <option value="Normal">Normal</option>
+                <option value="success-type">Success</option>
+                <option value="error-type">Error</option>
+                <option value="warning-type">Warning</option>
+                <option value="info-type">Info</option>
+            </select>
+
+            <input type="text" placeholder="Message" value="This is Toast Message!!!" class="input-field">
+            <div class="duration-container">
+                <label for="range">Duration</label>
+                <input type="range" name="range" id="range" min="3" max="10" value="5">
+                <span class="sec">5s</span>
+            </div>
+            <button type="submit">Show Toast</button>
+        </form>
+
+        <div class="all-popup-container">
+            <div class="toast-popup-container top-left-container"></div>
+            <div class="toast-popup-container top-right-container"></div>
+            <div class="toast-popup-container bottom-left-container"></div>
+            <div class="toast-popup-container bottom-right-container"></div>
+        </div>
+
+    </div>
+</body>
+
+</html>

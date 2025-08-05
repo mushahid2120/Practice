@@ -1,0 +1,171 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: "Roboto",sans-serif;
+    font-size: 1rem;
+}
+
+
+.heading{
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    padding-block: 20px;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.194);
+    margin-bottom: 30px;
+}
+
+.container{
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+form >*{
+    width: 100%;
+    max-width: 300px;
+    font-size: inherit;
+    padding: 8px 10px;
+    margin-bottom: 20px;
+}
+
+.duration-container{
+    display: flex;
+    justify-content:space-between;
+    align-items: center;
+    flex-direction: row;
+    padding: 0;
+    gap:20px;
+}
+
+.duration-container>*{
+    padding: 0;
+}
+
+.duration-container>input{
+    flex-grow: 2;
+}
+
+.duration-container>span{
+    align-self: flex-end;
+}
+
+button{
+    width:auto;
+    background-color:  #0d6efd;
+    border:none;
+    color:white;    
+    border-radius: 6px;
+    padding: 12px 16px;
+}
+
+button:disabled,button:hover:disabled{
+        color: #94a3b8;
+    cursor: not-allowed;
+    background-color: #e2e8f0;
+    border-color: #e2e8f0;
+    opacity: .65;
+}
+
+button:hover{
+    background-color: #0b5ed7;;
+}
+
+.toast-pop-up{
+    width:100%;
+    padding: 16px 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px #00000040;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background-color: white;
+    /* opacity: 0; */
+}
+
+.cross-icon{
+    cursor: pointer;
+}
+
+.toast-popup-container{
+    position: absolute;
+    width: 100%;
+    max-width: 250px;
+    background-color: transparent;
+
+}
+
+.top-left-container{
+    top:10px;
+    left:10px;
+} 
+
+.top-right-container{
+    top:10px;
+    right:10px;
+}
+
+.bottom-left-container{
+    bottom:10px;
+    left:10px;
+}
+
+.bottom-right-container{
+    bottom:10px;
+    right:10px;
+} 
+
+
+.success-type{
+color:hsl(140, 100%, 27%);
+}
+
+.success-type::before{
+    content: "✓";
+    margin-right: 8px;
+}
+
+.error-type{
+     color: hsl(360, 100%, 45%);
+     
+}
+
+.error-type::before{
+    content: "!";
+    margin-right: 8px;
+    
+}
+.warning-type{
+     color:hsl(31, 92%, 45%);
+     
+}
+
+.warning-type::before{
+    content: "⚠";
+    margin-right: 8px;
+    
+}
+.info-type{
+     color: hsl(210, 92%, 45%);
+     
+}
+.info-type::before{
+    content:"ⓘ";
+
+margin-right: 8px;
+}
