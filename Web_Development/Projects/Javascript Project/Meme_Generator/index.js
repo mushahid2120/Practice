@@ -1,7 +1,7 @@
 const meme_generateBtn=document.querySelector('.generate');
 const meme_title=document.querySelector('.meme-title');
 const meme_img=document.querySelector('.figure>img');
-const meme_author=document.querySelector('.author');
+const meme_author=document.querySelector('.meme-by');
 
 generatingImg();
 
@@ -16,7 +16,7 @@ function generatingImg(){
                         console.log(data)
                         meme_img.src=data.url
                         meme_title.innerHTML=data.title;
-                        meme_author.innerHTML=data.author;
+                        meme_author.innerHTML=`Meme by: ${data.author}`;
                         
     });
 }
