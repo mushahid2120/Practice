@@ -1,0 +1,88 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: "Roboto",sans-serif;
+    font-size: 1rem;    
+
+}
+
+
+.heading{
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    padding-block: 20px;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.194);
+    margin-bottom:20px;
+}
+     
+.container{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:10px;
+}       
+
+
+
+.generate{
+    padding: 8px 20px;
+    
+    font-size:20px;
+    font-weight: 700;
+    color: rgb(16, 128, 112);
+    border:none;
+    border-left: 4px solid #222;
+    border-right: 4px solid #222;
+    background-color: white;    
+    cursor:pointer;
+    transition: all 0.3s ease-in-out;
+
+}
+
+
+.generate:hover{
+    letter-spacing: 2.5px;
+    padding-inline:30px;
+    border-width: 8px;
+    font-weight: 800;
+}
+
+.card{
+    box-shadow: rgba(0, 0, 0, 0.2) 10px 10px 16px;
+    background-color: #f7eeee;
+    border-radius: 4px;
+    padding:30px 50px;
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 700px;
+    margin-inline: 24px;
+
+}
+
+.meme-title{
+    color:rgb(17, 24, 39);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+.figure{
+    width: 100%;
+    padding:0;
+    margin:0;
+
+}
+
+.figure>img{
+    display: inline-block  ;
+    width: 100%;
+}
+
+.meme-by{
+    font-weight: 400;
+    margin-top: 20px;
+}

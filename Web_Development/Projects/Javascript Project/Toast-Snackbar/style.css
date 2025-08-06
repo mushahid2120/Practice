@@ -5,7 +5,8 @@
 body{
     margin: 0;
     font-family: "Roboto",sans-serif;
-    font-size: 1rem;
+    font-size: 1rem;    
+    overflow: hidden;
 }
 
 
@@ -96,6 +97,55 @@ button:hover{
     margin-bottom: 10px;
     background-color: white;
     /* opacity: 0; */
+}
+
+.opening-from-left{
+    animation: openingFromLeft 40ms 20ms ease-in both;
+}
+
+@keyframes openingFromLeft{
+    0%{
+        transform: translateX(-80%);
+    }
+    100%{
+        transform: translateX(0);
+    }
+}
+
+.opening-from-right{
+    animation: openingFromRight 40ms 20ms ease-in both;
+}
+
+@keyframes openingFromRight{
+    0%{
+        transform: translateX(80%);
+    }
+    100%{
+        transform: translateX(0);
+    }
+}
+
+.closing-to-left{
+        animation: closingToLeft 0.1s ease-out forwards;
+}
+@keyframes closingToLeft{
+    0%{
+        transfrom: translateX(0);
+    }
+    100%{
+        transform: translateX(-80%);
+    }
+}
+.closing-to-right{
+        animation: closingToRight 0.1s ease-out forwards;
+}
+@keyframes closingToRight{
+    0%{
+        transfrom: translateX(0);
+    }
+    100%{
+        transform: translateX(50%);
+    }
 }
 
 .cross-icon{

@@ -46,7 +46,7 @@ form.addEventListener('submit', function(e) {
     new_created_Element.children[0].innerHTML = input_message.value;
 
     showing_messagess(new_created_Element);
-    new_created_Element._timeout = setTimeout(remove_messagess, parseInt(duration.value) * 2000, new_created_Element);
+    new_created_Element._timeout = setTimeout(remove_messagess, parseInt(duration.value) * 1000, new_created_Element);
     console.log(new_created_Element.children[0].innerHTML + "  having this timeout ref=  "+ new_created_Element._timeout)
 
 })
@@ -55,9 +55,10 @@ form.addEventListener('submit', function(e) {
 
 all_toast_container.addEventListener('click', function(e) {
     if (e.target.classList.value === 'cross-icon') {
-        remove_messagess(e.target.parentElement);
+        setTimeout(remove_messagess,100,e.target.parentElement)
+        // remove_messagess(e.target.parentElement);
         clearTimeout(e.target.parentElement._timeout);
-        console.log(e.target.parentElement.children[0].innerHTML + " time out reference when cross clicked " + new_created_Element._timeout)
+        console.log(e.target.parentElement.children[0].innerHTML + " time out reference when cross clicked " + e.target._timeout)
     }
 
 })
@@ -81,25 +82,36 @@ function showing_messagess(display_element) {
     if (ver_position.value === 'top') {
         if (hori_position.value === 'left') {
             parentContainer = top_left_container;
+            display_element.classList.add('opening-from-left');
         } else {
             parentContainer = top_right_container;
+            display_element.classList.add('opening-from-right');
         }
     } else {
         if (hori_position.value === 'left') {
             parentContainer = bottom_left_container;
+            display_element.classList.add('opening-from-left');
         } else {
             parentContainer = bottom_right_container;
+            display_element.classList.add('opening-from-right');
         }
     }
 
     display_element._parentContainer = parentContainer; // store reference
     parentContainer.append(display_element);
+
+    
 }
 
 function remove_messagess(removing_element) {
     const parentContainer = removing_element._parentContainer;
     if (parentContainer && parentContainer.contains(removing_element)) {
         parentContainer.removeChild(removing_element);
+        // if(parentContainer.classList[1].contains('top-left-container') || parentContainer.classList[1]==='bottom-left-container')
+        //     removing_element.classList.add('closing-to-left')
+        // else
+        //     removing_element.classList.add('closing-to-right')
+        console.log(removing_element);
         console.log(
             `deleting = ${removing_element.children[0].innerHTML} reference = ${removing_element._timeout}`
         );
