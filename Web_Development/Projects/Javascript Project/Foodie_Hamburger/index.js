@@ -1,26 +1,21 @@
-const hamburger_icon=document.querySelector('.hamburger-icon-container>img');
-const menu_container=document.querySelector('.hamburger-icon-container');
-const menu_list=document.querySelector('.menu-list')
-const fade_element=document.querySelector('.reset-anymore')
+const nav_bar=document.querySelector('.nav-bar')
+const menu_icon=document.querySelector('.hamburger-icon-container>img')
 const cross_icon=document.querySelector('.cross-icon')
-const all_link=document.querySelectorAll('a')
-
-
-hamburger_icon.addEventListener('click',(e)=>{
-                                                hamburger_icon.style.display='none'
-                                                cross_icon.style.display='block'
-                                                menu_container.classList.add('menu-open')
-                                                menu_list.style.display='flex';
-                                                fade_element.classList.add('fade-away')
-                                                
-
-});
-
-cross_icon.addEventListener('click',(e)=>{
-                                            hamburger_icon.style.display='inline-block'
-                                            cross_icon.style.display='none'
-                                            menu_container.classList.remove('menu-open')
-                                            menu_list.style.display='none';
-                                            fade_element.classList.remove('fade-away')
+const menu_list =document.querySelector('.menu-list')
+menu_icon.addEventListener('click',(e)=>{
+                                            e.stopPropagation();
+                                            nav_bar.classList.add('menu-open')
 })
 
+menu_list.addEventListener('click',(e)=>{
+                            e.stopPropagation();
+})
+
+cross_icon.addEventListener('click',(e)=>{
+                                            
+                                            nav_bar.classList.remove('menu-open')
+})
+
+window.addEventListener('click',(e)=>{
+                                    nav_bar.classList.remove('menu-open')
+})
