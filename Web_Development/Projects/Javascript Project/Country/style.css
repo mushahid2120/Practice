@@ -8,20 +8,30 @@ body{
     font-family: 'Nunito Sans', sans-serif;
     letter-spacing: 0;
     line-height: 1;
-    color:hsl(200, 15%, 8%);
-
+    
+    --backgroud-color: hsl(0, 0%, 99%);
+    --element-background-color: hsl(0, 100%, 100%);
+    --text-color: hsl(200, 15%, 8%);
+    color:var(--text-color)
 }
 
+.darkmode{
+     --backgroud-color: hsl(207, 26%, 17%);
+    --element-background-color:hsl(209, 23%, 22%);
+    --text-color: hsl(0, 100%, 100%);
+}
 
-
-
+a{
+    text-decoration-line: none;
+    color: inherit;
+}
 
 li{
     list-style: none;
 }
 
 .header-container{
-    background-color: #ffffff;
+    background-color: var(--element-background-color);
     box-shadow: 0 1px 3px 2px rgba(170, 131, 131, 0.161);
     position: relative;
 
@@ -59,7 +69,7 @@ header{
 }
 
 .main-container{
-    background-color: hsl(0, 0%, 99%);
+    background-color: var(--backgroud-color);
     
     padding-block: 20px;
 }
@@ -91,7 +101,8 @@ header{
     border-radius: 4px;
     gap: 14px;
     overflow: hidden;
-    color: hsl(0, 0%, 50%)
+    color: hsl(0, 0%, 50%);
+    background-color: var(--element-background-color);
 }
 
 
@@ -101,11 +112,11 @@ header{
     outline: none;
     border: none;
     background-color: inherit;
-    color: inherit;
+    color: var(--text-color);
 }
 
 .input-field::placeholder{
-    color: inherit;
+    color: grey;
 }
 
 .filter-bar{
@@ -126,6 +137,7 @@ header{
     vertical-align: middel;
     display: flex;
     align-items: center;
+    background-color: var(--element-background-color);
 }
 
 .filter-btn{
@@ -187,9 +199,16 @@ img{
 .contry{
     border-radius: 6px;
     overflow: hidden;
-    max-width: 220px;
-    box-shadow: 0 0 2px 1px rgba(107, 47, 47, 0.075);
+    width: 220px;
+    box-shadow: 0 4px 8px 0 rgba(107, 47, 47, 0.103);
     margin-right:10px;
+    transition: all 0.2s ease-in-out;
+    background-color: var(--element-background-color);
+}
+
+.contry:hover{
+    transform: scale(1.01);
+    box-shadow: 0 4px 4px 0 rgba(107, 47, 47, 0.2);
 }
 .contry-detail-container{
     padding:10px 20px 30px;
@@ -214,21 +233,6 @@ img{
 
 
 
-.element{
-    background-color: hsl(0, 100%, 100%);
-}
-
-.darkmode-background{
-        background-color: hsl(207, 26%, 17%);
-}
-.darkmode-element{
-    
-    background-color:hsl(209, 23%, 22%)
-}
-
-.darkmode-font{
-    color:hsl(0, 100%, 100%)
-}
 
 
 
