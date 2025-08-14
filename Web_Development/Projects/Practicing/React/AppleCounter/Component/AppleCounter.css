@@ -1,0 +1,19 @@
+.appleCounter-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 30px;
+}
+
+.img-container{
+    width: 30px;
+}
+
+img{
+    width: 100%;
+    cursor: pointer;
+}
+
+.apple-basket{
+    text-align: center;
+}

@@ -1,0 +1,46 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+/* 
+.card-container{
+    display:flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    
+}
+
+.card{
+    background-color: #ddd;
+    max-width: 250px;
+    padding: 20px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.card-content h3{
+    margin-top : 10px;
+}
+
+.card-content > p{  
+    margin-top: 6px;
+}
+
+img{
+    width: 100%;
+} */
+
+.applecounter{
+    margin: 30px 10px;
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.img-container{
+    max-width: 100px;
+}
+
+img{
+    width: 100%;
+}
