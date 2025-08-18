@@ -7,7 +7,7 @@ export default function Filter() {
         <div className="filter-by-region">Filter by Region</div>
         <i className="fa-solid fa-angle-down dropdown-icon"></i>
       </div>
-      <ul className="region-list ">
+      <ul className="region-list">
         <li className="region">Africa</li>
         <li className="region">Americas</li>
         <li className="region">Asia</li>

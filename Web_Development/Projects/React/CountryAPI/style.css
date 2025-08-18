@@ -68,12 +68,12 @@ header{
     font-weight: inherit;
 }
 
-.main-container{
+.main-container-all-contries{
     background-color: var(--backgroud-color);
     
     padding-block: 20px;
 }
-.main-content{
+.main-content-all-contries{
     max-width: 1200px;
     margin-inline: auto;
     padding-inline: 20px;
@@ -289,7 +289,7 @@ img{
     header{
         min-height: 80px;
     }
-    .main-container{
+    .main-container-all-contries{
         padding-block: 40px;
     }
     .search-filter{
