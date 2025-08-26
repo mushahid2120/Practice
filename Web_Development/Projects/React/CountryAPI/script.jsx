@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import Home from "./Components/Home.jsx";
 import Error from "./Components/Error.jsx"
 import CountriesDetail from "./Components/CountriesDetail.jsx";
+import './style.css'
 
 const router=createBrowserRouter([
     {
@@ -21,7 +22,7 @@ const router=createBrowserRouter([
                 element: <Contact/>
             },
             {
-                path: "/countryDetail",
+                path: "/:countryDetail",
                 element:<CountriesDetail/>
             }
         ]

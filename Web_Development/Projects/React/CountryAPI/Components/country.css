@@ -8,17 +8,13 @@ body{
     font-family: 'Nunito Sans', sans-serif;
     letter-spacing: 0;
     line-height: 1;
-    color:hsl(200, 15%, 8%);
-    --backgroud-color: hsl(0, 0%, 99%);
-    --element-background-color: hsl(0, 100%, 100%);
-    --text-color: hsl(200, 15%, 8%);
-    color:var(--text-color)
 }
 
 .darkmode{
      --backgroud-color: hsl(207, 26%, 17%);
     --element-background-color:hsl(209, 23%, 22%);
     --text-color: hsl(0, 100%, 100%);
+    color: var(--text-color)
 }
 
 
@@ -62,7 +58,7 @@ li{
 .img-container{
     width: 44vw;
 }
-img{
+.img-container>img{
     width: 100%;
     height: unset;
 }
@@ -93,6 +89,7 @@ li+li{
 
 .border-contrie-name{
     margin-left: 10px;
+    margin-bottom: 10px;
     display: inline-block;
     padding: 6px 10px;
     border-radius: 6px;
@@ -113,9 +110,7 @@ li+li{
 }
 
 
-.darkmode-font{
-    color:hsl(0, 100%, 100%)
-}
+
 
 
 @media(max-width: 830px){

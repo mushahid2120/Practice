@@ -1,10 +1,11 @@
 import React from "react";
 import React, { useEffect, useState } from "react";
 import ContryCard from "./ContryCard";
+import CountriesShimmerCard from "./countriesShimmerCard.jsx";
+
 
 export default function ContriesList({ query }) {
   const [countriesData, setCountriesData] = useState(null);
-  console.log(query);
 
   useEffect(() => {
     fetch("http://127.0.0.1:5500/Javascript%20Project/Country/data.json")
@@ -13,10 +14,12 @@ export default function ContriesList({ query }) {
         setCountriesData(cdata);
       });
   }, []);
-  if(countriesData!==null){
-    const matchedData=countriesData.filter((country)=> country.name.toLowerCase().includes(query))
-    console.log(matchedData)
 
+  
+  if(countriesData!==null){
+
+    const matchedData=countriesData.filter((country)=> {return (country?.name?.toLowerCase().includes(query)) ||  country?.region?.toLowerCase().includes(query)})
+    console.log(query)
      return (<section className="contries" >
           {matchedData.map((country) => {
               return <ContryCard CoutryDetail={{
@@ -24,11 +27,12 @@ export default function ContriesList({ query }) {
                                 flag: country.flags.png,
                                 population: country.population,
                                 region: country.region,
-                                capital: country.capital
+                                capital: country.capital,
+                                data: country
                                 }}
                         key={country.name}/>})}
             </section>)
   }
   else
-    return <p>Loading.............</p>
+    return <CountriesShimmerCard/>
 }

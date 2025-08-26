@@ -8,17 +8,21 @@ body{
     font-family: 'Nunito Sans', sans-serif;
     letter-spacing: 0;
     line-height: 1;
-    
+
+}
+
+.main-container-all-contries,.header-container {
     --backgroud-color: hsl(0, 0%, 99%);
     --element-background-color: hsl(0, 100%, 100%);
-    --text-color: hsl(200, 15%, 8%);
+    --text-color: rgb(17, 21, 23);
     color:var(--text-color)
 }
 
-.darkmode{
+.main-container-all-contries.darkmode , .header-container.darkmode{
      --backgroud-color: hsl(207, 26%, 17%);
     --element-background-color:hsl(209, 23%, 22%);
     --text-color: hsl(0, 100%, 100%);
+    color:var(--text-color);
 }
 
 a{
@@ -153,17 +157,18 @@ header{
 .region-list{
     display: none;
     position: absolute;
-    bottom: -174px;
+    bottom: -220px;
     left: 0;
     box-shadow: 0 0 2px 1px rgba(107, 47, 47, 0.075);
     border-radius: 6px;
     overflow: hidden;
     width: 100%;
-    
+    background-color: inherit;
+    z-index: 2;
 }
 .region-list>.region{
     cursor: pointer;
-    background-color: inherit;
+    
 
     padding-inline: 20px;
     padding-block: 10px;
@@ -187,6 +192,7 @@ header{
 
 img{
     width: 100%;
+    object-fit:cover;
     height: 150px;
 }
 
@@ -201,6 +207,7 @@ img{
     border-radius: 6px;
     overflow: hidden;
     width: 220px;
+    min-height: 240px;
     box-shadow: 0 4px 8px 0 rgba(107, 47, 47, 0.103);
     margin-right:10px;
     transition: all 0.2s ease-in-out;
@@ -258,7 +265,7 @@ img{
         max-width:150px;
     }
     .region-list{
-        bottom: -166px;
+        bottom: -190px;
     }
 
     .contry{
@@ -320,5 +327,8 @@ img{
     }
     img{
         height: 200px;
+    }
+    .region-list{
+        bottom: -205px;
     }
 }

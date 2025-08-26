@@ -1,9 +1,9 @@
 import {Link} from 'react-router' 
-console.log(Link)
+import './countriesShimmerCard.css'
 export default function ContryCard({CoutryDetail}) {
-  const {name,flag,population,region,capital}=CoutryDetail;
+  const {name,flag,population,region,capital,data}=CoutryDetail;
     return (
-      <Link to={`/countryDetail?country=${name}`} className="contry ">
+      <Link to={`/${name}`} className="contry " state={data}>
         <img src={flag} alt="" />
         <div className="contry-detail-container">
           <div className="contry-name">{name}</div>

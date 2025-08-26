@@ -1,19 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
+import FilterList from './FilterList'
 
-export default function Filter() {
+export default function Filter({setQuery}) {
+  const [isOpenFilterList,setIsOpenFilterList]=useState(false);
   return (
-    <div className="filter-bar ">
+    <div className={`filter-bar ${isOpenFilterList ?"open-filter":""}`} onClick={()=>{setIsOpenFilterList(!isOpenFilterList)}}>
       <div className="filter-btn">
         <div className="filter-by-region">Filter by Region</div>
         <i className="fa-solid fa-angle-down dropdown-icon"></i>
       </div>
-      <ul className="region-list">
-        <li className="region">Africa</li>
-        <li className="region">Americas</li>
-        <li className="region">Asia</li>
-        <li className="region">Europe</li>
-        <li className="region">Oceania</li>
-      </ul>
+          <FilterList setQuery={setQuery}/>
     </div>
   );
 }
