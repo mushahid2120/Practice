@@ -16,7 +16,7 @@ export default function SelectField({label,id,name,value,onChange,options,defaul
           }
           {
             options.map((option,i)=>(
-                <option value="grocery" key={i}>{option}</option>
+                <option value={option} key={i}>{option}</option>
             ))
           }
           </select>
