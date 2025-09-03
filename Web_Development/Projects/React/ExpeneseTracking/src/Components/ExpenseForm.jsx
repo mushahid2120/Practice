@@ -1,82 +1,127 @@
 import React, { use, useEffect, useRef, useState } from "react";
+import InputField from "./InputField";
+import SelectField from "./SelectField";
 
 export default function ExpenseForm({ setExpenses }) {
+  const [expense, setExpense] = useState({
+    title: "",
+    category: "",
+    amount: "",
+  });
+
+  const [errors,setErrors]=useState({})
+  
+  
+
+  const validate=(formData)=>{
+    const errorData={}
+    // if(!formData.title)
+    //     errorData.title='Title is Required'
+    // if(!formData.category)
+    //     errorData.category='Please Select Category'
+    // if(!formData.amount)
+    //     errorData.amount='Amount is Required'
+    // setErrors(errorData)   
 
 
-  let titleRef = useRef();
-  let categoryRef = useRef();
-  const amountRef = useRef();
+    Object.entries(formData).forEach(([key,value])=>{
+      validateConfig[key].some((rule)=>{
+        if(rule.required && !value){
+          errorData[key]=rule.message
+          return true
+        }
+        if(rule.minLength && value.length<4){
+          errorData[key]=rule.message
+          return true;
+        }
+      })
+    })
+    setErrors(errorData)
+    return errorData 
+  }
+
+  const validateConfig={
+    title:[ {required: true, message: "Please Enter Title"},
+            {minLength:5,message:'Title should be atleast 5 character long'}],
+    category: [{required:true,message:'Please Select a Category'}],
+    amount: [{required: true,message:'Please Enter an Amount'}]
+  }
+
+  // let titleRef = useRef();
+  // let categoryRef = useRef();
+  // const amountRef = useRef();
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const validateForm=validate(expense)
+    if(Object.keys(validateForm).length) return
+    
     setExpenses((prevState) => {
-      return [...prevState, { 
-      title: titleRef.current.value,
-      category: categoryRef.current.value,
-      amount: amountRef.current.value,
-      id: crypto.randomUUID()
-       }];
+      return [
+        ...prevState,
+        {
+          ...expense,
+          id: crypto.randomUUID(),
+          // title: titleRef.current.value,
+          // category: categoryRef.current.value,
+          // amount: amountRef.current.value,
+          // id: crypto.randomUUID()
+        },
+      ];
     });
-
+    setExpense({
+      title: "",
+      category: "",
+      amount: "",
+    });
   };
 
- 
+  const handleChange=(e)=>{
+    const {name,value}=e.target
+    setExpense((prevState)=>({
+      ...prevState,
+      [name]:e.target.value
+    }))
+    setErrors((prevState)=>({...prevState,[name]:''}))
+  }
+
+
 
   return (
     <>
       <form className="expense-form" onSubmit={handleSubmit}>
-        <div className="input-container">
-          <label htmlFor="title">Title</label>
-          <input
-            id="title"
-            name="title"
-            // value={expense.title}
-            // onChange={(e) =>
-            //   setExpense((prevState) => ({
-            //     ...prevState,
-            //     title: e.target.value,
-            //   }))
-            // }
-            ref={titleRef}
-          />
-        </div>
-        <div className="input-container">
-          <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            name="category"
-            // value={expense.category}
-            // onChange={(e) =>
-            //   setExpense((prevState) => ({
-            //     ...prevState,
-            //     category: e.target.value,
-            //   }))
-            // }
-            ref={categoryRef}
-          >
-            <option value="">All</option>
-            <option value="grocery">Grocery</option>
-            <option value="clothes">Clothes</option>
-            <option value="bills">Bills</option>
-            <option value="education">Education</option>
-            <option value="medicine">Medicine</option>
-          </select>
-        </div>
-        <div className="input-container">
-          <label htmlFor="amount">Amount</label>
-          <input
-            id="amount"
-            name="amount"
-            // value={expense.amount}
-            // onChange={(e) =>
-            //   setExpense((prevState) => ({
-            //     ...prevState,
-            //     amount: e.target.value,
-            //   }))
-            // }
-            ref={amountRef}
-          />
-        </div>
+        
+        <InputField 
+          label="Title"
+          id="title"
+          name="title"
+          value={expense.title}
+          onChange={handleChange}
+          error={errors.title}
+        />
+        
+
+        <SelectField
+          label="Category"
+          id="category"
+          name="category"
+          value={expense.category}
+          onChange={handleChange}
+          options={['Grocery','Clothes','Bills','Educations','Medicine']}
+          defaultOption='All'
+          error={errors.category}
+        />
+        
+        <InputField 
+          label="Amount"
+          id="amount"
+          name="amount"
+          value={expense.amount}
+          onChange={handleChange}
+          error={errors.amount}
+        />
         <button className="add-btn">Add</button>
       </form>
     </>

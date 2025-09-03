@@ -17,6 +17,7 @@ main {
 .expense-tracker {
     display: flex;
     gap: 32px;
+    
 }
 
 .expense-form {
@@ -26,6 +27,7 @@ main {
 .expense-table {
     width: 100%;
     border-collapse: collapse;
+    align-self: flex-start;
 }
 
 .expense-table select {
@@ -116,6 +118,13 @@ main {
 
 .context-menu div:hover {
     background-color: #ddd;
+}
+
+.error{
+    margin:0;
+    padding: 0;
+    font-size: 12px;
+    color: rgb(202, 67, 67);
 }
 
 @media (max-width: 900px) {
