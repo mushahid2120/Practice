@@ -6,7 +6,8 @@ export default function ContextMenu({
   setMenuPosition,
   setExpenses,
   expenses,
-  setExpense
+  setExpense,
+  setEditingRowId,
 }) {
   if (!menuPosition.left) return;
 
@@ -14,9 +15,12 @@ export default function ContextMenu({
     <div className="context-menu" style={menuPosition}>
       <div
         onClick={() => {
-          const {title,category,amount}=expenses.find((expense)=>expense.id===rowId)
-          setExpense({title,category,amount})
+          const { title, category, amount } = expenses.find(
+            (expense) => expense.id === rowId
+          );
+          setExpense({ title, category, amount });
           setMenuPosition({});
+          setEditingRowId(rowId);
         }}
       >
         Edit
@@ -24,7 +28,10 @@ export default function ContextMenu({
       <div
         onClick={() => {
           setMenuPosition({});
-          setExpenses((prevState) => prevState.filter((expense) =>(expense.id !== rowId)));}}
+          setExpenses((prevState) =>
+            prevState.filter((expense) => expense.id !== rowId)
+          );
+        }}
       >
         Delete
       </div>
