@@ -13,8 +13,8 @@
 
 </head>
 
-<body class="font-['archivo'] bg-black text-white  ">
-    <header class="flex font-bold justify-between items-center px-10 fixed w-full">
+<body class="font-['archivo'] bg-black text-white  max-w-300 mx-auto">
+    <header class="flex font-bold justify-between items-center px-10 fixed max-w-300 w-full">
         <div class="w-32"><img class="w-full" src="images/ShoeLogo.svg" alt="Company Logo"></div>
         <nav class="flex  gap-8 text-xl max-[816px]:text-lg max-[816px]:gap-4  max-md:hidden ">
             <a class="text-inherit" href="#">Home</a>
@@ -25,7 +25,7 @@
         </nav>
         <button class="text-5xl md:hidden">≡</button>
     </header>
-    <main>
+    <main >
         <section
             class=" bg-[url('./images/hero-bg.svg')]  bg-no-repeat bg-right bg-contain pt-24 max-md:pt-40 max-md:bg-cover  pb-4">
             <div class="flex item-center justify-between mx-12 max-md:flex-col">
@@ -70,12 +70,15 @@
                 <img class="rotate-10 mx-auto max-w-130 max-md:max-w-90" src="images/shoe.svg" alt="">
             </div>
         </section>
-        <section class="flex px-10 justify-between items-center max-lg:flex-col">
-            <div class=" bg-[url('./images/aboutUsBG.svg')] bg-cover bg-center max-h-[420px] flex justify-center items-center mx-10 ">
-                <img class="h-[400px]" src="./images/aboutUs.svg" alt="">
+        <section class="flex px-10 mb-20 justify-between items-center max-md:flex-col max-md:gap-10">
+            <h3 class=" text-5xl font-bold md:hidden">About Us!</h3>
+            <div
+                class=" bg-[url('./images/aboutUsBG.svg')] bg-cover bg-center flex items-start justify-center mx-10 grow-4 max-h-[400px] max-md:w-full max-md:min-h-[400px]">
+                <img class="max-h-[500px]" src="./images/aboutUs.svg" alt="" >
             </div>
-            <div class=" flex flex-col self-start">
-                <h3 class=" text-5xl font-bold">About Us!</h3>
+            <div
+                class="  min-w-[200px] max-w-[500px] shrink-2 max-[900px]:max-w-[400px] max-md:self-start max-md:max-w-full">
+                <h3 class=" text-5xl font-bold max-md:hidden">About Us!</h3>
                 <p class="text-base font-light mt-10 mb-6">For each one of those shoe sweethearts out there, THE SHOE
                     COMPANY offer the one-stop goal to pick
                     the correct match of footwear.</p>
@@ -91,7 +94,49 @@
                     ‘Organization Name’, we offer men, ladies, and child’s shoes perfect for any and each event.</p>
             </div>
         </section>
+        <section class="bg-[url('./images/peopleSayBG.png')] mx-10">
+            <h2 class="font-bold text-5xl text-center mx-20 mb-10 max-lg:text-3xl">What People are saying about THE SHOE
+                COMPANY ?</h2>
+            <div class="flex justify-between items-center text-base font-light gap-10 max-md:flex-col max-md:text-lg">
+                <div class="w-60 max-md:w-90">
+                    <img class="w-full rounded-full" src="./images/peopleSay1.png" alt="">
+                    <p class="text-center">“Looking for shoes that are built just for you? THE SHOE COMPANY is the way
+                        to go. Love the
+                        design and build quality.”</p>
+                </div>
+
+                <div class="w-60 max-md:w-90">
+                    <img class="w-full rounded-full" src="./images/peopleSay2.png" alt="">
+                    <p class="text-center">“I love the shoes, the quality, and everyting. They are worth the
+                        investment!”</p>
+                </div>
+
+                <div class="w-60 max-md:w-90">
+                    <img class="w-full rounded-full" src="./images/peopleSay3.png" alt="">
+                    <p class="text-center">“They make the best and forever lasting shoes. Superb fit and confort is
+                        literally the next
+                        level. Much recommended!”</p>
+                </div>
+            </div>
+        </section>
+        <section class="mx-10 mb-20">
+            <h3 class="text-3xl font-bold mt-10 mb-6">Contact Us,</h3>
+            <p class="text-base font-light">THE SHOE Company</p>
+            <p class="text-base font-light">Dellas, Texas, USA + 1</p>
+            <p class="text-base font-light">5514 2471 6852</p>
+            <div class="flex gap-3 my-4">
+                <a href="#"><img src="./images/facebook.svg" alt=""></a>
+                <a href="#"><img src="./images/instagram.svg" alt=""></a>
+                <a href="#"><img src="./images/twitch.svg" alt=""></a>
+                <a href="#"><img src="./images/youtube.svg" alt=""></a>
+            </div>
+            <div class="max-w-110 max-h-110 mx-auto overflow-hidden"><img class="w-full h-full object-cover" src="./images/map.png" alt=""></div>
+        </section>
     </main>
+    <footer class="flex justify-center items-center mt-10 text-base font-ligth">
+        <img class="max-w-16" src="./images/ShoeLogo.svg" alt="">
+        <p>Made with ❤️ By Mushahid</p>
+    </footer>
 </body>
 
 </html>
