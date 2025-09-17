@@ -1,6 +1,6 @@
 
 
-export default function InputField({name,height,width}) {
+export default function InputField({name}) {
   return (
     <div>
       <label htmlFor="userName" className="relative">
