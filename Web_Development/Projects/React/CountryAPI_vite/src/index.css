@@ -155,13 +155,12 @@ header{
     justify-content: space-between;
 }
 
-
-
 .region-list{
     display: none;
     position: absolute;
     bottom: -220px;
     left: 0;
+    top:50px;
     box-shadow: 0 0 2px 1px rgba(107, 47, 47, 0.075);
     border-radius: 6px;
     overflow: hidden;
