@@ -1,0 +1,66 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    background-color: rgba(198, 199, 200, 0.892);
+}
+
+.productContainer{
+    font-family: system-ui, -apple-system;
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+h3{
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.productCard{
+    width: 200px;
+    box-shadow: 1px 2px 2px 0px rgba(0, 0, 0, 0.365);
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: white;
+    color: black;
+}
+
+.productImg{
+    width: 100%;
+}
+
+.productDetail{
+    margin:10px
+}
+
+.productRatingPrice{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-block:6px;
+    font-size: 14px;
+}
+
+.productPrice{
+    font-size: 20px;
+    font-weight: 600;
+}
+.addToCardBuyNow{
+    display: flex;
+    justify-content: space-between;
+}
+
+button{
+    cursor: pointer;
+    font-size: 14px;
+    padding-inline: 2px;
+    padding-block: 6px;
+    background-color: blue;
+}
