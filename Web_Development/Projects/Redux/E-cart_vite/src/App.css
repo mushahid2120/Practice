@@ -6,6 +6,48 @@
 
 body{
     background-color: rgba(198, 199, 200, 0.892);
+    display: block;
+    width: 100vw;
+}
+
+header{
+    width: 100vw;
+    color: black;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: 30px;
+    padding-top: 16px;
+    box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.154);
+    
+}
+a{
+    color: black;
+}
+
+header>a>h2{
+    font-size: 32px;
+    cursor: pointer;    
+    transform: translateY(-20%);
+    
+}
+
+.cartIcon{
+        cursor: pointer;
+    position: relative;
+}
+
+.no-of-item{
+    position: absolute;
+    top: -20px;
+    left: 5px;
+    background-color: black;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding-inline: 6px;
+    border-radius: 100%;
+
 }
 
 .productContainer{
@@ -24,7 +66,7 @@ h3{
 }
 
 .productCard{
-    width: 200px;
+    width: 250px;
     box-shadow: 1px 2px 2px 0px rgba(0, 0, 0, 0.365);
     border-radius: 16px;
     overflow: hidden;
@@ -34,6 +76,7 @@ h3{
 
 .productImg{
     width: 100%;
+    background-color: rgb(57, 24, 20);
 }
 
 .productDetail{
@@ -57,10 +100,74 @@ h3{
     justify-content: space-between;
 }
 
-button{
+.product-button{
     cursor: pointer;
     font-size: 14px;
-    padding-inline: 2px;
+    padding-inline: 6px;
     padding-block: 6px;
     background-color: blue;
+}
+
+.cart-container{
+    margin: 20px;
+    color: black;
+}
+
+.cart-heading{
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 55% 20% 20% 5%;
+    border-bottom: 2px solid black;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.item{
+    width: 100%;
+    max-width:500px; 
+}
+.price{
+    width: 100%;
+    max-width: 100px;
+}
+.quantity{
+    width: 100%;
+    max-width: 100px;
+}
+
+.cartItems-container{
+    display: grid;
+    grid-template-columns: 55% 20% 20% 5%;
+    align-items: center;
+    font-weight: 600;
+    border-bottom: 1px solid black;
+}
+
+.product-img-title{
+    display: flex;
+}
+
+.product-title{
+    margin-top: 10px;
+}
+
+.cartItems-container img{
+    max-width: 90px;
+}
+
+.cartButton{
+    border: 1px solid black;
+    background-color: rgba(198, 199, 200, 0.892);
+    color: black;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 0;
+    padding-inline: 14px;
+    padding-block: 16px;
+}
+
+.total-amount{
+    display: flex;
+    justify-content: end;
+    font-weight: 700;
 }
