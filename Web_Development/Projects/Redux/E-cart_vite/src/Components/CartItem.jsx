@@ -20,7 +20,7 @@ export default function CartItem({ id, title, price, images, quantity }) {
                 <button className='cartButton' onClick={()=>{dispatch(removeCartItem({id}))}}>Delete</button>
             </div>
 
-            <div>{quantity*price}</div>
+            <div>${quantity*price}</div>
     </div>
   )
 }
