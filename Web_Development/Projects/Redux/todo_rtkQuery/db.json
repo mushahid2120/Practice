@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "value": "Buy groceries",
+      "completed": false
+    },
+    {
+      "id": "3",
+      "value": "Finish work project",
+      "completed": true
+    },
+    {
+      "id": "f948fcd0-5a4b-4e69-af1b-ab8ea27b71bc",
+      "value": "Reading",
+      "completed": false
+    },
+    {
+      "id": "9157fa71-e594-41c6-b763-20f3ee000bdf",
+      "value": "Eating",
+      "completed": true
+    }
+  ]
+}
