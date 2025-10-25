@@ -46,22 +46,6 @@ project-name/
 
 ---
 
-## 💡 How to Run Locally
-
-1. **Clone the repo**
-```bash
-git clone https://github.com/your-username/HTML-CSS-Project.git
-```
-
-2. **Navigate into a project folder**
-```bash
-cd project-name
-```
-
-3. **Open `index.html`** in your browser
-
----
-
 ## 🧩 Tech Stack
 
 - **HTML5** – Structure  
