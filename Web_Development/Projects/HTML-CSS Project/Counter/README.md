@@ -8,7 +8,6 @@ It lets you **increment**, **decrement**, or **reset** a number and even set a *
 ## 🪄 Live Preview
 
 👉 **[View Demo](https://your-username.github.io/counter-app/](https://counter-app-htmlcssjs.netlify.app/)**  
-*(Replace `your-username` with your actual GitHub username after publishing via GitHub Pages)*
 
 ---
 
@@ -40,26 +39,6 @@ counter-app/
 ├── style.css       # Styles
 └── script.js       # Logic and interactivity
 ```
-
----
-
-## ⚙️ How to Run Locally
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/your-username/counter-app.git
-   ```
-
-2. **Navigate into the folder**
-   ```bash
-   cd counter-app
-   ```
-
-3. **Open `index.html`** in your browser  
-   (Double-click it or drag it into a browser window)
-
-
----
 
 ## 💡 Example Usage
 
