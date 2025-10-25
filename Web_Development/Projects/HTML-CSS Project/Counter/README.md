@@ -7,7 +7,7 @@ It lets you **increment**, **decrement**, or **reset** a number and even set a *
 
 ## 🪄 Live Preview
 
-👉 **[View Demo]([https://your-username.github.io/counter-app/](https://counter-app-htmlcssjs.netlify.app/))**  
+👉 **[View Demo](https://your-username.github.io/counter-app/](https://counter-app-htmlcssjs.netlify.app/)**  
 *(Replace `your-username` with your actual GitHub username after publishing via GitHub Pages)*
 
 ---
