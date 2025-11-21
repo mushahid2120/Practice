@@ -1,0 +1,23 @@
+[
+    {
+        "id": "1d881626-5bcf-4c77-a72a-5f9e63985a92",
+        "name": "mushahid",
+        "email": "md@md.com",
+        "password": "12345",
+        "rootDirId": "f6e7397e-9413-4b8c-b1f5-d3ed81893b5d"
+    },
+    {
+        "id": "9ac15479-009c-4617-b234-ab2bd55b476e",
+        "name": "rohit",
+        "email": "rohit@gmail.com",
+        "password": "12345",
+        "rootDirId": "9f3f6e5b-33b1-4704-982f-6d1c48f849b4"
+    },
+    {
+        "id": "5b1cab98-41b4-41a7-804c-0edd5bcfc1af",
+        "name": "alam",
+        "email": "alam@gmail.com",
+        "password": "123456",
+        "rootDirId": "f14e169c-ea60-4e5c-b99f-bf4489b52678"
+    }
+]

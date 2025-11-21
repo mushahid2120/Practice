@@ -1,267 +1,322 @@
 import { useRef } from "react";
+import axios from "axios";
 import { useEffect, useState } from "react";
-import Button from "./button";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import DirItemListing from "./Component/DirItemListing";
+import { RiFolderAddFill } from "react-icons/ri";
+import { FaUpload } from "react-icons/fa";
+import Portal from "./Component/Portal";
 
 function App() {
-  const [fileList, setFileList] = useState([]);
-  const [directoryList,setDirectoryList]=useState([])
-  const [progress, setProgress] = useState(0);
-  const [isEdit, setIsEdit] = useState(null);
-  const [isEditDir,setIsEditDir]=useState(null)
-  const inputref = useRef();
-  const renameRef = useRef();
-  const renameDirRef=useRef()
-  const dirRef=useRef()
-  const {dirId}=useParams()
-  
-    // console.log(dirId)
+  const [driveContent, setDriveContent] = useState({
+    files: [],
+    directories: [],
+  });
+  const [directoryName, setDirectoryName] = useState("");
+  const [progress, setProgress] = useState({});
+  const [ContextMenu, setContextMenu] = useState({ index: -1, listType: null });
+  const [uploadingFiles, setUploadingFiles] = useState([]);
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [renameId, setRenameId] = useState(null);
+
+  const fileUploadRef = useRef();
+  const createDirRef = useRef();
+  const { dirId } = useParams();
 
   const fetchData = async () => {
-    // console.log(`http://127.0.0.1:4000/directory${dirPath}`)
-    const response = await fetch(`http://127.0.0.1:4000/directory/${dirId || ''}`);
-    const data = await response.json();
-    setFileList(data.files);
-    setDirectoryList(data.directories)
-
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:4000/directory/${dirId || ""}`
+      );
+      const data = await response.json();
+      if (data.parentDirId === null) setDirectoryName("");
+      else setDirectoryName(data.name);
+      setDriveContent(data);
+    } catch (error) {
+      console.log("Failed to Fetch....");
+    }
   };
-
 
   useEffect(() => {
     fetchData();
-  }, [inputref,dirId]);
+  }, [dirId]);
 
-  const handleSave = async (id) => {
+  //Rename File
+  const handleRenameFile = async () => {
     try {
-    const res = await fetch(`http://127.0.0.1:4000/files/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newfilename: renameRef.current.value }),
-    });
-    const resData = await res.json();
-    setIsEdit(null);
-    console.log(resData);
-    fetchData();
-    } catch (error) {
-      console.log(error.message)
-      res.send("Rename unSuccefull")
-    }
-  };
-
-  const handleSaveDir=async(folderId)=>{
-       try {
-    const res = await fetch(`http://127.0.0.1:4000/directory/${folderId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newfoldername: renameDirRef.current.value }),
-    });
-    const resData = await res.json();
-    setIsEditDir(null);
-    console.log(resData);
-    fetchData();
-    } catch (error) {
-      console.log(error.message)
-      res.send("Rename unSuccefull")
-    }
-  }
-
-  const handleDelete = async (id) => {
-    const response = await fetch(`http://127.0.0.1:4000/files/${id}`, {
-      method: "DELETE",
-    });
-    const resData = await response.json();
-    fetchData();
-    console.log(resData);
-  };
-
-  const handleDeleteDir=async(folderId)=>{
-     const response = await fetch(`http://127.0.0.1:4000/directory/${folderId}`, {
-      method: "DELETE",
-    });
-    const resData = await response.json();
-    fetchData();
-    console.log(resData);
-  }
-
-  const handleUpload = async (e) => {
-    console.log("handling Submit");
-    e.preventDefault();
-    const fileName = inputref.current.files[0].name;
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `http://127.0.0.1:4000/files/${dirId}`);
-    xhr.setRequestHeader('filename',fileName)
-    xhr.upload.addEventListener("progress", (e) => {
-      const progressPer = Math.floor((e.loaded / e.total) * 100);
-      console.log(progressPer);
-      setProgress(progressPer);
-    }); 
-
-    xhr.onload = () => {
-      console.log(xhr.responseText);
+      const res = await fetch(`http://127.0.0.1:4000/files/${renameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newfilename: inputValue }),
+      });
+      const resData = await res.json();
+      console.log(resData);
       fetchData();
-    };
-    xhr.send(inputref.current.files[0]);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //Rename Directory
+  const handleRenameDir = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:4000/directory/${renameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newfoldername: inputValue }),
+      });
+      const resData = await res.json();
+      console.log(resData);
+      fetchData();
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //Delete Files
+  const handleDeleteFile = async (id) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:4000/files/${id}`, {
+        method: "DELETE",
+      });
+      const resData = await response.json();
+      fetchData();
+      console.log(resData);
+    } catch (error) {
+      console.log("Cannot Delete!!!");
+    }
+  };
+
+  //Delete Directory
+  const handleDeleteDir = async (folderId) => {
+    const response = await fetch(
+      `http://127.0.0.1:4000/directory/${folderId}`,
+      {
+        method: "DELETE",
+      }
+    );
+    const resData = await response.json();
+    fetchData();
+    console.log(resData);
+  };
+
+  //Upload files
+  const handleFileUpload = async (e) => {
+    // // console.log("handling Submit");
+    // e.preventDefault();
+    // setProgress(0);
+    // // xhr.send(inputref.current.files[0]);
+
+    // const uploadAllfiles = (fileContent) => {
+    //   return new Promise((resolve, reject) => {
+    //     const fileName = fileContent.name;
+    //     const xhr = new XMLHttpRequest();
+    //     xhr.open("POST", `http://127.0.0.1:4000/files/${dirId || ""}`);
+    //     xhr.setRequestHeader("filename", fileName);
+    //     xhr.upload.addEventListener("progress", (e) => {
+    //       const progressPer = Math.floor((e.loaded / e.total) * 100);
+    //       console.log(progressPer);
+    //       setProgress(progressPer);
+    //     });
+
+    //     xhr.onload = () => {
+    //       console.log(xhr.responseText);
+    //       const res = JSON.parse(xhr.responseText);
+    //       if (res.message) resolve(xhr.responseText);
+    //       else reject(xhr.responseText);
+    //     };
+    //     xhr.onerror = () => {
+    //       reject(
+    //         (xhr.onerror = () => {
+    //           reject(new Error("Network error: Could not reach server"));
+    //         })
+    //       );
+    //     };
+    //     xhr.send(fileContent);
+    //   });
+    // };
+
+    // for (const file of fileUploadRef.current.files) {
+    //   try {
+    //     const res = await uploadAllfiles(file);
+    //     console.log(res);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }
+    // fetchData();
+
+    try {
+      const uploadSingleFile = async (file) => {
+        const filename = file.name;
+        console.log(file.name, file.type);
+        const res = await axios.post(
+          `http://127.0.0.1:4000/files/${dirId || ""}`,
+          file,
+          {
+            headers: {
+              "Content-Type": file.type,
+              filename: file.name,
+            },
+            onUploadProgress: (e) => {
+              console.log(e.loaded, e.total);
+              const percent = Math.round((e.loaded * 100) / e.total);
+              setProgress((prevState) => ({
+                ...prevState,
+                [filename]: percent,
+              }));
+            },
+          }
+        );
+        console.log(res);
+      };
+
+      for (const file of e.target.files) {
+        const filename = file.name;
+        setProgress((prevState) => ({
+          ...prevState,
+          [filename]: 0,
+        }));
+      }
+
+      for (const file of e.target.files) {
+        await uploadSingleFile(file);
+        await delay(file.type.includes("video") ? 4000 : 1000);
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+      fetchData();
+      setProgress({});
+      // uploadSingleFile(e.target.files[0]);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
 
-
-  const handleCreateDir=async(e)=>{
-    e.preventDefault()
-    const  res=await fetch(`http://localhost:4000/directory/${dirId}`,{
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({foldername: dirRef.current.value})
-    })
-    const resData=await res.json()
-    fetchData()
-    dirRef.current.value=''
-    console.log(resData)
-  }
-
-
+  //Create Directory
+  const handleCreateDir = async (e) => {
+    try {
+      console.log("Create dir");
+      e.preventDefault();
+      const res = await fetch(`http://localhost:4000/directory/${dirId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ foldername: inputValue }),
+      });
+      const resData = await res.json();
+      fetchData();
+      // createDirRef.current.value = "";
+      console.log(resData);
+    } catch (error) {
+      console.log("Directory not created");
+    }
+  };
 
   return (
-    <div className="text-lg font-semibold m-2">
-      <h1 className="text-xl">This is Google Drive</h1>
-      <form className="m-4" onSubmit={handleUpload}>
-        <input
-          type="file"
-          name="file"
-          id="file"
-          ref={inputref}
-          onChange={() => {
-            setProgress(0);
-          }}
+    <div
+      className="text-lg font-semibold px-4 py-2 min-h-screen bg-[#F9FAFB]"
+      onClick={() => {
+        setContextMenu(-1);
+      }}
+    >
+      <header className="flex justify-between ">
+        <h1 className="text-xl text-[#111827]">
+          {directoryName || "Your Drive"}
+        </h1>
+        <div className="flex gap-4 justify-center items-center mr-6">
+          <RiFolderAddFill
+            size={22}
+            color="blue"
+            cursor="pointer"
+            onClick={() => {
+              setIsPortalOpen("createDir");
+            }}
+          />
+          {isPortalOpen && (
+            <Portal
+              setIsPortalOpen={setIsPortalOpen}
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              handleSubmit={
+                isPortalOpen === "createDir"
+                  ? handleCreateDir
+                  : isPortalOpen === "directory"
+                  ? handleRenameDir
+                  : handleRenameFile
+              }
+            />
+          )}
+          <FaUpload
+            size={20}
+            color="#2563EB"
+            cursor="pointer"
+            onClick={() => fileUploadRef.current.click()}
+          />
+          <input
+            type="file"
+            name="file"
+            multiple
+            ref={fileUploadRef}
+            onChange={(e) => {
+              const arrayOfFiles = Array.from(e.target.files);
+              setUploadingFiles(arrayOfFiles);
+              handleFileUpload(e);
+            }}
+            hidden
+          />
+        </div>
+        {/* <div className="flex gap-2 text-sm font-normal text-blue-600">
+          <Link to="/Login">Login</Link>
+          <Link to="/SignUp">SignUp</Link>
+        </div> */}
+      </header>
+      <hr />
+
+      <main>
+        {/* {uploadingFiles.map((file) => {
+          console.log(file);
+          return <div>{file.name}</div>;
+        })} */}
+
+        {Object.entries(progress).map(([filename, percent], i) => 
+          <div
+            className=" border-solid relative border-[#E5E7EB] border-[2px] pl-4 pr-2 pt-1 pb-4 my-2 bg-[#F5F7da] rounded-md font-semibold text-[#374151] text-[16px]  hover:bg-[#F5F7aa] transition-all ease-in-out"
+            key={i}
+          >
+            {filename}
+            <div className="text-[12px] text-center   bg-slate-200 h-1 leading-[10px] rounded-lg">
+              <p className={`rounded-lg   font-semibold bg-blue-500 h-1 `} style={{width: `${percent}%`}}>
+              </p>
+                {percent}%
+            </div>
+          </div>
+        )}
+
+        <DirItemListing
+          listingItem={driveContent.directories}
+          listType="directory"
+          isContextMenu={ContextMenu}
+          setIsContextMenu={setContextMenu}
+          handleDelete={handleDeleteDir}
+          setIsPortalOpen={setIsPortalOpen}
+          setInputValue={setInputValue}
+          setRenameId={setRenameId}
         />
-        <span id="progress-bar" className="font-normal text-base">
-          progress: {progress}%
-        </span>
-        <br />
-        <button className=" mt-4 px-4 rounded-lg bg-blue-600 text-white ">
-          Submit
-        </button>
-      </form>
-
-      <form className="m-4" onSubmit={handleCreateDir}>
-        <input
-          type="text"
-          name="dir"
-          id="dir"
-          className=" outline-slate-400 px-1 border-solid border-2 boder-slate-300"
-          ref={dirRef} 
-          required
-        />{' '}
-        <button className=" mt-4 px-4 rounded-lg bg-blue-600 text-white ">
-           create Folder
-        </button>
-      </form>
-      
-      {directoryList.map(({ name:folder,id }, index) =>
-        isEditDir === index ? (
-          <div key={index}>
-            <input
-              type="text"
-              defaultValue={folder}
-              ref={renameDirRef}
-              className=" outline-slate-400 px-1 border-solid border-2 boder-slate-300"
-            />
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-blue-500 text-white"
-              onClick={() => {
-                handleSaveDir(id);
-              }}
-            >
-              Save
-            </button>
-          </div>
-        ) : (
-          <div key={index}>
-            {folder}{" "}
-            <Link
-              to={`/directory/${id}`
-              }
-              className="text-blue-600"
-            >
-              {" "}
-              Open{" "}
-            </Link>
-
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-green-400 text-white"
-              onClick={() => {
-                setIsEditDir(index);
-              }}
-            >
-              Edit
-            </button>
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-red-600 text-white "
-              onClick={() => {
-                handleDeleteDir(id);
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        )
-      )}
-
-      { fileList.map(({ name:file,id }, index) =>
-        isEdit === index ? (
-          <div key={index}>
-            <input
-              type="text"
-              defaultValue={file}
-              ref={renameRef}
-              className=" outline-slate-400 px-1 border-solid border-2 boder-slate-300"
-            />
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-blue-500 text-white"
-              onClick={() => {
-                handleSave(id);
-              }}
-            >
-              Save
-            </button>
-          </div>
-        ) : (
-          <div key={index}>
-            {file}{" "}
-            <a
-              href={`http://127.0.0.1:4000/files/${id}`
-              }
-              className="text-blue-600"
-            >
-              {" "}
-              Open{" "}
-            </a>
-              <a
-                href={`http://127.0.0.1:4000/files/${id}?action=download`}
-                className="text-red-400"
-              >
-                {" "}
-                Download
-              </a>
-
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-green-400 text-white"
-              onClick={() => {
-                setIsEdit(index);
-              }}
-            >
-              Edit
-            </button>
-            <button
-              className=" mt-2 mx-2 px-2 rounded-lg bg-red-600 text-white "
-              onClick={() => {
-                handleDelete(id);
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        )
-      )}
+        <DirItemListing
+          listingItem={driveContent.files}
+          listType="files"
+          isContextMenu={ContextMenu}
+          setIsContextMenu={setContextMenu}
+          handleDelete={handleDeleteFile}
+          setIsPortalOpen={setIsPortalOpen}
+          setInputValue={setInputValue}
+          setRenameId={setRenameId}
+        />
+      </main>
     </div>
   );
 }

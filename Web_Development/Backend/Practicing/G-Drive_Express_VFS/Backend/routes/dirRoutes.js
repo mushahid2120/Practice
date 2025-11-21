@@ -4,9 +4,11 @@ import path from 'path'
 import filesList from "../filesDB.json" with {type: 'json'}
 import directoryList from "../directoryDB.json" with {type: 'json'}
 import { writeFile } from "fs/promises";
+import { error } from "console";
 
 const router=express.Router()
 
+//Read Direactory
 router.get("/{:id}", async (req, res) => {
   const id=req.params?.id || directoryList[0].id
   const directoryData=id ? (directoryList.find((dir)=>dir.id===id)) : directoryList[0]
@@ -16,13 +18,14 @@ router.get("/{:id}", async (req, res) => {
   res.json({...directoryData,files:filesData,directories:directoriesData})
 });
 
+
+//Create Directory
 router.post ('/{:parentDirId}',async(req,res)=>{
   const parentDirId=req.params.parentDirId==='undefined' || req.params.parentDirId===undefined ?
   (directoryList[0].id):(req.params.parentDirId);
   
-  const foldername=req.body.foldername
+  const foldername=req.body?.foldername || 'untitle'
   const id=crypto.randomUUID()
-  console.log(typeof req.params.parentDirId,directoryList[0].id)
 
   const directoryData=directoryList.find((dir)=>dir.id===parentDirId)
   directoryData.directories.push(id)
@@ -35,39 +38,60 @@ router.post ('/{:parentDirId}',async(req,res)=>{
         parentDirId
     })
     
-  await writeFile('./directoryDB.json',JSON.stringify(directoryList))
-  res.json({message: "Folder Created"})
+  try {
+    await writeFile('./directoryDB.json',JSON.stringify(directoryList))
+  return res.json({message: "Folder Created"})
+  } catch (error) {
+    next(error)
+  }
 })
 
+
+//Rename Directory
 router.patch('/:folderId',async(req,res)=>{
-  const folderId=req.params.folderId
-  const newFolderName=req.body.newfoldername
+  const folderId=req.params?.folderId
+  const newFolderName=req.body?.newfoldername
   const dirData=directoryList.find((dir)=>folderId===dir.id)
-  dirData.name=newFolderName
-  await writeFile('./directoryDB.json',JSON.stringify(directoryList))
-  res.json({message: "Folder Renamed Succussfully "})
+  if(!dirData) return res.status(404).json({error: 'Folder not found'})
+  if(newFolderName) dirData.name=newFolderName
+  try {
+    await writeFile('./directoryDB.json',JSON.stringify(directoryList))
+    return res.json({message: "Folder Renamed Succussfully "})
+  } catch (error) {
+    next(error)
+  }
 })
 
+
+//Delete Directory
 router.delete('/:folderId',async(req,res)=>{
   const folderId=req.params.folderId
-  const result=deleteAllDir([folderId])
   const folderParentId=directoryList.find((dir)=>dir.id===folderId).parentDirId
+  if(!folderParentId) return res.status(404).json({error: 'No Such Directory'})
   const folderParentIndex=directoryList.findIndex((dir)=>dir.id===folderParentId)
   directoryList[folderParentIndex].directories=directoryList[folderParentIndex].directories.filter((dirId)=>dirId!==folderId)
+  const result=deleteAllDir([folderId])
 
   const resultFilesList=filesList.filter((file,index)=>!result.deleteFileIndex.includes(index))
   const resultDirList=directoryList.filter((dir,index)=>!result.deletedDirIndex.includes(index))
     
   for await (const fileIndex of result.deleteFileIndex){
-    const fileData=filesList[fileIndex]
+    try {
+      const fileData=filesList[fileIndex]
     await rm(`./GDrive/${fileData.id}${fileData.extension}`)
+    } catch (error) {
+      res.status(500).json({error: `${fileData.name} Cannot Delete`})
+    }
   }
 
-  await writeFile('./filesDB.json',JSON.stringify(resultFilesList))
+  try{
+    await writeFile('./filesDB.json',JSON.stringify(resultFilesList))
   await writeFile('./directoryDB.json',JSON.stringify(resultDirList))
 
-  // res.json({resultDirList})
   res.json({message: "Folder Deleted Successfully"})
+  }catch(error){
+    next(error)
+  }
 })
 
  function deleteAllDir(dirIdList) {
@@ -93,33 +117,20 @@ router.delete('/:folderId',async(req,res)=>{
     }
     return true
   })
-  // console.log(deletedDirIndex)
   return {deletedDirIndex,deleteFileIndex}
 }
-
-
 
  function deleteAllFiles(fileIdList) {
   const  deleteFileIndex=[]
   const newFileDB=filesList.filter((file,index)=>{
     const result = fileIdList.find((fileId)=>fileId===file.id)
     if(result){
-      // console.log(result)
       deleteFileIndex.push(index)
       return false
     }
     return true
   })
-
-  // for await(const index of deleteFileIndex){
-  //   const file=filesList[index]
-  //   console.log(file)
-  //   // await rm(`./GDrive/${file.id}${file.extension}`)
-  // }
-  // console.log({deleteFileIndex})
-  // console.log(newFileDB)
   return deleteFileIndex
-  // await writeFile('./filesDB.json',JSON.stringify(newFileDB))
 }
 
 

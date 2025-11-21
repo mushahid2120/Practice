@@ -8,22 +8,21 @@ import directoryList from "../directoryDB.json" with {type: 'json'}
 
 const router=express.Router()
 
-//Read
+//Read File
 router.get("/:id", (req, res) => {
-  const id =req.params?.id
+  const id =req.params?.id 
   const fileData=filesList.find((file)=>file.id===id)
-  console.log(fileData)
+  if(!fileData) {return res.status(404).send('File Not Found')}
   if(req.query.action==='download')
     res.set('Content-Disposition',`attachment;filename=${fileData.name}`)
-  res.sendFile(`${process.cwd()}/GDrive/${id}${fileData.extension}`)
+  return res.status(200).sendFile(`${process.cwd()}/GDrive/${id}${fileData.extension}`)
 });
 
 
-//Upload
-router.post("/:parentDirId", async (req, res) => {
+//Upload File
+router.post("/{:parentDirId}", async (req, res,next) => {
   const parentDirId=req.params.parentDirId || directoryList[0].id
   const fileName=req.headers.filename
-  // res.send({Message: "File Uploaded Successfully"})
   const id=crypto.randomUUID()
   const extension=path.extname(fileName)
   const fileFullName=`${id}${extension}`
@@ -34,28 +33,44 @@ router.post("/:parentDirId", async (req, res) => {
 
   const writeStream=createWriteStream(`./GDrive/${fileFullName}`)
   req.pipe(writeStream)
-  req.on('end',async()=>{
-      await writeFile('./filesDB.json',JSON.stringify(filesList))
-      await writeFile('./directoryDB.json',JSON.stringify(directoryList))
-      res.send({Message: "File Uploaded Successfully"})
-  })
+  
+
+        writeStream.on('finish', async () => {
+          try {
+            console.log('triggering... finish')
+            await writeFile('./filesDB.json', JSON.stringify(filesList));
+            await writeFile('./directoryDB.json', JSON.stringify(directoryList));
+            res.json({ message: "File Uploaded Successfully" });
+          } catch (err) {
+            console.log(err)
+            next(err);
+          }
+        }); 
 });
 
 
-//Rename
+
+//Rename File
 router.patch("/:id", async (req, res) => {
   const id=req.params.id
-  const newFileName=req.body.newfilename
+  const newFileName=req.body?.newfilename 
   console.log(newFileName)
   const fileData=filesList.find((file)=>(file.id===id))
-  fileData.name=newFileName
-  await writeFile('./filesDB.json',JSON.stringify(filesList))
-  res.json({message: "File Renamed Successfully"})
+  if(!fileData) return res.status(405).json({error: 'File not Found'})
+  if(newFileName) fileData.name=newFileName
+  try {
+    await writeFile('./filesDB.json',JSON.stringify(filesList))
+  return res.json({message: "File Renamed Successfully"})
+  } catch (error) {
+    next(error)
+  }
 });
 
+//Delete File
 router.delete("/:id", async (req, res) => {
-  const {id}=req.params
+  const id=req.params?.id
   const fileDataIndex=filesList.findIndex((file)=>(file.id===id))
+  if(fileDataIndex===-1) return res.status(404).json({error: "Deleting File not Found"})
   const fileData=filesList[fileDataIndex]
   const parentDirData=directoryList.find((dir)=>dir.id===fileData.parentDirId)
   const parentDirDataIndex=parentDirData.files.findIndex((fileId)=>fileId===id)
@@ -63,10 +78,14 @@ router.delete("/:id", async (req, res) => {
   filesList.splice(fileDataIndex,1)
   parentDirData.files.splice(parentDirDataIndex,1)
 
-  await rm(`./GDrive/${id}${fileData.extension}`)
+  try {
+    await rm(`./GDrive/${id}${fileData.extension}`)
   await writeFile('./filesDB.json',JSON.stringify(filesList))
   await writeFile('./directoryDB.json',JSON.stringify(directoryList))
-  res.json({ message: "File Deleted" });
+  return res.json({ message: "File Deleted" });
+  } catch (error) {
+    next(error)
+  }
 });
 
 export default router

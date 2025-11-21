@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import SignUp from "./page/SingUp.jsx";
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
     path: "/directory/:dirId",
     element: <App />,
   },
+  {
+    path: "/SignUp",
+    element: <SignUp/>
+  }
 ]);
 
 createRoot(document.getElementById("root")).render(
