@@ -7,7 +7,7 @@ It displays a list of people having birthdays today, allows you to clear the lis
 
 ## 🪄 Live Preview
 
-👉 **[View Demo]([#](https://birthday-parcel.netlify.app/))**  
+👉 **[View Demo](https://birthday-parcel.netlify.app/)**  
 
 ---
 
