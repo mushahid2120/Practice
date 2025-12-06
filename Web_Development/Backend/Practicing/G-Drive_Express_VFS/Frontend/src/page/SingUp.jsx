@@ -3,7 +3,6 @@ import {useNavigate} from 'react-router-dom'
 
 export default function SignUp() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [userId,setUserId]=useState(null)
   const navigate=useNavigate()
 
   const handleChange = (e) => {
@@ -13,7 +12,8 @@ export default function SignUp() {
   const handleSubmit = async(e) => {
     e.preventDefault();
     console.log(typeof form)
-    const res=await fetch('http://localhost:4000/auth/singup',{
+    const res=await fetch('http://127.0.0.1:4000/auth/singup',{
+        credentials: 'include',
         method: 'POST',
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(form)

@@ -5,33 +5,42 @@ import filesList from "../filesDB.json" with {type: 'json'}
 import directoryList from "../directoryDB.json" with {type: 'json'}
 import { writeFile } from "fs/promises";
 import { error } from "console";
+import validateId from "../middleware/validateId.js";
 
 const router=express.Router()
 
+router.param("id",validateId);
+router.param("parentDirId",validateId);
+router.param("folderId",validateId);
+
+
 //Read Direactory
 router.get("/{:id}", async (req, res) => {
-  const id=req.params?.id || directoryList[0].id
-  const directoryData=id ? (directoryList.find((dir)=>dir.id===id)) : directoryList[0]
-  const filesData=directoryData.files.map((fileId)=>filesList.find((file)=>file.id===fileId))
-  const directoriesData=directoryData.directories.map((dirId)=>directoryList.find((dir)=>dir.id===dirId))
-  console.log(filesList.length,directoryList.length)
-  res.json({...directoryData,files:filesData,directories:directoriesData})
+  const id=req.params?.id || req.user.rootDirId;
+  const directoryData=directoryList.find((dir)=>dir.id===id && dir.userId===req.user.id);
+  if(!directoryData) return res.status(404).json({error:"You don't have any access" }) ;
+  const filesData=directoryData.files.map((fileId)=>filesList.find((file)=>file.id===fileId));
+  const directoriesData=directoryData.directories.map((dirId)=>directoryList.find((dir)=>dir.id===dirId));
+  console.log(filesList.length,directoryList.length);
+  res.json({...directoryData,files:filesData,directories:directoriesData});
 });
 
 
 //Create Directory
 router.post ('/{:parentDirId}',async(req,res)=>{
   const parentDirId=req.params.parentDirId==='undefined' || req.params.parentDirId===undefined ?
-  (directoryList[0].id):(req.params.parentDirId);
+  (req.user.rootDirId):(req.params.parentDirId);
   
   const foldername=req.body?.foldername || 'untitle'
   const id=crypto.randomUUID()
 
-  const directoryData=directoryList.find((dir)=>dir.id===parentDirId)
+  const directoryData=directoryList.find((dir)=>dir.id===parentDirId && dir.userId===req.user.id)
+  if(!directoryData) return res.status(404).json({error: 'You are not authorized to create this directory'})
   directoryData.directories.push(id)
 
   directoryList.push({
         id,
+        userId: req.user.id,
         "name": foldername,
         "files": [],
         "directories": [],
@@ -51,8 +60,8 @@ router.post ('/{:parentDirId}',async(req,res)=>{
 router.patch('/:folderId',async(req,res)=>{
   const folderId=req.params?.folderId
   const newFolderName=req.body?.newfoldername
-  const dirData=directoryList.find((dir)=>folderId===dir.id)
-  if(!dirData) return res.status(404).json({error: 'Folder not found'})
+  const dirData=directoryList.find((dir)=>folderId===dir.id && dir.userId===req.user.id)
+  if(!dirData) return res.status(404).json({error: 'Folder not found or You are not authorized to rename this folder'})
   if(newFolderName) dirData.name=newFolderName
   try {
     await writeFile('./directoryDB.json',JSON.stringify(directoryList))
@@ -66,8 +75,8 @@ router.patch('/:folderId',async(req,res)=>{
 //Delete Directory
 router.delete('/:folderId',async(req,res)=>{
   const folderId=req.params.folderId
-  const folderParentId=directoryList.find((dir)=>dir.id===folderId).parentDirId
-  if(!folderParentId) return res.status(404).json({error: 'No Such Directory'})
+  const folderParentId=directoryList.find((dir)=>dir.id===folderId && dir.userId===req.user.id)?.parentDirId
+  if(!folderParentId) return res.status(404).json({error: 'No Such Directory or You are not authorized to delete this folder'})
   const folderParentIndex=directoryList.findIndex((dir)=>dir.id===folderParentId)
   directoryList[folderParentIndex].directories=directoryList[folderParentIndex].directories.filter((dirId)=>dirId!==folderId)
   const result=deleteAllDir([folderId])
