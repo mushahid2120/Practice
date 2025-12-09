@@ -14,7 +14,7 @@ function DirItemListing({
   setInputValue,
   setRenameId,
 }) {
-  return listingItem.map(({ name, id }, index) => (
+  return listingItem.map(({ name, _id:id }, index) => (
     <Link
       key={index}
       to={

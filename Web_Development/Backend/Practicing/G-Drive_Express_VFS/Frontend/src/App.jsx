@@ -30,6 +30,7 @@ function App() {
   const { dirId } = useParams();
 
 
+console.log(renameId)
   const fetchData = async () => {
     try {
       const response = await fetch(
@@ -216,7 +217,7 @@ function App() {
 
       for (const file of e.target.files) {
         await uploadSingleFile(file);
-        await delay(file.type.includes("video") ? 4000 : 2000);
+        // await delay(file.type.includes("video") ? 4000 : 2000);
       }
 
       function delay(ms) {
