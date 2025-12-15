@@ -5,7 +5,7 @@ import fileRoutes from "./routes/fileRoutes.js";
 import dirRoutes from "./routes/dirRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import checkAuth from "./middleware/authCheck.js";
-import connectDB from "./db.js";
+import connectDB from "./config/db.js";
 
 const app = express();
 app.use(express.json());

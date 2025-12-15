@@ -3,10 +3,11 @@ import express from "express";
 import path from 'path'
 import { createWriteStream, write} from "fs";
 import { ObjectId } from "mongodb";
+import validateId from "../middleware/validateId.js";
 
 const router=express.Router()
-// router.param("id",validateId);
-// router.param("parentDirId",validateId);
+router.param("id",validateId);
+router.param("parentDirId",validateId);
 
 //Read File
 router.get("/:id", async(req, res,next) => {

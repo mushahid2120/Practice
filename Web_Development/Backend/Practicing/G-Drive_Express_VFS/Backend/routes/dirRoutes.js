@@ -1,8 +1,12 @@
 import  { rm } from "fs/promises";
 import express from "express";
 import { ObjectId } from "mongodb";
+import validateId from "../middleware/validateId.js";
 
 const router=express.Router();
+router.param("id",validateId);
+router.param("parentDirId",validateId);
+router.param("folderId",validateId);
 
 //Read Direactory
 router.get("/{:id}", async (req, res) => {

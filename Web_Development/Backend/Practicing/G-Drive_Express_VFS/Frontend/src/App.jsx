@@ -26,11 +26,8 @@ function App() {
 
   const nav = useNavigate();
   const fileUploadRef = useRef();
-  const createDirRef = useRef();
   const { dirId } = useParams();
 
-
-console.log(renameId)
   const fetchData = async () => {
     try {
       const response = await fetch(
@@ -329,7 +326,7 @@ console.log(renameId)
                 setIsProfileOpen(!isProfileOpen);
               }}
             >
-              {isAuthorized && <FaUser size={20} color="#2563EB" cursor="pointer" />}
+              <FaUser size={20} color="#2563EB" cursor="pointer" />
             </div>
             {isProfileOpen &&
               (userDetail === null ? (
