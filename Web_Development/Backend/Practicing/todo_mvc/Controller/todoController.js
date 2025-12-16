@@ -1,8 +1,9 @@
 import { ObjectId } from "mongodb";
+import Todo from "../Model/todoModel.js";
 
 export const getAllTodos=async(req,res,next)=>{
     try {
-        const todoList = await req.db.collection('task').find().toArray();
+        const todoList = await Todo.find();
         // return res.json({todoList});
         res.render('index.jsx',{todoList})
     } catch (error) {
@@ -14,7 +15,7 @@ export const getAllTodos=async(req,res,next)=>{
 export const addTodo=async(req,res,next)=>{
     try {
         const {task}=req.body;
-        await req.db.collection('task').insertOne({task,completed: false});
+        await Todo.insertOne({task});
         // return res.json({message: "Insert Succussfully "});
         res.redirect('/todo')
     } catch (error) {
@@ -26,7 +27,7 @@ export const addTodo=async(req,res,next)=>{
 export const deleteTodo=async(req,res,next)=>{
     try {
         const todoId = req.params.todoId;
-        await req.db.collection('task').deleteOne({_id: new ObjectId(todoId)});
+        await Todo.findByIdAndDelete(todoId)
         return res.json({message: "Deleted Succussfully"});
         
     } catch (error) {

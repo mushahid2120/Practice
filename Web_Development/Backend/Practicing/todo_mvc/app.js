@@ -1,20 +1,15 @@
+import './db.js'; 
 import express from 'express';
 import cors from 'cors';
-import connectDB from './db.js'; 
 import todoRouter from './router/todoRouter.js'
 import  {createEngine} from  'express-react-views'
 
-const db=await connectDB();
 const app=express();
 
 app.use(express.json());
 app.use(express.urlencoded())
 app.use(cors());
 app.use(express.static('./public'))
-app.use((req,res,next)=>{
-    req.db=db;
-    next();
-})
 
 app.set('views','./Views');
 app.set('view engine', 'jsx');
