@@ -7,14 +7,17 @@ import User from "./db.js";
 //   age: 40,
 //   email: "khan@md.com",
 //   hobbies: ["cricket","Books","movies"],
-// });
+// })
+
+const parentId=new mongoose.Types.ObjectId()
+console.log(parentId)
 
 const result=await User.create({
-  name: "ansari",
-  age: 15,
-  email: "ansari@md.com",
-  hobbies: ["cricket","Books","movies","coding"],
-  parentId: '6941755fb0995203e2360c6b'
+  name: "john",
+  age: 16,
+  email: "john@md.com",
+  hobbies: ["cricket","Books"],
+  parentId: parentId
 })
 
 // const user=new User({
