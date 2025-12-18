@@ -14,7 +14,8 @@ const userSchema=new Schema({
         type: String,
         require: true,
         match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        lowercase: true
+        lowercase: true,
+        unique: true
     },
     password: {
         type: String,

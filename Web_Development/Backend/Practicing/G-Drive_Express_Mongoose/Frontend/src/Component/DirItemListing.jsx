@@ -17,7 +17,7 @@ function DirItemListing({
   return listingItem.map(({ name, _id: id }, index) => (
     <div
       key={id}
-      className="flex justify-between items-center border-solid relative border-[#E5E7EB] border-[2px] pl-4 pr-2 pt-2 pb-3 my-2 bg-[#f4f2f5] rounded-md font-semibold text-[#374151] text-[16px]  hover:bg-blue-100 transition-all ease-in-out"
+      className="flex justify-between items-center border-solid relative border-[#E5E7EB] border-[1px] pl-4 pr-2 my-2 bg-[#f4f2f5] rounded-md font-normal text-[16px]  hover:bg-blue-100 transition-all ease-in-out"
     >
       <Link
         to={
@@ -25,7 +25,7 @@ function DirItemListing({
             ? `/directory/${id}`
             : `http://127.0.0.1:4000/files/${id}`
         }
-        className="text-blue-600 w-full"
+        className=" w-full pt-2 pb-3"
       >
         <span>{name}</span>
       </Link>

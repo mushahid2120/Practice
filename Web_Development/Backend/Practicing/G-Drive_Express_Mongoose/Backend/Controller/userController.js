@@ -6,18 +6,21 @@ export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
   const userId = new mongoose.Types.ObjectId();
   const dirId = new mongoose.Types.ObjectId();
+
+  const session=await mongoose.startSession();
   try {
     const user = await Users.findOne({ email });
     if (user) {
       return res.json({ message: "email already exit " });
     }
 
+    session.startTransaction()
     const dirResult = await Dir.insertOne(
       {
         _id: dirId,
         name: `root-${email}`,
         userId: userId,
-      }
+      },{session}
     );
 
     const userResult = await Users.insertOne(
@@ -27,10 +30,11 @@ export const signup = async (req, res, next) => {
         email,
         password,
         rootDirId: dirId,
-      }
+      },{session}
     );
 
     console.log({ dirResult, userResult });
+    session.commitTransaction()
 
     // await writeFile('./userDB.json',JSON.stringify(userList))
     // await writeFile('./directoryDB.json',JSON.stringify(directoryList))

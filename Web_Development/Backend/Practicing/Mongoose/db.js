@@ -11,6 +11,8 @@ const schema = new Schema({
     type: String,
     required: [true, "name field is required"],
     minLength: [2, "name should be atleast 2 character "],
+    alias: 'naam',
+    index: true
   },
   age: {
     type: Number,
@@ -20,11 +22,17 @@ const schema = new Schema({
     type: String,
     required: true,
     lowercase: true,
-    trim: true,
+    unique: true
+  },
+  password:{
+    type: String,
+    lowercase: true,
+    trim: true
   },
   hobbies: {
     type: [String],
   },
+  balance: Number,
   parentId: {
     type: Schema.Types.ObjectId,
     required: function () {
@@ -35,10 +43,45 @@ const schema = new Schema({
   }},{
     strict: 'throw',
     timestamps: true,
-    versionKey: "__version"
+    versionKey: "--version",
+    optimisticConcurrency: true,
+    virtuals:{
+      hobbiesString: {
+        get(){return this.hobbies.join(', ')},
+        set(value){return this.hobbies=[...this.hobbies,...value.split(', ')]}
+      }
+    },
+    methods:{
+      getSummary(option){
+        if(option==='full')
+          return `${this.name} is ${this.age} years old and he has these hobbies ${this.hobbies.join(', ')}`
+         return `${this.name} is ${this.age} years old`
+      }
+    },
+    statics:{
+      findOneByName(name){
+        return this.findOne({name})
+      }
+    }
 }
 );
 
+// schema.pre("save",function(){
+//   console.log("before crating something")
+//   this.password=this.name+this.age;
+// })
+
+// schema.post("save",function(doc){
+//   console.log("after creating ")
+//   doc.firstname=doc.name.split(' ')[0]
+//   console.log(doc)
+// })
+
+// schema.pre(['findOne','find'],function(){
+//   this.find({age: {$lte:29}})
+// })
+
 const User = mongoose.model("mMyColl", schema);
+
 
 export default User;

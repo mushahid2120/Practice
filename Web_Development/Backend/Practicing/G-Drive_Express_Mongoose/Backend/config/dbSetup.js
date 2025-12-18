@@ -1,12 +1,13 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
+import connectDB from "./db.js";
 
-const client = new MongoClient("mongodb://storageApp:12345@127.0.0.1:27017/storageApp");
+const db = await connectDB()
+console.log(db)
 
-const db = client.db();
 const command = "collMod";
 
 const userResult = await db.command({
-  [command]: "user",
+  [command]: "users",
   validator: {
     $jsonSchema: {
       required: ["_id", "name", "email", "password", "rootDirId"],
@@ -31,6 +32,9 @@ const userResult = await db.command({
         rootDirId: {
           bsonType: "objectId",
         },
+      __v: {
+        bsonType:  'int'
+      }
       },
       additionalProperties: false,
     },
@@ -63,6 +67,9 @@ const fileResult = await db.command({
       },
       parentDirId: {
         bsonType: 'objectId',
+      },
+      __v: {
+        bsonType:  'int'
       }
     },
     additionalProperties: false
@@ -73,7 +80,7 @@ const fileResult = await db.command({
 });
 
 const dirResult = await db.command({
-  [command]: "directory",
+  [command]: "directories",
   validator: {
   $jsonSchema: {
     required: [
@@ -99,6 +106,9 @@ const dirResult = await db.command({
       },
       userId: {
         bsonType: 'objectId',
+      },
+      __v: {
+        bsonType:  'int'
       }
     },
     additionalProperties: false
@@ -110,4 +120,4 @@ const dirResult = await db.command({
 
 console.log({userResult,fileResult,dirResult})
 
-await client.close();
+await mongoose.disconnect()
