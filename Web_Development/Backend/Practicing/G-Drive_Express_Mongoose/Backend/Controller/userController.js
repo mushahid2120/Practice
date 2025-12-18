@@ -9,11 +9,6 @@ export const signup = async (req, res, next) => {
 
   const session=await mongoose.startSession();
   try {
-    const user = await Users.findOne({ email });
-    if (user) {
-      return res.json({ message: "email already exit " });
-    }
-
     session.startTransaction()
     const dirResult = await Dir.insertOne(
       {
@@ -48,7 +43,16 @@ export const signup = async (req, res, next) => {
     res.cookie("userId", userId, cookieCofig);
     res.json({ message: "User Created" });
   } catch (error) {
-    return res.json(error)
+    await session.abortTransaction();
+    if(error.name==="ValidationError"){
+      const [errorFor]=Object.keys(error.errors)
+      const errorMessage=error.errors[errorFor].properties.message  
+      return res.status(401).json({error: {[errorFor]:errorMessage}})
+    }
+    else{
+      if(error.name === 'MongoServerError' && error.code===11000)
+        return res.status(401).json({error: {email: "email already Exist "}})
+    }
     next(error);
   }
 };
