@@ -1,6 +1,10 @@
 import Users from "../Model/userModel.js";
 import Dir from "../Model/dirModel.js";
 import mongoose from "mongoose";
+import crypto from 'node:crypto'
+
+export const mySecret="mysecret"
+export let hashValue;
 
 export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -28,19 +32,8 @@ export const signup = async (req, res, next) => {
       },{session}
     );
 
-    console.log({ dirResult, userResult });
     session.commitTransaction()
 
-    // await writeFile('./userDB.json',JSON.stringify(userList))
-    // await writeFile('./directoryDB.json',JSON.stringify(directoryList))
-
-    const cookieCofig = {
-      sameSite: "none",
-      secure: true,
-      path: "/",
-    };
-
-    res.cookie("userId", userId, cookieCofig);
     res.json({ message: "User Created" });
   } catch (error) {
     await session.abortTransaction();
@@ -59,28 +52,34 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  // const userData=userList.find((user)=>user.email===email && user.password===password)
   const user = await Users.findOne({ email, password });
+  
+  const myDate=new Date()
 
   const cookieCofig = {
     sameSite: "none",
     secure: true,
     path: "/",
+    httpOnly: true,
+    maxAge: 1000*60*60*24*7
   };
+
+  const cookieObject={uid: user._id.toString(),expiry: Math.round(Date.now()/1000+15)}
+  const cookiePayload=Buffer.from(JSON.stringify(cookieObject)).toString('base64url')
+  hashValue=crypto.createHash('sha256').update(cookiePayload).update(mySecret).digest('hex')
+
+
   if (user) {
-    res.cookie("userId", user._id.toString(), cookieCofig);
+    res.cookie("userId", cookiePayload, cookieCofig);
     return res.json({ message: "Login Successful" });
   } else return res.status(401).json({ error: "Invalid Credentials" });
 };
 
 export const logout = (req, res) => {
-  const cookieCofig = {
-    sameSite: "none",
-    secure: true,
-    path: "/",
-    maxAge: 0,
-  };
-  res.cookie("userId", "", cookieCofig);
+  res.clearCookie("userId", {
+        sameSite: "None",
+        secure: true,
+      });
   res.json({ message: "Logout Successfull" });
 };
 

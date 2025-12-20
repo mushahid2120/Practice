@@ -37,7 +37,6 @@ function App() {
         }
       );
       const data = await response.json();
-      console.log(data);
       if (data.parentDirId === null) setDirectoryName("");
       else setDirectoryName(data.name);
       if (!data.error) {
@@ -55,7 +54,6 @@ function App() {
         credentials: "include",
       });
       const data = await response.json();
-      console.log(data);
       if (!data.error) setUserDetail(data);
       else setIsAuthorized(false);
     } catch (error) {
@@ -191,7 +189,6 @@ function App() {
               filename: file.name,
             },
             onUploadProgress: (e) => {
-              console.log(e.loaded, e.total);
               const percent = Math.round((e.loaded * 100) / e.total);
               setProgress((prevState) => ({
                 ...prevState,

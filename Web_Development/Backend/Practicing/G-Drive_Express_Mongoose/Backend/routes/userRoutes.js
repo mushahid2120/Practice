@@ -1,5 +1,5 @@
 import express, { json } from "express";
-import authCheck from "../middleware/authCheck.js";
+import authCheck from "../middleware/authCheckMW.js";
 import {
   getUser,
   login,

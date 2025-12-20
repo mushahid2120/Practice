@@ -2,7 +2,7 @@ import { useState } from "react";
 import {useNavigate} from 'react-router-dom'
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "ankit@md.com", password: "12345" });
   const [error,setError]=useState('')
   const nav=useNavigate()
 
@@ -21,7 +21,6 @@ export default function Login() {
     const data=await res.json()
     if(res.status===401)
       return setError(data.error)
-    console.log(data)
     nav('/')
   };
 

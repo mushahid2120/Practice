@@ -1,5 +1,5 @@
 import express from "express";
-import validateId from "../middleware/validateId.js";
+import validateId from "../middleware/validateIdMW.js";
 import {
   deleteFile,
   getFile,

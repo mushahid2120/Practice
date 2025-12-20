@@ -12,13 +12,10 @@ export default function SignUp() {
       setError((prevState)=>({...prevState,[e.target.name]:''}))
   };
 
-  console.log(error)
-
   const handleSubmit = async(e) => {
     e.preventDefault();
     console.log(typeof form)
     const res=await fetch('http://127.0.0.1:4000/auth/singup',{
-        credentials: 'include',
         method: 'POST',
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(form)
@@ -27,10 +24,10 @@ export default function SignUp() {
     const error=data.error
     if(error)
         return setError((prevState)=>({...prevState,...error}))
-      return 
     setForm({ name: "", email: "", password: "" })
-    if(data.message==="User Created"){
-        navigate('/')
+        console.log(data)
+    if(data.message){
+        navigate('/login')
     }
         
   };

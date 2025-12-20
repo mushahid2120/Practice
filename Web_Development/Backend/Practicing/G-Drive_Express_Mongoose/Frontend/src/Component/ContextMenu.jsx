@@ -12,7 +12,6 @@ function ContextMenu({
   listType,
   setRenameId
 }) {
-  console.log(id)
   return (
     isOpen && (
       <div className="cursor-pointer absolute right-4 top-[70%] z-10 text-xl text-[#6B7280] font-normal bg-blue-200">

@@ -20,7 +20,7 @@ export const getAllDir = async (req, res) => {
     .find({ parentDirId: id }).lean();
   const directoriesData = await Dir
     .find({ parentDirId: id }).lean();
-  console.log(filesData.length, directoriesData.length);
+  // console.log(filesData, directoriesData,directoryData);
   res.json({
     ...directoryData,
     files: filesData,
