@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import connectDB from "./db.js";
 
-const db = await connectDB()
-console.log(db)
+await connectDB()
+const db=mongoose.connection.db;
 
-const command = "collMod";
+const command = "collMod";  // create or collMod
 
 const userResult = await db.command({
   [command]: "users",
@@ -99,10 +99,7 @@ const dirResult = await db.command({
         description: 'Name should be atleast 1 character'
       },
       parentDirId: {
-        bsonType: [
-          'objectId',
-          'null'
-        ]
+        bsonType: ['objectId','null']
       },
       userId: {
         bsonType: 'objectId',

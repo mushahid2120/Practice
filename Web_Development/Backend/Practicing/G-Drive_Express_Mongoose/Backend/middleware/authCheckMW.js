@@ -1,48 +1,37 @@
-import { hashValue, mySecret } from "../Controller/userController.js";
+import { mySecret } from "../Controller/userController.js";
 import Users from "../Model/userModel.js";
 import crypto from 'node:crypto'
 
 export default async function checkAuth(req, res, next) {
   try {
-    const { userId } = req.cookies;
-    if (!userId) return res.status(401).json({ error: "Not Logged In" });
+    const { token } = req.signedCookies;
 
-    const gotHashValue=crypto.createHash('sha256').update(userId).update(mySecret).digest('hex')
-    console.log(gotHashValue,hashValue)
-    if(gotHashValue!==hashValue){
-      res.clearCookie("userId", {
-        sameSite: "None",
-        secure: true,
-      });
-      return res.status(401).json({ error: "Not Logged In" });
-    }
+    //signature matched (true) if failed (false)
+    if(token===false) res.clearCookie("token", {sameSite: "None",secure: true,});
+    if (!token) return res.status(401).json({ error: "Not Logged In..." });
 
-
-    console.log(Buffer.from(userId,'base64url').toString())
-    const {uid,expiry}=JSON.parse(Buffer.from(userId,'base64url').toString())
+    //Extracting data from token
+    const payloadString=Buffer.from(token,'base64url').toString()
+    const {uid,expiry}=JSON.parse(payloadString)
     const currentTime=Date.now()/1000
-
-    const expireTime = new Date(expiry * 1000);
-    const current = new Date(currentTime* 1000) ;
-    console.log({
-      expireTime: expireTime.toLocaleString("en-GB"),
-      currentTime: current.toLocaleString("en-GB"),
-    });    
-
+   
+    //Checking Session is expire or not
     if (expiry <= currentTime) {
       console.log("Cookie has been expire");
-      res.clearCookie("userId", {
+      res.clearCookie("token", {
         sameSite: "None",
         secure: true,
       });
       return res.status(401).json({ error: "Not Logged In" });
     }
 
+    //finding User from database
     const user = await Users.findById(uid).lean();
     req.user = user;
 
     if (!user) return res.status(401).json({ error: "Not Logged In" });
     next();
+
   } catch (error) {
     console.log(error);
     if (error.name === "CastError")

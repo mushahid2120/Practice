@@ -49,6 +49,7 @@ export default function SignUp() {
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your name"
+            required
           />
           <p className="text-red-600 text-sm absolute w-full text-end">{error.name}</p>
         </div>
@@ -62,6 +63,7 @@ export default function SignUp() {
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your email"
+            required
           />
           <p className="text-red-600 text-sm absolute w-full text-end">{error.email}</p>
         </div>
@@ -75,6 +77,7 @@ export default function SignUp() {
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your password"
+            required
           />
           <p className="text-red-600 text-sm absolute w-full text-end">{error.password}</p>
         </div>

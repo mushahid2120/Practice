@@ -41,6 +41,7 @@ export default function Login() {
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your email"
+            required
           />
         </div>
 
@@ -53,6 +54,7 @@ export default function Login() {
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your password"
+            required
           />
         </div>
         <div className="relative"><p className="absolute -top-3 text-red-700 text-sm">{error}</p></div>
