@@ -3,26 +3,33 @@ import { secretKey } from "../routes/auth.js";
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Cart from "../models/Cart.js";
+import Session from "../models/Session.js";
 
 export const authenticateToken = async (req, res, next) => {
-  const { token } = req.cookies;
-
-  const cart=new Cart({})
-  if (!token) {
-    return res.status(401).json({ message: "Authentication required" });
-  }
-
+  const token = req.cookies?.token;
   try {
-    const { userId } = jwt.verify(token, secretKey);
-    
-    const user = await User.findById(userId).select("_id").lean();
-    if (user) {
-      const cart = Cart.findOne({ guestId: userId });
-      
-      req.cart=cart;
+    if (!token)
+      return res.status(401).json({ error: "You are not valid user" });
+
+    const { sid } = jwt.verify(token, secretKey);
+
+
+    if (!sid) {
+      res.clearCookie("token");
+      return res.status(401).json({ error: "You are not valid user" });
     }
+
+    const session = await Session.findById(sid).select("_id cartId").lean();
+
+    if (!session) {
+      res.clearCookie("token");
+      return res.status(401).json({ error: "Session Invalid" });
+    }
+
+    req.session = session;
     next();
   } catch (error) {
+    console.log(error);
     return res.status(403).json({ message: "Invalid or expired token" });
   }
 };

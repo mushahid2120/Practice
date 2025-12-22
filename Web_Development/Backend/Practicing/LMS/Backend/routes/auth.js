@@ -1,8 +1,10 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Cart from "../models/Cart.js";
+import Session from "../models/Session.js";
 
-export const secretKey='mySecretKey'
+export const secretKey = "mySecretKey";
 
 const router = express.Router();
 
@@ -10,7 +12,7 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    console.log({ email, password, name })
+    // console.log({ email, password, name });
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -19,20 +21,25 @@ router.post("/register", async (req, res) => {
     }
 
     // Create new user
-    const user = new User({
+    const user = await User.insertOne({
       email,
       password,
       name,
     });
 
-    await user.save();
+    //Create new Cart
+    const cart = await Cart.insertOne({
+      userId: user._id,
+      data: [],
+    });
 
-    console.log(user)
+    console.log({ user, cart });
 
     res.status(201).json({
-      message: "User registered successfully"});
+      message: "User registered successfully",
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -54,28 +61,34 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    const cart = await Cart.findOne({ userId: user.id });
+
+    const session = await Session.insertOne({
+      cartId: cart._id,
+    });
+
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      secretKey,
-      { expiresIn: "24h" }
-    );
+    const token = jwt.sign({ sid: session.id }, secretKey, {
+      expiresIn: "24h",
+    });
 
-    const cookieConfig={
-      httpOnly: true
-    }
+    const cookieConfig = {
+      httpOnly: true,
+    };
 
-    res.cookie('token',token,cookieConfig)
-
-    res.status(200).json({message: "Login successful"});
+    res.cookie("token", token, cookieConfig);
+    res.status(200).json({ name:user.name,email:user.email });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-router.post('/logout',(req,res)=>{
-  res.clearCookie('token');
-  return res.status(200).json({message: 'User Logout Succussfull'})
-})
+router.post("/logout", async(req, res) => {
+  const { token } = req.cookies;
+  const { sid } = jwt.verify(token, secretKey);
+  await Session.findByIdAndDelete(sid)
+  res.clearCookie("token");
+  return res.status(200).json({ message: "User Logout Succussfull" });
+});
 
 export default router;

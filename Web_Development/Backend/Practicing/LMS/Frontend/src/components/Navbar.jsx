@@ -15,6 +15,8 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
 
+  console.log(user)
+
   return (
     <nav className="sticky top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg mb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

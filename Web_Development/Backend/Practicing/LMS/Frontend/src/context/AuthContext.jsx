@@ -11,8 +11,9 @@ export function AuthProvider({ children }) {
   const login = async (userData) => {
     try {
       const res = await axiosInstance.post("/auth/login", userData);
+      console.log(res)
       if (res.status === 200) {
-        setUser(userData.email);
+        setUser({name:res.data.name,email:res.data.email});
         nav("/");
       }
     } catch (error) {
@@ -24,7 +25,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await axiosInstance.post("/auth/register", userData);
       console.log(res);
-      if (res.status === 201) nav("/auth/login");
+      if (res.status === 201) nav("/login");
       return res.status;
     } catch (error) {
       console.log("Failed to Register");

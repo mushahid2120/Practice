@@ -6,10 +6,14 @@ import { useEffect } from "react";
 const courses = await getAllCoursesApi();
 
 export default function Home() {
-  const {fetchCart} =useCart();
+
+  const {fetchCart,cart}=useCart();
+
   useEffect(()=>{
     fetchCart()
   },[])
+
+
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

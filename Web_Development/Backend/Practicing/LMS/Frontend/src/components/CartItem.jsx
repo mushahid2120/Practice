@@ -2,7 +2,8 @@ import { Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 export default function CartItem({ item}) {
-  const { name, image, quantity, price } =item;
+  console.log(item)
+  const { name, image, quantity, price,_id } =item;
   const { removeFromCart } = useCart();
   return (
     <div className="flex items-center p-6 space-x-6">
@@ -23,7 +24,7 @@ export default function CartItem({ item}) {
         </p>
       </div>
       <button
-        onClick={() => removeFromCart(item)}
+        onClick={() => removeFromCart(_id)}
         className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
       >
         <Trash2 className="w-5 h-5" />

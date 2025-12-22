@@ -9,16 +9,18 @@ import User from "./db.js";
 //   hobbies: ["cricket","Books","movies"],
 // })
 
-const parentId=new mongoose.Types.ObjectId()
-console.log(parentId)
+// const parentId=new mongoose.Types.ObjectId()
+// console.log(parentId)
 
-const result=await User.create({
-  name: "john",
-  age: 16,
-  email: "john@md.com",
-  hobbies: ["cricket","Books"],
-  parentId: parentId
-})
+// const result=await User.create({
+//   name: "john",
+//   age: 16,
+//   email: "john@md.com",
+//   hobbies: ["cricket","Books"],
+//   parentId: parentId
+// })
+const user=User.findOne({email: 'john@md.com'})
+console.log(await user.hobbies.push('hockey'))
 
 // const user=new User({
 //   name: "abdul",
@@ -38,6 +40,6 @@ const result=await User.create({
 
 //DELETE
 // const result =await User.findOneAndDelete({name: "md"})
-console.log(result);
+// console.log(result);
 
 mongoose.disconnect();
