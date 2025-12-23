@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import {useCart} from "../context/CartContext"
 export default function Login() {
   const [userData,setUserData] = useState({email: 'md@md.com',password: '12345'});
   const {login}=useAuth();
-
+  const {fetchCart}=useCart()
   const handleSubmit = async(e) => {
     e.preventDefault();
     const res=await login(userData)
+    await fetchCart()
     if(res!==200) return 
     setUserData({email: '',password: ''})
 

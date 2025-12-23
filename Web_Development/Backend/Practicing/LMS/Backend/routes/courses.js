@@ -9,8 +9,13 @@ const router = express.Router();
 // GET all courses
 router.get("/", async (req, res) => {
   try {
-    const courses = await Course.find();
-    if (!req.cookies?.token) {
+    const token = req.cookies?.token ;
+    const sid = jwt.verify(token, secretKey, (error, user) => {
+      if (error) return null;
+      return user;
+    })?.sid;
+    const session = await Session.findById(sid);
+    if (!session) {
       const session = await Session.insertOne({
         cartId: null,
       });
@@ -23,9 +28,10 @@ router.get("/", async (req, res) => {
       };
       res.cookie("token", token, cookieConfig);
     }
+    const courses = await Course.find();
     res.json(courses);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 });

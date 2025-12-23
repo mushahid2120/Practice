@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 
 //Here I am using for Guest Users
 const sessionSchema = new mongoose.Schema({
-    cartId: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cart',
+        ref: 'User',
         default : null
     },
     data: {type: [

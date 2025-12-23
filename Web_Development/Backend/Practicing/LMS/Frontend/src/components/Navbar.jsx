@@ -8,14 +8,25 @@ import {
   MenuItems,
   Transition,
 } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar({ darkMode, toggleDarkMode }) {
   const { cartCount } = useCart();
-  const { user, logout } = useAuth();
+  const { user, logout,isLogin } = useAuth();
 
-  console.log(user)
+    const {fetchCart}=useCart();
+    const mountRef=useRef(true)
+
+    
+
+  useEffect(()=>{
+    if(mountRef.current){
+      isLogin()
+      fetchCart()
+      mountRef.current=false
+      }
+  },[])
 
   return (
     <nav className="sticky top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg mb-4">

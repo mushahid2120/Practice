@@ -19,7 +19,7 @@ export const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ error: "You are not valid user" });
     }
 
-    const session = await Session.findById(sid).select("_id cartId").lean();
+    const session = await Session.findById(sid);
 
     if (!session) {
       res.clearCookie("token");

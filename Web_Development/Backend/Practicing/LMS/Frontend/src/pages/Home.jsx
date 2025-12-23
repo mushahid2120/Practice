@@ -1,17 +1,9 @@
 import CourseCard from "../components/CourseCard";
 import { getAllCoursesApi } from "../api/courseApi";
-import { useCart } from "../context/CartContext";
-import { useEffect } from "react";
 
 const courses = await getAllCoursesApi();
 
 export default function Home() {
-
-  const {fetchCart,cart}=useCart();
-
-  useEffect(()=>{
-    fetchCart()
-  },[])
 
 
   

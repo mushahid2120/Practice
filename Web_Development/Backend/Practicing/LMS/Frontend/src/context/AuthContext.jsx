@@ -41,8 +41,13 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const isLogin=async()=>{
+    const res=await axiosInstance.get("/auth/profile");
+    if(res.status===200) setUser(res.data)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout,isLogin }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,26 +8,28 @@ const router = express.Router();
 // GET cart
 router.get("/", async (req, res, next) => {
   try {
-    const sid=req.session._id;
-    const session = await Session.findById(sid)
-      .populate([
-        {
-          path: "cartId",
-          populate: { path: "data.courseId", select: "_id name price image" },
-        },
-        { path: "data.courseId", select: "_id name price image" },
-      ])
-      .select("data cartId")
-      .lean();
-
-    if (!session.cartId) {
-      const data = session.data.map((d) => ({
-        ...d.courseId,
-        quantity: d.quantity,
-      }));
-      return res.status(200).json(data);
+    const session = req.session;
+    let cartData;
+    if (!session.userId) {
+      cartData = await Session.findOne({ userId: session.userId })
+        .populate({
+          path: "data.courseId",
+          select: "_id name price image",
+        })
+        .select("data")
+        .lean();
     }
-    const data=session.cartId.data.map((d)=>({...d.courseId,quantity:d.quantity}))
+    else{
+    cartData = await Cart.findOne({userId: session.userId})
+      .populate({ path: "data.courseId", select: "_id name price image" })
+      .select("data")
+      .lean();
+    }
+
+    const data = cartData.data.map((d) => ({
+      ...d.courseId,
+      quantity: d.quantity,
+    }));
     return res.status(200).json(data);
   } catch (error) {
     console.log(error);
@@ -39,20 +41,22 @@ router.get("/", async (req, res, next) => {
 router.post("/:courseId", async (req, res) => {
   try {
     const courseId = req.params.courseId;
-    const session=req.session
+    const session = req.session;
 
-    if (!session.cartId) {
-      const res = await Session.updateOne(
-        { _id: session._id },
+    if (!session.userId) {
+      await session.updateOne(
+        // { _id: session._id },
         { $push: { data: { courseId, quantity: 1 } } }
       );
-      console.log(res);
+      // session.data.push({courseId})
+      // session.markModified('data')
+      // session.set('data',[...session.data,{courseId}])
+      // await session.save()
     } else {
-      const res = await Cart.updateOne(
-        { _id: session.cartId },
+      await Cart.updateOne(
+        { userId: session.userId },
         { $push: { data: { courseId, quantity: 1 } } }
       );
-      console.log(res);
     }
     return res
       .status(201)
@@ -66,20 +70,23 @@ router.post("/:courseId", async (req, res) => {
 // Update course from cart
 router.patch("/:courseId", async (req, res) => {
   try {
-    const session=req.session;
+    const session = req.session;
     const courseId = req.params.courseId;
 
-    if (!session.cartId) {
-      const result = await Session.updateOne(
-        { _id: session._id, "data.courseId": courseId },
-        { $inc: { "data.$.quantity": 1 } }
+    if (!session.userId) {
+      // const result = await Session.updateOne(
+      //   { _id: session._id, "data.courseId": courseId },
+      //   { $inc: { "data.$.quantity": 1 } }
+      // );
+      const result = await session.updateOne(
+        { $inc: { "data.$[item].quantity": 1 } },
+        { arrayFilters: [{ "item.courseId": courseId }] }
       );
     } else {
       const result = await Cart.updateOne(
-        { _id: session.cartId, "data.courseId": courseId },
+        { userId: session.userId, "data.courseId": courseId },
         { $inc: { "data.$.quantity": 1 } }
       );
-      console.log(result)
     }
     return res
       .status(201)
@@ -93,24 +100,22 @@ router.patch("/:courseId", async (req, res) => {
 router.delete("/:courseId", async (req, res) => {
   try {
     const { courseId } = req.params;
-    const session=req.session
-    if(!session.cartId){
-      const res=await Session.updateOne(
-        { _id: session._id,},
-        { $pull: { data:{courseId}} }
+    const session = req.session;
+   
+    if (!session.userId) {
+      await session.updateOne(
+        { $pull: { data: { courseId } } }
+      );
+    } else {
+      const result=await Cart.updateOne(
+        { userId: session.userId },
+        { $pull: { data: { courseId } } }
       );
     }
-    else{
-        const res=await Cart.updateOne(
-        { _id: session.cartId,},
-        { $pull: { data:{courseId}} }
-      );
-    }
-    return res.status(201).json({message: "Delete Succussfully"})
+    return res.status(201).json({ message: "Delete Succussfully" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 });
-
 
 export default router;
