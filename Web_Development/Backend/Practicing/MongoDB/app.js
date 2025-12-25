@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-const client = new MongoClient("mongodb://127.0.0.1:27017");
+const client = new MongoClient("mongodb://admin:admin127.0.0.1:27017/test?authSource=admin");
 
 await client.connect();
 
@@ -58,6 +58,7 @@ const collection = db.collection("mytest");
 //   }
 // }
 // })
+
 
 
 console.log(result);

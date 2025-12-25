@@ -261,6 +261,22 @@ function App() {
     }
   };
 
+  //Logout All
+  const handleLogoutAll=async()=>{
+     try {
+      const res = await fetch("http://127.0.0.1:4000/auth/logout-all", {
+        credentials: "include",
+        method: "POST",
+      });
+      const data = await res.json();
+      console.log(data);
+      setUserDetail(null);
+      nav("/login");
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   return (
     <div
       className="text-lg font-semibold px-4 py-2 min-h-screen bg-[#F9FAFB]"
@@ -335,7 +351,7 @@ function App() {
                   Login
                 </Link>
               ) : (
-                <div className="absolute right-0 top-7 py-2 bg-white rounded-md font-normal">
+                <div className="absolute right-0 top-7 py-2 bg-white rounded-md font-normal whitespace-nowrap space-y-1">
                   <div className="leading-[10px] text-normal px-2">
                     <h4>{userDetail.name}</h4>
                     <p className="text-base font-light">{userDetail.email}</p>
@@ -347,6 +363,13 @@ function App() {
                   >
                     <MdLogout size={20} cursor="pointer" />
                     Logout
+                  </button>
+                  <button
+                    className="flex items-center gap-4 px-2 text-white w-full rounded-md bg-[#eb2525] hover:bg-[#b01717]"
+                    onClick={handleLogoutAll}
+                  >
+                    <MdLogout size={20} cursor="pointer" />
+                    Logout All
                   </button>
                 </div>
               ))}

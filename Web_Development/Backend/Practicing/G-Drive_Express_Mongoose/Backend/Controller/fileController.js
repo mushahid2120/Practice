@@ -57,7 +57,6 @@ export const uploadFile = async (req, res, next) => {
 
     req.pipe(writeStream);
     writeStream.on("finish", async () => {
-      console.log("triggering... finish");
       res.json({ message: "File Uploaded Successfully" });
     });
   } catch (err) {

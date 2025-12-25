@@ -7,6 +7,7 @@ import authRoutes from "./routes/userRoutes.js";
 import checkAuth from "./middleware/authCheckMW.js";
 import connectDB from "./config/db.js";
 import { mySecret } from "./Controller/userController.js";
+import otpRouter from "./routes/otpRoutes.js";
 
 const app = express();
 app.use(express.json());
@@ -19,6 +20,7 @@ await connectDB();
 app.use("/directory", checkAuth, dirRoutes);
 app.use("/files", checkAuth, fileRoutes);
 app.use("/auth", authRoutes);
+app.use('/otp',otpRouter)
 
 // app.use((err, req, res, next) => {
 //   console.log("Global error handler");

@@ -20,7 +20,6 @@ export const getAllDir = async (req, res) => {
     .find({ parentDirId: id }).lean();
   const directoriesData = await Dir
     .find({ parentDirId: id }).lean();
-  // console.log(filesData, directoriesData,directoryData);
   res.json({
     ...directoryData,
     files: filesData,
@@ -46,7 +45,6 @@ export const createDir = async (req, res,next) => {
       name: foldername,
       parentDirId
     });
-    console.log(result);
     return res.json({ message: "Folder Created" });
   } catch (error) {
     return res.json({error})
@@ -95,7 +93,6 @@ export const deleteDir = async (req, res, next) => {
     for await (const file of filesData) {
       try {
         const fileName = file._id.toString() + file.extension;
-        console.log(fileName);
         await rm(`./GDrive/${fileName}`);
       } catch (error) {
         console.log(error);

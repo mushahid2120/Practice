@@ -4,6 +4,7 @@ import {
   getUser,
   login,
   logout,
+  logoutAll,
   signup,
 } from "../Controller/userController.js";
 
@@ -14,6 +15,8 @@ router.post("/singup", signup);
 router.post("/login", login);
 
 router.post("/logout", logout);
+
+router.post("/logout-all", logoutAll);
 
 router.get("/", authCheck, getUser);
 

@@ -1,19 +1,20 @@
 import Users from "../Model/userModel.js";
 import Dir from "../Model/dirModel.js";
 import mongoose from "mongoose";
-import crypto from "node:crypto";
-import bcrypt from 'bcrypt' 
+import Session from '../Model/sessionModel.js'
+import { verifyOtp } from "../service/sendOtp.js";
 
 export const mySecret = "mysecret";
 
 export const signup = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password,otp} = req.body;
+  const isValidotp=await verifyOtp(otp,email)
+  if(!isValidotp) return res.status(400).json({error: {opt: "Invalid or Expired OTP"}})
+
   const userId = new mongoose.Types.ObjectId();
   const dirId = new mongoose.Types.ObjectId();
 
   const session = await mongoose.startSession();
-
-  const hashedPassword = await bcrypt.hash(password,12)
   try {
     session.startTransaction();
     await Dir.insertOne(
@@ -30,7 +31,7 @@ export const signup = async (req, res, next) => {
         _id: userId,
         name,
         email,
-        password: hashedPassword,
+        password,
         rootDirId: dirId,
       },
       { session }
@@ -58,14 +59,22 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res,next) => {
   const { email, password } = req.body;
   const user = await Users.findOne({ email });
   if (!user) return res.status(401).json({ error: "Invalid Credentials" });
-  const isPasswordValid=await bcrypt.compare(password,user.password)
+  const isPasswordValid=await user.comparePassword(password)
   
   if (!isPasswordValid)
     return res.status(401).json({ error: "Invalid Credentials" });
+
+
+
+  const allSession=await Session.find({userId: user.id})
+  if(allSession.length>3)
+    await allSession[0].deleteOne()
+
+  const session= await Session.create({userId: user.id})
 
   const cookieCofig = {
     sameSite: "none",
@@ -76,23 +85,32 @@ export const login = async (req, res) => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   };
 
-  const payloadJSONstring = JSON.stringify({
-    uid: user._id.toString(),
-    expiry: Math.round(Date.now() / 1000 + 15),
-  });
-  const payloadEncoded = Buffer.from(payloadJSONstring).toString("base64url");
 
-  res.cookie("token", payloadEncoded, cookieCofig);
+  res.cookie("sid", session.id, cookieCofig);
   return res.json({ message: "Login Successful" });
 };
 
-export const logout = (req, res) => {
-  res.clearCookie("token", {
+export const logout = async(req, res) => {
+  const { sid } = req.signedCookies;
+  await Session.findByIdAndDelete(sid)
+  res.clearCookie("sid", {
     sameSite: "None",
     secure: true,
     // signed: true
   });
   res.json({ message: "Logout Successfull" });
+};
+
+export const logoutAll=async(req, res) => {
+  const { sid } = req.signedCookies;
+  const session=await Session.findById(sid)
+  await Session.deleteMany({userId: session.userId})
+  res.clearCookie("sid", {
+    sameSite: "None",
+    secure: true,
+    // signed: true
+  });
+  res.json({ message: "Logout All Successfull" });
 };
 
 export const getUser = (req, res) => {
