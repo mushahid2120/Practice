@@ -23,8 +23,11 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      require: true,
       minLength: [4, "Password must be alteast 4 character"],
+    },
+    picture: {
+      type: String,
+      default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYzrKwzB9qf6z1LUGt9CMjPzC5zBy87WL6Fw&s"
     },
     rootDirId: {
       type: Schema.Types.ObjectId,

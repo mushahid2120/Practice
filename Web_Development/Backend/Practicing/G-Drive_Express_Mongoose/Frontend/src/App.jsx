@@ -8,6 +8,7 @@ import { FaUpload, FaUser } from "react-icons/fa";
 import { MdLogin, MdLogout } from "react-icons/md";
 import Portal from "./Component/Portal";
 
+
 function App() {
   const [driveContent, setDriveContent] = useState({
     files: [],
@@ -27,6 +28,7 @@ function App() {
   const nav = useNavigate();
   const fileUploadRef = useRef();
   const { dirId } = useParams();
+  
 
   const fetchData = async () => {
     try {
@@ -276,7 +278,7 @@ function App() {
       console.log(error.message);
     }
   }
-
+  
   return (
     <div
       className="text-lg font-semibold px-4 py-2 min-h-screen bg-[#F9FAFB]"
@@ -339,8 +341,9 @@ function App() {
                 setIsProfileOpen(!isProfileOpen);
               }}
             >
-              <FaUser size={20} color="#2563EB" cursor="pointer" />
+              {userDetail ?<img src={userDetail.picture} alt="userPic"  className="w-8 rounded-full cursor-pointer border-solid border-blue-200 border-2"/>:<FaUser size={20} color="#2563EB" cursor="pointer" />}
             </div>
+            
             {isProfileOpen &&
               (userDetail === null ? (
                 <Link

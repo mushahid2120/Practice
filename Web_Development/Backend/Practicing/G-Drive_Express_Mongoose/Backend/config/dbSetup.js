@@ -10,7 +10,7 @@ const userResult = await db.command({
   [command]: "users",
   validator: {
     $jsonSchema: {
-      required: ["_id", "name", "email", "password", "rootDirId"],
+      required: ["_id", "name", "email", "rootDirId"],
       properties: {
         _id: {
           bsonType: "objectId",
@@ -25,9 +25,12 @@ const userResult = await db.command({
           pattern: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}$",
         },
         password: {
-          bsonType: "string",
+          bsonType: ["string","null"],
           minLength: 4,
           description: "password should atleast 4 character",
+        },
+        picture: {
+          bsonType: 'string',
         },
         rootDirId: {
           bsonType: "objectId",
@@ -67,6 +70,9 @@ const fileResult = await db.command({
       },
       parentDirId: {
         bsonType: 'objectId',
+      },
+      userId: {
+        bsonType: 'objectId'
       },
       __v: {
         bsonType:  'int'

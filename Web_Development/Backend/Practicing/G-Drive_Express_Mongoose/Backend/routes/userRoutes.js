@@ -3,6 +3,7 @@ import authCheck from "../middleware/authCheckMW.js";
 import {
   getUser,
   login,
+  loginWithGoogle,
   logout,
   logoutAll,
   signup,
@@ -19,5 +20,7 @@ router.post("/logout", logout);
 router.post("/logout-all", logoutAll);
 
 router.get("/", authCheck, getUser);
+
+router.post('/login-with-google',loginWithGoogle)
 
 export default router;

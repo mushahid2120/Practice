@@ -11,6 +11,10 @@ const filesSchema = new Schema(
       type: String,
       require: true,
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      require: true
+    },
     parentDirId: {
       type: Schema.Types.ObjectId,
       require: true,

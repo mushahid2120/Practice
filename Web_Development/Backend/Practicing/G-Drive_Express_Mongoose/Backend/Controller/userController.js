@@ -3,6 +3,7 @@ import Dir from "../Model/dirModel.js";
 import mongoose from "mongoose";
 import Session from '../Model/sessionModel.js'
 import { verifyOtp } from "../service/sendOtp.js";
+import {OAuth2Client} from 'google-auth-library'
 
 export const mySecret = "mysecret";
 
@@ -114,5 +115,17 @@ export const logoutAll=async(req, res) => {
 };
 
 export const getUser = (req, res) => {
-  res.status(200).json({ name: req.user.name, email: req.user.email });
+  res.status(200).json({ name: req.user.name, email: req.user.email,picture: req.user.picture });
 };
+
+export const loginWithGoogle=async(req,res,next)=>{
+  const idToken=req.body.credential;
+  const client=new OAuth2Client();
+  const googleUser=await client.verifyIdToken({idToken,audience: '334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com'})
+  if(!googleUser) return res.staus(403).json({error:"User verifaction failed"});
+  const {email,picture,name,sub}=googleUser.payload
+  const dbUser=await Users.findOne({email});
+  
+
+  res.json({message: "Login Successfull"})
+}

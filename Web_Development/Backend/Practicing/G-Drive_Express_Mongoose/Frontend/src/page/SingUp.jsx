@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -8,6 +9,9 @@ export default function SignUp() {
     password: "12345",
     otp: "",
   });
+
+
+
   const [error, setError] = useState({
     name: "",
     email: "",
@@ -52,15 +56,16 @@ export default function SignUp() {
   const handleClickOTP = async () => {
     try {
       if (!emailRef.current.reportValidity()) return;
-      const res=await fetch('http://127.0.0.1:4000/otp/send',{
-        method: 'POST',
+      const res = await fetch("http://127.0.0.1:4000/otp/send", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({email:form.email})
-      })
-      const data=await res.json()
-      console.log(data)
-      console.log(res.status)
-      if(res.status!==200) return setError((prevState)=>({...prevState,otp:error.otp}))
+        body: JSON.stringify({ email: form.email }),
+      });
+      const data = await res.json();
+      console.log(data);
+      console.log(res.status);
+      if (res.status !== 200)
+        return setError((prevState) => ({ ...prevState, otp: error.otp }));
       setIsEnterOtp(true);
       setSendOtpValue(10);
       const IntId = setInterval(() => {
@@ -76,6 +81,20 @@ export default function SignUp() {
       console.log(error);
     }
   };
+
+  const handleLoginWithGoogle=async(response)=>{
+    try{
+          const res=await fetch('http://127.0.0.1:4000/auth/login-with-google',{
+            method: 'POST',
+            headers: {'Content-Type': "application/json"},
+            body:JSON.stringify({credential:response.credential})
+          })
+          const data=await res.json()
+          console.log(data)
+    }catch(error){
+      console.log(error)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -144,8 +163,8 @@ export default function SignUp() {
               required
             />
             <p className="text-red-600 text-sm absolute w-full text-end">
-            {error.otp}
-          </p>
+              {error.otp}
+            </p>
           </div>
         )}
 
@@ -167,11 +186,21 @@ export default function SignUp() {
 
         <button
           type="submit"
-          className={`w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition ${isEnterOtp || "bg-blue-300 hover:bg-blue-300 cursor-default"}`}
+          className={`w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition ${
+            isEnterOtp || "bg-blue-300 hover:bg-blue-300 cursor-default"
+          }`}
           disabled={!isEnterOtp}
         >
           Submit
         </button>
+      <div className="flex justify-center items-center"><GoogleLogin
+        onSuccess={handleLoginWithGoogle}
+        onError={() => {
+          console.log("Login Failed");
+        }}
+          useOneTap
+          theme="filled_blue"
+      /></div>
       </form>
     </div>
   );

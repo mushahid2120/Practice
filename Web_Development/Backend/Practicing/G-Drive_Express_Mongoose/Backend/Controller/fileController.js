@@ -51,6 +51,7 @@ export const uploadFile = async (req, res, next) => {
       extension,
       name: fileName,
       parentDirId,
+      userId: req.user._id
     });
     const fileFullName = `${fileCreated._id.toString()}${extension}`;
     const writeStream = createWriteStream(`./GDrive/${fileFullName}`);
