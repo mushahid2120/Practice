@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {useNavigate} from 'react-router-dom'
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "ankit@md.com", password: "12345" });
@@ -22,6 +23,25 @@ export default function Login() {
     if(res.status===401)
       return setError(data.error)
     nav('/')
+  };
+
+    const handleLoginWithGoogle = async (response) => {
+    try {
+      const res = await fetch("http://127.0.0.1:4000/auth/login-with-google", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (res.status === 200) {
+        nav("/");
+        return;
+      }
+      console.log(data)
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -65,6 +85,16 @@ export default function Login() {
         >
           Login
         </button>
+        <div className="flex justify-center items-center">
+                  <GoogleLogin
+                    onSuccess={handleLoginWithGoogle}
+                    onError={() => {
+                      console.log("Login Failed");
+                    }}
+                    useOneTap
+                    theme="filled_blue"
+                  />
+                </div>
       </form>
     </div>
   );

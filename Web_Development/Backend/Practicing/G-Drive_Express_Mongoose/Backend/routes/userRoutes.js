@@ -1,6 +1,7 @@
 import express, { json } from "express";
 import authCheck from "../middleware/authCheckMW.js";
 import {
+  getAllUsers,
   getUser,
   login,
   loginWithGoogle,
@@ -22,5 +23,7 @@ router.post("/logout-all", logoutAll);
 router.get("/", authCheck, getUser);
 
 router.post('/login-with-google',loginWithGoogle)
+
+router.get('/allusers',getAllUsers)
 
 export default router;

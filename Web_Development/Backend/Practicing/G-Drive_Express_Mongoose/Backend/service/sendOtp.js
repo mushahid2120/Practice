@@ -3,8 +3,7 @@ import Otp from "../Model/otpModel.js";
 
 export  async function sendOtp(email) {
 try {
-      const otp = Math.round(Math.random() * 9000).toString();
-      
+      const otp = Math.round(Math.random() * 9000).toString();      
 
   const result=await Otp.findOneAndUpdate(
     { email },
@@ -41,7 +40,6 @@ try {
 export  const verifyOtp=async(otp,email)=>{
     try {
         const otpData=await Otp.findOne({otp,email}).lean()
-        console.log({otpData,otp})
         if(otpData) return true;
         return false;
     } catch (error) {

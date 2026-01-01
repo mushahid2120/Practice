@@ -1,16 +1,17 @@
 import Users from "../Model/userModel.js";
 import Dir from "../Model/dirModel.js";
 import mongoose from "mongoose";
-import Session from '../Model/sessionModel.js'
+import Session from "../Model/sessionModel.js";
 import { verifyOtp } from "../service/sendOtp.js";
-import {OAuth2Client} from 'google-auth-library'
+import { OAuth2Client } from "google-auth-library";
 
 export const mySecret = "mysecret";
 
 export const signup = async (req, res, next) => {
-  const { name, email, password,otp} = req.body;
-  const isValidotp=await verifyOtp(otp,email)
-  if(!isValidotp) return res.status(400).json({error: {opt: "Invalid or Expired OTP"}})
+  const { name, email, password, otp } = req.body;
+  const isValidotp = await verifyOtp(otp, email);
+  if (!isValidotp)
+    return res.status(400).json({ error: { opt: "Invalid or Expired OTP" } });
 
   const userId = new mongoose.Types.ObjectId();
   const dirId = new mongoose.Types.ObjectId();
@@ -60,22 +61,19 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res,next) => {
+export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await Users.findOne({ email });
   if (!user) return res.status(401).json({ error: "Invalid Credentials" });
-  const isPasswordValid=await user.comparePassword(password)
-  
+  const isPasswordValid = await user.comparePassword(password);
+
   if (!isPasswordValid)
     return res.status(401).json({ error: "Invalid Credentials" });
 
+  const allSession = await Session.find({ userId: user.id });
+  if (allSession.length > 3) await allSession[0].deleteOne();
 
-
-  const allSession=await Session.find({userId: user.id})
-  if(allSession.length>3)
-    await allSession[0].deleteOne()
-
-  const session= await Session.create({userId: user.id})
+  const session = await Session.create({ userId: user.id });
 
   const cookieCofig = {
     sameSite: "none",
@@ -86,14 +84,13 @@ export const login = async (req, res,next) => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   };
 
-
   res.cookie("sid", session.id, cookieCofig);
   return res.json({ message: "Login Successful" });
 };
 
-export const logout = async(req, res) => {
+export const logout = async (req, res) => {
   const { sid } = req.signedCookies;
-  await Session.findByIdAndDelete(sid)
+  await Session.findByIdAndDelete(sid);
   res.clearCookie("sid", {
     sameSite: "None",
     secure: true,
@@ -102,10 +99,10 @@ export const logout = async(req, res) => {
   res.json({ message: "Logout Successfull" });
 };
 
-export const logoutAll=async(req, res) => {
+export const logoutAll = async (req, res) => {
   const { sid } = req.signedCookies;
-  const session=await Session.findById(sid)
-  await Session.deleteMany({userId: session.userId})
+  const session = await Session.findById(sid);
+  await Session.deleteMany({ userId: session.userId });
   res.clearCookie("sid", {
     sameSite: "None",
     secure: true,
@@ -115,17 +112,107 @@ export const logoutAll=async(req, res) => {
 };
 
 export const getUser = (req, res) => {
-  res.status(200).json({ name: req.user.name, email: req.user.email,picture: req.user.picture });
+  res.status(200).json({
+    name: req.user.name,
+    email: req.user.email,
+    picture: req.user.picture,
+  });
 };
 
-export const loginWithGoogle=async(req,res,next)=>{
-  const idToken=req.body.credential;
-  const client=new OAuth2Client();
-  const googleUser=await client.verifyIdToken({idToken,audience: '334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com'})
-  if(!googleUser) return res.staus(403).json({error:"User verifaction failed"});
-  const {email,picture,name,sub}=googleUser.payload
-  const dbUser=await Users.findOne({email});
-  
+export const loginWithGoogle = async (req, res, next) => {
+  const idToken = req.body.credential;
+  const client = new OAuth2Client();
+  const googleUser = await client.verifyIdToken({
+    idToken,
+    audience:
+      "334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com",
+  });
+  if (!googleUser)
+    return res.staus(403).json({ error: "User verifaction failed" });
+  const { email, picture, name, sub } = googleUser.getPayload();
+  const dbUser = await Users.findOne({ email }).lean();
+  if (dbUser) {
+    const allSession = await Session.find({ userId: dbUser._id });
+    if (allSession.length > 3) await allSession[0].deleteOne();
 
-  res.json({message: "Login Successfull"})
-}
+    const session = await Session.create({ userId: dbUser._id });
+
+    const cookieCofig = {
+      sameSite: "none",
+      signed: true,
+      secure: true,
+      path: "/",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    };
+
+    res.cookie("sid", session.id, cookieCofig);
+    return res.json({ error: "Login but user already Exist" });
+  }
+  const userId = new mongoose.Types.ObjectId();
+  const dirId = new mongoose.Types.ObjectId();
+
+  const dbSession = await mongoose.startSession();
+  try {
+    dbSession.startTransaction();
+    await Dir.insertOne(
+      {
+        _id: dirId,
+        name: `root-${email}`,
+        userId: userId,
+      },
+      { dbSession }
+    );
+
+    await Users.insertOne(
+      {
+        _id: userId,
+        name,
+        email,
+        rootDirId: dirId,
+        picture,
+      },
+      { dbSession }
+    );
+
+    const session = await Session.create({ userId });
+
+    const cookieCofig = {
+      sameSite: "none",
+      signed: true,
+      secure: true,
+      path: "/",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    };
+
+    res.cookie("sid", session.id, cookieCofig);
+
+    dbSession.commitTransaction();
+
+    return res.json({ message: "User Created" });
+  } catch (error) {
+    dbSession.abortTransaction();
+    console.log(error);
+    next(error);
+  }
+};
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const allUsers = await Users.find().lean();
+    const allSession=await Session.find().lean()
+    const allSessionUserId = allSession.map((userId) => userId.toString());
+    const allSessionUserIdSet = new Set(allSessionUserId);
+    const transformedUser = allUsers.map(({_id,name,email})=>({
+      id: _id,
+      name,
+      email,
+      isLoggedIn: allSessionUserIdSet.has(_id.toString()),
+    }));
+    return res.json(transformedUser);
+  } catch (error) {
+    console.log(error)
+    next(error);
+  }
+};

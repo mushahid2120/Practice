@@ -10,8 +10,6 @@ export default function SignUp() {
     otp: "",
   });
 
-
-
   const [error, setError] = useState({
     name: "",
     email: "",
@@ -82,19 +80,24 @@ export default function SignUp() {
     }
   };
 
-  const handleLoginWithGoogle=async(response)=>{
-    try{
-          const res=await fetch('http://127.0.0.1:4000/auth/login-with-google',{
-            method: 'POST',
-            headers: {'Content-Type': "application/json"},
-            body:JSON.stringify({credential:response.credential})
-          })
-          const data=await res.json()
-          console.log(data)
-    }catch(error){
-      console.log(error)
+  const handleLoginWithGoogle = async (response) => {
+    try {
+      const res = await fetch("http://127.0.0.1:4000/auth/login-with-google", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (res.status === 200) {
+        navigate("/");
+        return;
+      }
+      console.log(data)
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -193,14 +196,16 @@ export default function SignUp() {
         >
           Submit
         </button>
-      <div className="flex justify-center items-center"><GoogleLogin
-        onSuccess={handleLoginWithGoogle}
-        onError={() => {
-          console.log("Login Failed");
-        }}
-          useOneTap
-          theme="filled_blue"
-      /></div>
+        <div className="flex justify-center items-center">
+          <GoogleLogin
+            onSuccess={handleLoginWithGoogle}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+            useOneTap
+            theme="filled_blue"
+          />
+        </div>
       </form>
     </div>
   );

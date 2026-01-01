@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignUp from "./page/SingUp.jsx";
 import Login from "./page/Login.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import Admin from './page/Admin.jsx' 
 
 const clientId =
   "334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com";
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: "/directory/:dirId",
     element: <App />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
   },
   {
     path: "/signup",
