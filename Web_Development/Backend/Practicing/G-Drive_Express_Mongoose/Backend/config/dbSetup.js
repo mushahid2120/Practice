@@ -32,6 +32,12 @@ const userResult = await db.command({
         picture: {
           bsonType: 'string',
         },
+        role: {
+          enum: ['User','Manager','Admin']
+        },
+        deleted:{
+          bsonType: 'bool'
+        },
         rootDirId: {
           bsonType: "objectId",
         },

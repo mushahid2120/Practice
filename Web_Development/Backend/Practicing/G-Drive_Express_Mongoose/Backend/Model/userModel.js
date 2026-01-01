@@ -29,6 +29,15 @@ const userSchema = new Schema(
       type: String,
       default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYzrKwzB9qf6z1LUGt9CMjPzC5zBy87WL6Fw&s"
     },
+    role: {
+      type: String,
+      enum: ['Admin','Manager','User'],
+      default: 'User'
+    },
+    deleted: {
+      type: Boolean,
+      default: false
+    },
     rootDirId: {
       type: Schema.Types.ObjectId,
       require: true,

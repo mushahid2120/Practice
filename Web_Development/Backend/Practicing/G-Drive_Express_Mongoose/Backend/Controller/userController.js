@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import Session from "../Model/sessionModel.js";
 import { verifyOtp } from "../service/sendOtp.js";
 import { OAuth2Client } from "google-auth-library";
+import Files from "../Model/fileModel.js";
+import { rm } from "fs/promises";
 
 export const mySecret = "mysecret";
 
@@ -54,8 +56,9 @@ export const signup = async (req, res, next) => {
           return res
             .status(401)
             .json({ error: { email: "email already Exist " } });
-      if (error.code === 121)
+      if (error.code === 121) {
         return res.status(400).json({ error: "Schema Validation Error" });
+      }
     }
     next(error);
   }
@@ -64,6 +67,12 @@ export const signup = async (req, res, next) => {
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await Users.findOne({ email });
+  if (user.deleted)
+      return res
+        .status(402)
+        .json({
+          error: "You accout has been delted please contact for recovery",
+        });
   if (!user) return res.status(401).json({ error: "Invalid Credentials" });
   const isPasswordValid = await user.comparePassword(password);
 
@@ -116,6 +125,7 @@ export const getUser = (req, res) => {
     name: req.user.name,
     email: req.user.email,
     picture: req.user.picture,
+    role: req.user.role,
   });
 };
 
@@ -132,6 +142,12 @@ export const loginWithGoogle = async (req, res, next) => {
   const { email, picture, name, sub } = googleUser.getPayload();
   const dbUser = await Users.findOne({ email }).lean();
   if (dbUser) {
+    if (dbUser.deleted)
+      return res
+        .status(402)
+        .json({
+          error: "You accout has been delted please contact for recovery",
+        });
     const allSession = await Session.find({ userId: dbUser._id });
     if (allSession.length > 3) await allSession[0].deleteOne();
 
@@ -200,11 +216,13 @@ export const loginWithGoogle = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const allUsers = await Users.find().lean();
-    const allSession=await Session.find().lean()
-    const allSessionUserId = allSession.map((userId) => userId.toString());
+    const allUsers = await Users.find({ deleted: false }).lean();
+    const allSession = await Session.find().lean();
+
+    const allSessionUserId = allSession.map(({ userId }) => userId.toString());
     const allSessionUserIdSet = new Set(allSessionUserId);
-    const transformedUser = allUsers.map(({_id,name,email})=>({
+
+    const transformedUser = allUsers.map(({ _id, name, email }) => ({
       id: _id,
       name,
       email,
@@ -212,7 +230,51 @@ export const getAllUsers = async (req, res, next) => {
     }));
     return res.json(transformedUser);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
+  }
+};
+
+export const logoutUserById = async (req, res, next) => {
+  try {
+    const userId = req.params?.userId;
+    await Session.deleteMany({ userId });
+    res.status(202).end();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const hardDeleteUser = async (req, res, next) => {
+  const userId = req.params?.userId;
+  console.log({ userId });
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const findfiles = await Files.find({ userId });
+    for await (const file of findfiles) {
+      const fileName = file._id.toString() + file.extension;
+      await rm(`./GDrive/${fileName}`);
+    }
+    const deetefilereuslt = await Files.deleteMany({ userId });
+    const dirdeleteresult = await Dir.deleteMany({ userId });
+    const sessdeleteResult = await Session.deleteMany({ userId });
+    const userdeleteREsult = await Users.findByIdAndDelete(userId);
+    session.commitTransaction();
+    res.status(204).end();
+  } catch (error) {
+    session.abortTransaction();
+    console.log(error);
+  }
+};
+
+export const softDeleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params?.userId;
+    await Session.deleteMany({ userId });
+    await Users.findByIdAndUpdate(userId, { deleted: true });
+    res.status(204).end();
+  } catch (error) {
+    console.log(error);
   }
 };

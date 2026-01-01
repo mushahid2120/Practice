@@ -11,14 +11,15 @@ export default async function checkAuth(req, res, next) {
     if (!sid) return res.status(401).json({ error: "Not Logged In..." });
 
     const session = await Session.findById(sid);
-    if (!session){
+    if (!session) {
       res.clearCookie("sid", { sameSite: "None", secure: true });
       return res
         .status(401)
-        .json({ error: "Session Expired or Invalid Session" });}
+        .json({ error: "Session Expired or Invalid Session" });
+    }
 
     //finding User from database
-    const user = await Users.findById(session.userId).lean();
+    const user = await Users.findOne({_id: session.userId,deleted: false}).lean();
     req.user = user;
 
     if (!user) return res.status(401).json({ error: "Not Logged In" });
@@ -30,3 +31,18 @@ export default async function checkAuth(req, res, next) {
     next(error);
   }
 }
+
+export const checkRole = (req, res, next) => {
+  if (req.user.role !== "User") return next();
+  res.status(403).json({ error: "You Can not Access all User Data" });
+};
+export const checkAdminUser = async (req, res, next) => {
+  const userId = req.params?.userId;
+  const user = await Users.findById(userId).lean();
+  console.log(user, user?.role !== "Admin");
+  if (user?.role !== "Admin") {
+    return next();
+  } else {
+    res.status(403).json({ error: "You Can not Delete your own Account" });
+  }
+};
