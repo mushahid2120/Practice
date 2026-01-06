@@ -6,6 +6,7 @@ import { verifyOtp } from "../service/sendOtp.js";
 import { OAuth2Client } from "google-auth-library";
 import Files from "../Model/fileModel.js";
 import { rm } from "fs/promises";
+import redisClient from "../config/redis.js";
 
 export const mySecret = "mysecret";
 
@@ -79,10 +80,15 @@ export const login = async (req, res, next) => {
   if (!isPasswordValid)
     return res.status(401).json({ error: "Invalid Credentials" });
 
-  const allSession = await Session.find({ userId: user.id });
-  if (allSession.length > 3) await allSession[0].deleteOne();
+  // const allSession = await Session.find({ userId: user.id });
+  // if (allSession.length > 3) await allSession[0].deleteOne();
 
-  const session = await Session.create({ userId: user.id });
+  // const session = await Session.create({ userId: user.id });
+
+  const sessionId=crypto.randomUUID()
+  const redisKey=`session:${sessionId}`
+  const result=await redisClient.json.set(redisKey,'$',{userId: user._id})
+  console.log({result})
 
   const cookieCofig = {
     sameSite: "none",
@@ -93,7 +99,7 @@ export const login = async (req, res, next) => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   };
 
-  res.cookie("sid", session.id, cookieCofig);
+  res.cookie("sid", sessionId, cookieCofig);
   return res.json({ message: "Login Successful" });
 };
 
