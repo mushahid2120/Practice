@@ -22,7 +22,7 @@ export default function Login() {
     const data=await res.json()
     if(res.status===401)
       return setError(data.error)
-    nav('/')
+    if(res.status===200) nav('/')
   };
 
     const handleLoginWithGoogle = async (response) => {

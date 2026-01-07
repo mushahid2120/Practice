@@ -66,41 +66,54 @@ export const signup = async (req, res, next) => {
 };
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
-  const user = await Users.findOne({ email });
-  if (user.deleted)
-      return res
-        .status(402)
-        .json({
-          error: "You accout has been delted please contact for recovery",
-        });
-  if (!user) return res.status(401).json({ error: "Invalid Credentials" });
-  const isPasswordValid = await user.comparePassword(password);
+  try {
+    const { email, password } = req.body;
+    const user = await Users.findOne({ email });
+    if (user.deleted)
+      return res.status(402).json({
+        error: "You accout has been delted please contact for recovery",
+      });
+    if (!user) return res.status(401).json({ error: "Invalid Credentials" });
+    const isPasswordValid = await user.comparePassword(password);
 
-  if (!isPasswordValid)
-    return res.status(401).json({ error: "Invalid Credentials" });
+    if (!isPasswordValid)
+      return res.status(401).json({ error: "Invalid Credentials" });
 
-  // const allSession = await Session.find({ userId: user.id });
-  // if (allSession.length > 3) await allSession[0].deleteOne();
+    const allSession = await Session.find({ userId: user.id });
+    if (allSession.length > 3) await allSession[0].deleteOne();
 
-  // const session = await Session.create({ userId: user.id });
+    const session = await Session.create({ userId: user.id });
 
-  const sessionId=crypto.randomUUID()
-  const redisKey=`session:${sessionId}`
-  const result=await redisClient.json.set(redisKey,'$',{userId: user._id})
-  console.log({result})
+    // console.log(`@userId: {${user._id}}`);
+    // const allSession = await redisClient.ft.search(
+    //   "userIdIdx",
+    //   `@userId: {${user._id}}`
+    // );
 
-  const cookieCofig = {
-    sameSite: "none",
-    signed: true,
-    secure: true,
-    path: "/",
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-  };
+    // if (allSession.total > 1)  await redisClient.del(allSession.documents[0].id);
 
-  res.cookie("sid", sessionId, cookieCofig);
-  return res.json({ message: "Login Successful" });
+
+    // const sessionId = crypto.randomUUID();
+    // const redisKey = `session:${sessionId}`;
+    // const result = await redisClient.json.set(redisKey, "$", {
+    //   userId: user._id,
+    // });
+
+    const cookieCofig = {
+      sameSite: "none",
+      signed: true,
+      secure: true,
+      path: "/",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    };
+
+    res.cookie("sid", session.id, cookieCofig);
+    return res.json({ message: "Login Successful" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 export const logout = async (req, res) => {
@@ -149,11 +162,9 @@ export const loginWithGoogle = async (req, res, next) => {
   const dbUser = await Users.findOne({ email }).lean();
   if (dbUser) {
     if (dbUser.deleted)
-      return res
-        .status(402)
-        .json({
-          error: "You accout has been delted please contact for recovery",
-        });
+      return res.status(402).json({
+        error: "You accout has been delted please contact for recovery",
+      });
     const allSession = await Session.find({ userId: dbUser._id });
     if (allSession.length > 3) await allSession[0].deleteOne();
 

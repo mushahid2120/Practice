@@ -11,8 +11,8 @@ export default async function checkAuth(req, res, next) {
       res.clearCookie("sid", { sameSite: "None", secure: true });
     if (!sid) return res.status(401).json({ error: "Not Logged In..." });
 
-    // const session = await Session.findById(sid);
-    const session=await redisClient.json.get(`session:${sid}`)
+    const session = await Session.findById(sid);
+    // const session=await redisClient.json.get(`session:${sid}`)
  
     if (!session) {
       res.clearCookie("sid", { sameSite: "None", secure: true });
@@ -22,10 +22,11 @@ export default async function checkAuth(req, res, next) {
     }
 
     //finding User from database
+    console.log(session.userId)
     const user = await Users.findOne({_id: session.userId,deleted: false}).lean();
+    if (!user) return res.status(401).json({ error: "Not Logged In" });
     req.user = user;
 
-    if (!user) return res.status(401).json({ error: "Not Logged In" });
     next();
   } catch (error) {
     console.log(error);
