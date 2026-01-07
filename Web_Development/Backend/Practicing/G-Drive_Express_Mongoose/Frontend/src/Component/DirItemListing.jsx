@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaDownload } from "react-icons/fa";
 import ContextMenu from "./ContextMenu";
+import { BaseUrl } from "../App";
 
 function DirItemListing({
   listingItem,
@@ -23,7 +24,7 @@ function DirItemListing({
         to={
           listType === "directory"
             ? `/directory/${id}`
-            : `http://127.0.0.1:4000/files/${id}`
+            : `${BaseUrl}/files/${id}`
         }
         className=" w-full pt-2 pb-3"
       >
@@ -31,7 +32,7 @@ function DirItemListing({
       </Link>
       <div className="flex items-center justify-around gap-4">
         {listType === "files" && (
-          <Link to={`http://127.0.0.1:4000/files/${id}?action=download`}>
+          <Link to={`${BaseUrl}/files/${id}?action=download`}>
             <FaDownload size={24} />
           </Link>
         )}

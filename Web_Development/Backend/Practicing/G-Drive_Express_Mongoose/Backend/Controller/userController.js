@@ -6,15 +6,22 @@ import { verifyOtp } from "../service/sendOtp.js";
 import { OAuth2Client } from "google-auth-library";
 import Files from "../Model/fileModel.js";
 import { rm } from "fs/promises";
-import redisClient from "../config/redis.js";
+import { loginSchema, signUpSchema } from "../validator/authSchemaZod.js";
+import z from "zod";
+// import redisClient from "../config/redis.js";
 
-export const mySecret = "mysecret";
+export const mySecret = process.env.SESSION_SECRET;
 
 export const signup = async (req, res, next) => {
-  const { name, email, password, otp } = req.body;
+  // const { name, email, password, otp } = req.body;
+
+  const { success, data, error } = signUpSchema.safeParse(req.body);
+  if (!success) return res.status(400).json({ error: z.flattenError(error) });
+  const { name, email, password, otp } = data;
+
   const isValidotp = await verifyOtp(otp, email);
   if (!isValidotp)
-    return res.status(400).json({ error: { opt: "Invalid or Expired OTP" } });
+    return res.status(400).json({ error: { otp: "Invalid or Expired OTP" } });
 
   const userId = new mongoose.Types.ObjectId();
   const dirId = new mongoose.Types.ObjectId();
@@ -46,6 +53,7 @@ export const signup = async (req, res, next) => {
 
     res.json({ message: "User Created" });
   } catch (error) {
+    console.log(error);
     await session.abortTransaction();
     if (error.name === "ValidationError") {
       const [errorFor] = Object.keys(error.errors);
@@ -67,13 +75,17 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+    const { success, data, error } = loginSchema.safeParse(req.body);
+    if (!success) return res.status(400).json({ error: z.flattenError(error) });
+    const { email, password } = data;
+    
     const user = await Users.findOne({ email });
+    if (!user) return res.status(401).json({ error: "Invalid Credentials" });
     if (user.deleted)
       return res.status(402).json({
         error: "You accout has been delted please contact for recovery",
       });
-    if (!user) return res.status(401).json({ error: "Invalid Credentials" });
     const isPasswordValid = await user.comparePassword(password);
 
     if (!isPasswordValid)
@@ -91,7 +103,6 @@ export const login = async (req, res, next) => {
     // );
 
     // if (allSession.total > 1)  await redisClient.del(allSession.documents[0].id);
-
 
     // const sessionId = crypto.randomUUID();
     // const redisKey = `session:${sessionId}`;
@@ -153,8 +164,7 @@ export const loginWithGoogle = async (req, res, next) => {
   const client = new OAuth2Client();
   const googleUser = await client.verifyIdToken({
     idToken,
-    audience:
-      "334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com",
+    audience: process.env.GOOGLE_CLIENT_ID,
   });
   if (!googleUser)
     return res.staus(403).json({ error: "User verifaction failed" });

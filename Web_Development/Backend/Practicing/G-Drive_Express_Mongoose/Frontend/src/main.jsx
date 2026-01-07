@@ -8,8 +8,7 @@ import Login from "./page/Login.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Admin from './page/Admin.jsx' 
 
-const clientId =
-  "334126242922-u35qsecmr9pjg1o7bg64ga2bucons5qh.apps.googleusercontent.com";
+const clientId =import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const router = createBrowserRouter([
   {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {useNavigate} from 'react-router-dom'
 import { GoogleLogin } from "@react-oauth/google";
+import { BaseUrl } from "../App";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "ankit@md.com", password: "12345" });
@@ -13,7 +14,7 @@ export default function Login() {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    const res=await fetch('http://127.0.0.1:4000/auth/login',{
+    const res=await fetch(`${BaseUrl}/auth/login`,{
     credentials: 'include',
     method: "POST",
     headers:{"Content-Type": "application/json"},
@@ -27,7 +28,7 @@ export default function Login() {
 
     const handleLoginWithGoogle = async (response) => {
     try {
-      const res = await fetch("http://127.0.0.1:4000/auth/login-with-google", {
+      const res = await fetch(`${BaseUrl}/auth/login-with-google`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

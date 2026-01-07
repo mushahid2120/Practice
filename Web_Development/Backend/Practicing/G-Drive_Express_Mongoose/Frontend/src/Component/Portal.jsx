@@ -1,9 +1,9 @@
-import {  useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
-function Portal({ setIsPortalOpen, handleSubmit,setInputValue,inputValue}) {
+function Portal({ setIsPortalOpen, handleSubmit, setInputValue, inputValue }) {
   const id = useId();
-  const inputRef=useRef()
+  const inputRef = useRef();
   useEffect(() => {
     const node = inputRef.current;
     if (!node) return;
@@ -39,7 +39,9 @@ function Portal({ setIsPortalOpen, handleSubmit,setInputValue,inputValue}) {
           className="w-full p-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Rename you file or folder"
           value={inputValue}
-          onChange={(e)=>{setInputValue(e.target.value)}}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
           ref={inputRef}
         />
         <div className="flex justify-end gap-4">

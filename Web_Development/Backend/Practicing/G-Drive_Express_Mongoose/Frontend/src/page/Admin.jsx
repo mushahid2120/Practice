@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BaseUrl } from "../App";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -11,7 +12,7 @@ export default function UsersPage() {
 
   const fetchAllUsers = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:4000/auth/allusers", {
+      const res = await fetch(`${BaseUrl}/auth/allusers`, {
         credentials: "include",
       });
       const data = await res.json();
@@ -23,7 +24,7 @@ export default function UsersPage() {
   };
 
   const fetchUser = async () => {
-    const res = await fetch("http://127.0.0.1:4000/auth", {
+    const res = await fetch(`${BaseUrl}/auth`, {
       credentials: "include",
     });
     const data = await res.json();
@@ -42,7 +43,7 @@ export default function UsersPage() {
   const logoutUser = async (userId) => {
     try {
       const res = await fetch(
-        `http://127.0.0.1:4000/auth/logout-user/${userId}`,
+        `${BaseUrl}/auth/logout-user/${userId}`,
         {
           method: "POST",
           credentials: "include",
@@ -57,7 +58,7 @@ export default function UsersPage() {
 
   const softDelete = async () => {
     const res = await fetch(
-      `http://127.0.0.1:4000/auth/soft-delete-user/${selectedUserId}`,
+      `${BaseUrl}/auth/soft-delete-user/${selectedUserId}`,
       {
         method: "DELETE",
         credentials: "include",
@@ -69,7 +70,7 @@ export default function UsersPage() {
 
   const hardDelete = async () => {
     const res = await fetch(
-      `http://127.0.0.1:4000/auth/hard-delete-user/${selectedUserId}`,
+      `${BaseUrl}/auth/hard-delete-user/${selectedUserId}`,
       {
         method: "DELETE",
         credentials: "include",

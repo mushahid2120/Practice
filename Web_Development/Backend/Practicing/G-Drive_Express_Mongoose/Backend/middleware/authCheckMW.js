@@ -1,4 +1,4 @@
-import redisClient from "../config/redis.js";
+// import redisClient from "../config/redis.js";
 import Session from "../Model/sessionModel.js";
 import Users from "../Model/userModel.js";
 
@@ -22,7 +22,6 @@ export default async function checkAuth(req, res, next) {
     }
 
     //finding User from database
-    console.log(session.userId)
     const user = await Users.findOne({_id: session.userId,deleted: false}).lean();
     if (!user) return res.status(401).json({ error: "Not Logged In" });
     req.user = user;

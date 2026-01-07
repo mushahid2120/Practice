@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { BaseUrl } from "../App";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -18,7 +19,7 @@ export default function SignUp() {
   });
   const navigate = useNavigate();
   const emailRef = useRef();
-  const [sendOtpValue, setSendOtpValue] = useState(0);
+  const [sendOtpValue, setSendOtpValue] = useState("Send OTP");
   const [isEnterOtp, setIsEnterOtp] = useState(false);
 
   const handleChange = (e) => {
@@ -36,25 +37,27 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(typeof form);
-    const res = await fetch("http://127.0.0.1:4000/auth/singup", {
+    const res = await fetch(`${BaseUrl}/auth/singup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
     const data = await res.json();
-    const error = data.error;
-    if (error) return setError((prevState) => ({ ...prevState, ...error }));
-    setForm({ name: "", email: "", password: "" });
+    const errorResponse = data.error;
+    if (errorResponse)
+      return setError((prevState) => ({ ...prevState, ...errorResponse }));
     console.log(data);
-    if (data.message) {
+    if (res.status === 200) {
+      setForm({ name: "", email: "", password: "" });
       navigate("/login");
     }
   };
 
   const handleClickOTP = async () => {
     try {
+      setSendOtpValue("Sending..");
       if (!emailRef.current.reportValidity()) return;
-      const res = await fetch("http://127.0.0.1:4000/otp/send", {
+      const res = await fetch(`${BaseUrl}/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),
@@ -65,7 +68,7 @@ export default function SignUp() {
       if (res.status !== 200)
         return setError((prevState) => ({ ...prevState, otp: error.otp }));
       setIsEnterOtp(true);
-      setSendOtpValue(10);
+      setSendOtpValue(60);
       const IntId = setInterval(() => {
         setSendOtpValue((prevState) => {
           if (prevState === 0) {
@@ -82,7 +85,7 @@ export default function SignUp() {
 
   const handleLoginWithGoogle = async (response) => {
     try {
-      const res = await fetch("http://127.0.0.1:4000/auth/login-with-google", {
+      const res = await fetch(`${BaseUrl}/auth/login-with-google`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -93,7 +96,7 @@ export default function SignUp() {
         navigate("/");
         return;
       }
-      console.log(data)
+      console.log(data);
     } catch (error) {
       console.log(error);
     }
@@ -138,10 +141,10 @@ export default function SignUp() {
             />
             <button
               type="button"
-              className="text-[13px] absolute right-0 h-full px-2 whitespace-nowrap max-w-20 w-full border bg-green-400 rounded-lg text-white font-semibold hover:bg-green-500 "
+              className="text-[13px] bg-blue-600 hover:bg-blue-800 absolute right-0 h-full px-2 whitespace-nowrap max-w-20 w-full border rounded-lg text-white font-semibold  "
               onClick={handleClickOTP}
             >
-              {sendOtpValue || "Send OTP"}
+              {sendOtpValue}
             </button>
           </div>
           <p className="text-red-600 text-sm absolute w-full text-end">
@@ -150,7 +153,7 @@ export default function SignUp() {
         </div>
 
         {isEnterOtp && (
-          <div className="relative flex whitespace-nowrap items-center">
+          <div className="relative flex whitespace-nowrap items-center mt-4">
             <label className="block text-sm font-medium pr-2">
               Enter OTP:{" "}
             </label>
@@ -165,7 +168,7 @@ export default function SignUp() {
               placeholder="e.g: 1234"
               required
             />
-            <p className="text-red-600 text-sm absolute w-full text-end">
+            <p className="text-red-600 -bottom-6 text-sm absolute w-full text-end">
               {error.otp}
             </p>
           </div>

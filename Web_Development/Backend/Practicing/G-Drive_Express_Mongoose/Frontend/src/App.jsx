@@ -8,6 +8,7 @@ import { FaUpload, FaUser } from "react-icons/fa";
 import { MdLogin, MdLogout } from "react-icons/md";
 import Portal from "./Component/Portal";
 
+  export const BaseUrl=import.meta.env.VITE_BACKEND_BASE_URL;
 
 function App() {
   const [driveContent, setDriveContent] = useState({
@@ -28,12 +29,13 @@ function App() {
   const nav = useNavigate();
   const fileUploadRef = useRef();
   const { dirId } = useParams();
+
   
 
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:4000/directory/${dirId || ""}`,
+        `${BaseUrl}/directory/${dirId || ""}`,
         {
           credentials: "include",
         }
@@ -52,7 +54,7 @@ function App() {
 
   const fetchUser = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:4000/auth", {
+      const response = await fetch(`${BaseUrl}/auth`, {
         credentials: "include",
       });
       const data = await response.json();
@@ -71,7 +73,7 @@ function App() {
   //Rename File
   const handleRenameFile = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:4000/files/${renameId}`, {
+      const res = await fetch(`${BaseUrl}/files/${renameId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -88,7 +90,7 @@ function App() {
   //Rename Directory
   const handleRenameDir = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:4000/directory/${renameId}`, {
+      const res = await fetch(`${BaseUrl}/directory/${renameId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -105,7 +107,7 @@ function App() {
   //Delete Files
   const handleDeleteFile = async (id) => {
     try {
-      const response = await fetch(`http://127.0.0.1:4000/files/${id}`, {
+      const response = await fetch(`${BaseUrl}/files/${id}`, {
         credentials: "include",
         method: "DELETE",
       });
@@ -120,7 +122,7 @@ function App() {
   //Delete Directory
   const handleDeleteDir = async (folderId) => {
     const response = await fetch(
-      `http://127.0.0.1:4000/directory/${folderId}`,
+      `${BaseUrl}/directory/${folderId}`,
       {
         credentials: "include",
         method: "DELETE",
@@ -133,57 +135,13 @@ function App() {
 
   //Upload files
   const handleFileUpload = async (e) => {
-    // // console.log("handling Submit");
-    // e.preventDefault();
-    // setProgress(0);
-    // // xhr.send(inputref.current.files[0]);
-
-    // const uploadAllfiles = (fileContent) => {
-    //   return new Promise((resolve, reject) => {
-    //     const fileName = fileContent.name;
-    //     const xhr = new XMLHttpRequest();
-    //     xhr.open("POST", `http://127.0.0.1:4000/files/${dirId || ""}`);
-    //     xhr.setRequestHeader("filename", fileName);
-    //     xhr.upload.addEventListener("progress", (e) => {
-    //       const progressPer = Math.floor((e.loaded / e.total) * 100);
-    //       console.log(progressPer);
-    //       setProgress(progressPer);
-    //     });
-
-    //     xhr.onload = () => {
-    //       console.log(xhr.responseText);
-    //       const res = JSON.parse(xhr.responseText);
-    //       if (res.message) resolve(xhr.responseText);
-    //       else reject(xhr.responseText);
-    //     };
-    //     xhr.onerror = () => {
-    //       reject(
-    //         (xhr.onerror = () => {
-    //           reject(new Error("Network error: Could not reach server"));
-    //         })
-    //       );
-    //     };
-    //     xhr.send(fileContent);
-    //   });
-    // };
-
-    // for (const file of fileUploadRef.current.files) {
-    //   try {
-    //     const res = await uploadAllfiles(file);
-    //     console.log(res);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
-    // fetchData();
-
     try {
       axios.defaults.withCredentials = true;
       const uploadSingleFile = async (file) => {
         const filename = file.name;
         console.log(file.name, file.type);
         const res = await axios.post(
-          `http://127.0.0.1:4000/files/${dirId || ""}`,
+          `${BaseUrl}/files/${dirId || ""}`,
           file,
           {
             headers: {
@@ -221,7 +179,6 @@ function App() {
       }
       fetchData();
       setProgress({});
-      // uploadSingleFile(e.target.files[0]);
     } catch (error) {
       console.log(error);
     }
@@ -232,7 +189,7 @@ function App() {
     try {
       console.log("Create dir");
       e.preventDefault();
-      const res = await fetch(`http://127.0.0.1:4000/directory/${dirId || ''} `, {
+      const res = await fetch(`${BaseUrl}/directory/${dirId || ''} `, {
         credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -240,7 +197,6 @@ function App() {
       });
       const resData = await res.json();
       fetchData();
-      // createDirRef.current.value = "";
       console.log(resData);
     } catch (error) {
       console.log("Directory not created");
@@ -250,7 +206,7 @@ function App() {
   //Logout
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:4000/auth/logout", {
+      const res = await fetch(`${BaseUrl}/auth/logout`, {
         credentials: "include",
         method: "POST",
       });
@@ -266,7 +222,7 @@ function App() {
   //Logout All
   const handleLogoutAll=async()=>{
      try {
-      const res = await fetch("http://127.0.0.1:4000/auth/logout-all", {
+      const res = await fetch(`${BaseUrl}/auth/logout-all`, {
         credentials: "include",
         method: "POST",
       });
