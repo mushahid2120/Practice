@@ -4,6 +4,7 @@ import { createWriteStream} from "fs";
 import { ObjectId } from "mongodb";
 import Files from "../Model/fileModel.js";
 import Dir from "../Model/dirModel.js";
+import { purify } from "./dirController.js";
 
 export const getFile = async (req, res, next) => {
   const id = req.params?.id;
@@ -35,6 +36,7 @@ export const getFile = async (req, res, next) => {
 export const uploadFile = async (req, res, next) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId.toString();
   const fileName = req.headers.filename;
+  const cleanFileName=purify.sanitize(fileName)
   const extension = path.extname(fileName);
 
   try {
@@ -49,7 +51,7 @@ export const uploadFile = async (req, res, next) => {
     }
     const fileCreated = await Files.insertOne({
       extension,
-      name: fileName,
+      name: cleanFileName,
       parentDirId,
       userId: req.user._id
     });
@@ -69,6 +71,7 @@ export const uploadFile = async (req, res, next) => {
 export const renameFile = async (req, res) => {
   const id = req.params.id;
   const newFileName = req.body?.newfilename;
+  const cleanNewFileName=purify.sanitize(newFileName)
   try {
     const fileData = await Files.findById(id).lean();
     if (!fileData) return res.status(405).json({ error: "File not Found" });
@@ -79,10 +82,10 @@ export const renameFile = async (req, res) => {
       return res
         .status(403)
         .json({ error: "You don't have access to rename this file" });
-    if (newFileName)
+    if (cleanNewFileName)
       await Files.updateOne(
         { _id: id },
-         { name: newFileName }
+         { name: cleanNewFileName }
       );
     return res.json({ message: "File Renamed Successfully" });
   } catch (error) {

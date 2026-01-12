@@ -8,14 +8,14 @@ export default async function checkAuth(req, res, next) {
 
     //signature matched (true) if failed (false)
     if (sid === false)
-      res.clearCookie("sid", { sameSite: "None", secure: true });
+      res.clearCookie("sid", { sameSite: "Lax", secure: true });
     if (!sid) return res.status(401).json({ error: "Not Logged In..." });
 
     const session = await Session.findById(sid);
     // const session=await redisClient.json.get(`session:${sid}`)
  
     if (!session) {
-      res.clearCookie("sid", { sameSite: "None", secure: true });
+      res.clearCookie("sid", { sameSite: "Lax", secure: true });
       return res
         .status(401)
         .json({ error: "Session Expired or Invalid Session" });

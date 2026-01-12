@@ -7,6 +7,7 @@ import { RiFolderAddFill } from "react-icons/ri";
 import { FaUpload, FaUser } from "react-icons/fa";
 import { MdLogin, MdLogout } from "react-icons/md";
 import Portal from "./Component/Portal";
+import DOMPurify from "dompurify";
 
   export const BaseUrl=import.meta.env.VITE_BACKEND_BASE_URL;
 
@@ -73,11 +74,12 @@ function App() {
   //Rename File
   const handleRenameFile = async () => {
     try {
+      const cleanInput=DOMPurify.sanitize(inputValue)
       const res = await fetch(`${BaseUrl}/files/${renameId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newfilename: inputValue }),
+        body: JSON.stringify({ newfilename: cleanInput }),
       });
       const resData = await res.json();
       console.log(resData);
@@ -90,11 +92,12 @@ function App() {
   //Rename Directory
   const handleRenameDir = async () => {
     try {
+      const cleanInput=DOMPurify.sanitize(inputValue)
       const res = await fetch(`${BaseUrl}/directory/${renameId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newfoldername: inputValue }),
+        body: JSON.stringify({ newfoldername: cleanInput }),
       });
       const resData = await res.json();
       console.log(resData);
@@ -189,11 +192,12 @@ function App() {
     try {
       console.log("Create dir");
       e.preventDefault();
+      const cleanInput=DOMPurify.sanitize(inputValue)
       const res = await fetch(`${BaseUrl}/directory/${dirId || ''} `, {
         credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ foldername: inputValue }),
+        body: JSON.stringify({ foldername: cleanInput }),
       });
       const resData = await res.json();
       fetchData();

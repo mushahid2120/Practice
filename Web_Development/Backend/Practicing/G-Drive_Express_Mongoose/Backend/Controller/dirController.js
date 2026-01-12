@@ -2,6 +2,11 @@ import { rm } from "fs/promises";
 import { ObjectId } from "mongodb";
 import Dir from "../Model/dirModel.js";
 import Files from "../Model/fileModel.js";
+import { JSDOM } from 'jsdom';
+import DOMPurify from 'dompurify';
+
+const window = new JSDOM('').window;
+export const purify = DOMPurify(window);
 
 
 //Get Directory Items
@@ -37,12 +42,13 @@ export const createDir = async (req, res,next) => {
       : req.params.parentDirId;
 
   const foldername = req.body?.foldername || "untitle";
+  const cleanFolderName=purify.sanitize(foldername);
   try {
     // const directoryData=await directoryCollection.findOne({_id : new ObjectId(parentDirId),userId: req.userId})
     // if(!directoryData) return res.status(404).json({error: 'You are not authorized to create this directory'})
     const result=await Dir.insertOne({
       userId: req.user._id,
-      name: foldername,
+      name: cleanFolderName,
       parentDirId
     });
     return res.json({ message: "Folder Created" });
@@ -55,13 +61,14 @@ export const createDir = async (req, res,next) => {
 export const renameDir = async (req, res) => {
   const folderId = req.params?.folderId;
   const newFolderName = req.body?.newfoldername;
+    const cleanNewFolderName=purify.sanitize(newFolderName);
   try {
     // const dirData=await dirCollection.findOne({_id: new ObjectId(folderId),userId: req.userId})
     // if(!dirData) return res.status(404).json({error: 'Folder not found or You are not authorized to rename this folder'})
     if (newFolderName)
       await Dir.updateOne(
         { _id: folderId, userId: req.user._id },
-        { name: newFolderName}
+        { name: cleanNewFolderName}
       );
     return res.json({ message: "Folder Renamed Succussfully " });
   } catch (error) {

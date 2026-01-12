@@ -5,3 +5,7 @@ export default function(req,res,next,id){
         return res.status(400).json({error:"Invalid ID"});
     next();
 }
+
+export function domPurifier(req,res,next){
+    
+}

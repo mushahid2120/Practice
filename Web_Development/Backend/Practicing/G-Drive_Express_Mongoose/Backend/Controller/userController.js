@@ -8,7 +8,7 @@ import Files from "../Model/fileModel.js";
 import { rm } from "fs/promises";
 import { loginSchema, signUpSchema } from "../validator/authSchemaZod.js";
 import z from "zod";
-// import redisClient from "../config/redis.js";
+// import redisClient from "../config/redis.jsames";
 
 export const mySecret = process.env.SESSION_SECRET;
 
@@ -111,7 +111,7 @@ export const login = async (req, res, next) => {
     // });
 
     const cookieCofig = {
-      sameSite: "none",
+      sameSite: "Lax",
       signed: true,
       secure: true,
       path: "/",
@@ -131,10 +131,10 @@ export const logout = async (req, res) => {
   const { sid } = req.signedCookies;
   await Session.findByIdAndDelete(sid);
   res.clearCookie("sid", {
-    sameSite: "None",
+    sameSite: "Lax",
     secure: true,
     // signed: true
-  });
+  });                     
   res.json({ message: "Logout Successfull" });
 };
 
@@ -143,7 +143,7 @@ export const logoutAll = async (req, res) => {
   const session = await Session.findById(sid);
   await Session.deleteMany({ userId: session.userId });
   res.clearCookie("sid", {
-    sameSite: "None",
+    sameSite: "Lax",
     secure: true,
     // signed: true
   });
@@ -181,7 +181,7 @@ export const loginWithGoogle = async (req, res, next) => {
     const session = await Session.create({ userId: dbUser._id });
 
     const cookieCofig = {
-      sameSite: "none",
+      sameSite: "Lax",
       signed: true,
       secure: true,
       path: "/",
@@ -221,7 +221,7 @@ export const loginWithGoogle = async (req, res, next) => {
     const session = await Session.create({ userId });
 
     const cookieCofig = {
-      sameSite: "none",
+      sameSite: "Lax",
       signed: true,
       secure: true,
       path: "/",

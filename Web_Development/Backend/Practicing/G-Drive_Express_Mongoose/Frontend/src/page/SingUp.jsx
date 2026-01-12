@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { BaseUrl } from "../App";
+import DOMPurify from "dompurify";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -36,11 +37,16 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(typeof form);
+    const cleanName = DOMPurify.sanitize(form.name);
+    const cleanEmail = DOMPurify.sanitize(form.email);
     const res = await fetch(`${BaseUrl}/auth/singup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        name: cleanName,
+        email: cleanEmail,
+        password: form.password,
+      }),
     });
     const data = await res.json();
     const errorResponse = data.error;
@@ -57,10 +63,11 @@ export default function SignUp() {
     try {
       setSendOtpValue("Sending..");
       if (!emailRef.current.reportValidity()) return;
+      const cleanEmail = DOMPurify.sanitize(form.email);
       const res = await fetch(`${BaseUrl}/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email }),
+        body: JSON.stringify({ email: cleanEmail }),
       });
       const data = await res.json();
       console.log(data);
