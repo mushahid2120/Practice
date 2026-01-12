@@ -29,7 +29,7 @@ const throtle = slowDown({
 const port = process.env.PORT || 4000;
 
 const app = express();
-app.use(helmet());
+// app.use(helmet());
 
 // app.use(rateLimiter,throtle);
 app.use(express.json());
