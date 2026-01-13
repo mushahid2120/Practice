@@ -69,8 +69,8 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { BsThreeDotsVertical, BsGrid3X3Gap, BsList } from "react-icons/bs";
-import { FaDownload, FaFolder, FaFile } from "react-icons/fa";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaDownload } from "react-icons/fa";
 import ContextMenu from "./ContextMenu";
 import { BaseUrl } from "../App";
 
@@ -79,12 +79,21 @@ function DirItemListing({
   listType,
   isContextMenu,
   setIsContextMenu,
-  handleDelete,
   setIsPortalOpen,
   setInputValue,
-  setRenameId,
+  setSelectedItemId,
 }) {
   const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
+
+    const viewSize=(itemSize)=>{
+    const KB=1024;
+    const MB=KB*1024;
+    const GB=MB*1024;
+    if(itemSize>=GB)  return `${Math.floor(itemSize/GB)} GB`;
+    else if(itemSize>=MB) return `${Math.floor(itemSize/MB)} MB`
+    else if(itemSize>=KB) return `${Math.floor(itemSize/KB)} KB`
+    return `${itemSize} Bytes`
+  }
 
   // Get file extension for icon
   const getFileIcon = (fileName) => {
@@ -126,7 +135,7 @@ function DirItemListing({
     return iconConfig[ext] || { color: "text-gray-500", bg: "bg-gray-50" };
   };
 
-  if (!listingItem || listingItem.length === 0) {
+  if ((!listingItem || listingItem.length === 0) && listType === "files") {
     return (
       <div className="flex flex-col items-center justify-center py-4 text-gray-400">
         <svg
@@ -234,235 +243,251 @@ function DirItemListing({
       {/* Grid View */}
       {viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {listingItem.map(({ name, _id: id }, index) => {
-            const iconStyle = listType === "files" ? getFileIcon(name) : null;
+          {listingItem.map(
+            ({ name, _id: id, createdAt, updatedAt, size }, index) => {
+              const iconStyle = listType === "files" ? getFileIcon(name) : null;
 
-            return (
-              <div
-                key={id}
-                className="group relative bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-blue-300  cursor-pointer"
-              >
-                <Link
-                  to={
-                    listType === "directory"
-                      ? `/directory/${id}`
-                      : `${BaseUrl}/files/${id}`
-                  }
-                  className="block p-4"
+              return (
+                <div
+                  key={id}
+                  className="group relative bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-blue-300  cursor-pointer"
                 >
-                  {/* Icon */}
-                  <div
-                    className={`w-14 h-14 rounded-xl mb-3 ${
+                  <Link
+                    to={
                       listType === "directory"
-                        ? "bg-gradient-to-br from-blue-400 to-blue-600"
-                        : iconStyle.bg
-                    } flex items-center justify-center shadow-md ${
-                      listType === "directory" ? "shadow-blue-500/30" : ""
-                    }`}
+                        ? `/directory/${id}`
+                        : `${BaseUrl}/files/${id}`
+                    }
+                    className="block p-4"
+                    title={`size: ${viewSize(size)}`}
                   >
-                    {listType === "directory" ? (
-                      <svg
-                        className="w-8 h-8 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                      </svg>
-                    ) : (
-                      <svg
-                        className={`w-8 h-8 ${iconStyle.color}`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                    {/* Icon */}
+                    <div
+                      className={`w-14 h-14 rounded-xl mb-3 ${
+                        listType === "directory"
+                          ? "bg-gradient-to-br from-blue-400 to-blue-600"
+                          : iconStyle.bg
+                      } flex items-center justify-center shadow-md ${
+                        listType === "directory" ? "shadow-blue-500/30" : ""
+                      }`}
+                    >
+                      {listType === "directory" ? (
+                        <svg
+                          className="w-8 h-8 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className={`w-8 h-8 ${iconStyle.color}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+
+                    {/* Name */}
+                    <h3 className="font-semibold text-gray-800 text-sm line-clamp-2 leading-tight mb-1 group-hover:text-blue-600 transition-colors">
+                      {name}
+                    </h3>
+                    {listType === "files" && (
+                      <p className="text-xs text-gray-500 uppercase">
+                        {name.split(".").pop()} file
+                      </p>
                     )}
+                  </Link>
+
+                  {/* Action Buttons */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 ">
+                    {listType === "files" && (
+                      <Link
+                        to={`${BaseUrl}/files/${id}?action=download`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-8 h-8 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors"
+                      >
+                        <FaDownload size={13} className="text-green-600" />
+                      </Link>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (
+                          isContextMenu.index === -1 ||
+                          isContextMenu.index !== index
+                        )
+                          setIsContextMenu({ index, listType });
+                        else setIsContextMenu({ index: -1, listType: null });
+                      }}
+                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                    >
+                      <BsThreeDotsVertical
+                        size={15}
+                        className="text-gray-600"
+                      />
+                    </button>
                   </div>
 
-                  {/* Name */}
-                  <h3 className="font-semibold text-gray-800 text-sm line-clamp-2 leading-tight mb-1 group-hover:text-blue-600 transition-colors">
-                    {name}
-                  </h3>
-                  {listType === "files" && (
-                    <p className="text-xs text-gray-500 uppercase">
-                      {name.split(".").pop()} file
-                    </p>
-                  )}
-                </Link>
-
-                {/* Action Buttons */}
-                <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 ">
-                  {listType === "files" && (
-                    <Link
-                      to={`${BaseUrl}/files/${id}?action=download`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-8 h-8 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors"
-                    >
-                      <FaDownload size={13} className="text-green-600" />
-                    </Link>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (
-                        isContextMenu.index === -1 ||
-                        isContextMenu.index !== index
-                      )
-                        setIsContextMenu({ index, listType });
-                      else setIsContextMenu({ index: -1, listType: null });
-                    }}
-                    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                  >
-                    <BsThreeDotsVertical size={15} className="text-gray-600" />
-                  </button>
+                  {/* Context Menu */}
+                  <ContextMenu
+                    isOpen={
+                      isContextMenu.index === index &&
+                      isContextMenu.listType === listType
+                    }
+                    setIsContextMenu={setIsContextMenu}
+                    id={id}
+                    setIsPortalOpen={setIsPortalOpen}
+                    name={name}
+                    setInputValue={setInputValue}
+                    listType={listType}
+                    setSelectedItemId={setSelectedItemId}
+                    createdAt={createdAt}
+                    updatedAt={updatedAt}
+                    size={viewSize(size)}
+                  />
                 </div>
-
-                {/* Context Menu */}
-                <ContextMenu
-                  isOpen={
-                    isContextMenu.index === index &&
-                    isContextMenu.listType === listType
-                  }
-                  setIsContextMenu={setIsContextMenu}
-                  handleDelete={handleDelete}
-                  id={id}
-                  setIsPortalOpen={setIsPortalOpen}
-                  name={name}
-                  setInputValue={setInputValue}
-                  listType={listType}
-                  setRenameId={setRenameId}
-                />
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
       )}
 
       {/* List View */}
       {viewMode === "list" && (
         <div className="space-y-2">
-          {listingItem.map(({ name, _id: id }, index) => {
-            const iconStyle = listType === "files" ? getFileIcon(name) : null;
+          {listingItem.map(
+            ({ name, _id: id, createdAt, updatedAt, size }, index) => {
+              const iconStyle = listType === "files" ? getFileIcon(name) : null;
 
-            return (
-              <div
-                key={id}
-                className="group relative bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-blue-300 "
-              >
-                <Link
-                  to={
-                    listType === "directory"
-                      ? `/directory/${id}`
-                      : `${BaseUrl}/files/${id}`
-                  }
-                  className="flex items-center gap-4 p-4"
+              return (
+                <div
+                  key={id}
+                  className="group relative bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-blue-300 "
                 >
-                  {/* Icon */}
-                  <div
-                    className={`w-12 h-12 rounded-lg flex-shrink-0 ${
+                  <Link
+                    to={
                       listType === "directory"
-                        ? "bg-gradient-to-br from-blue-400 to-blue-600"
-                        : iconStyle.bg
-                    } flex items-center justify-center shadow-sm ${
-                      listType === "directory" ? "shadow-blue-500/20" : ""
-                    }`}
+                        ? `/directory/${id}`
+                        : `${BaseUrl}/files/${id}`
+                    }
+                    title={viewSize(size)}
+                    className="flex items-center gap-4 p-4"
                   >
-                    {listType === "directory" ? (
-                      <svg
-                        className="w-7 h-7 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                      </svg>
-                    ) : (
-                      <svg
-                        className={`w-7 h-7 ${iconStyle.color}`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-
-                  {/* Name - Takes remaining space */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-800 text-base truncate group-hover:text-blue-600 transition-colors">
-                      {name}
-                    </h3>
-                    {listType === "files" && (
-                      <p className="text-xs text-gray-500 mt-0.5 uppercase">
-                        {name.split(".").pop()} file
-                      </p>
-                    )}
-                  </div>
-
-                  {/* File type badge (optional, only in list view) */}
-                  {listType === "files" && (
-                    <div className="hidden md:block">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full uppercase">
-                        {name.split(".").pop()}
-                      </span>
-                    </div>
-                  )}
-                </Link>
-
-                {/* Action Buttons - Always visible in list view */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-4 flex items-center gap-2">
-                  {listType === "files" && (
-                    <Link
-                      to={`${BaseUrl}/files/${id}?action=download`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-9 h-9 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors"
+                    {/* Icon */}
+                    <div
+                      className={`w-12 h-12 rounded-lg flex-shrink-0 ${
+                        listType === "directory"
+                          ? "bg-gradient-to-br from-blue-400 to-blue-600"
+                          : iconStyle.bg
+                      } flex items-center justify-center shadow-sm ${
+                        listType === "directory" ? "shadow-blue-500/20" : ""
+                      }`}
                     >
-                      <FaDownload size={14} className="text-green-600" />
-                    </Link>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (
-                        isContextMenu.index === -1 ||
-                        isContextMenu.index !== index
-                      )
-                        setIsContextMenu({ index, listType });
-                      else setIsContextMenu({ index: -1, listType: null });
-                    }}
-                    className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                  >
-                    <BsThreeDotsVertical size={16} className="text-gray-600" />
-                  </button>
-                </div>
+                      {listType === "directory" ? (
+                        <svg
+                          className="w-7 h-7 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className={`w-7 h-7 ${iconStyle.color}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
 
-                {/* Context Menu */}
-                <ContextMenu
-                  isOpen={
-                    isContextMenu.index === index &&
-                    isContextMenu.listType === listType
-                  }
-                  setIsContextMenu={setIsContextMenu}
-                  handleDelete={handleDelete}
-                  id={id}
-                  setIsPortalOpen={setIsPortalOpen}
-                  name={name}
-                  setInputValue={setInputValue}
-                  listType={listType}
-                  setRenameId={setRenameId}
-                />
-              </div>
-            );
-          })}
+                    {/* Name - Takes remaining space */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-800 text-base truncate group-hover:text-blue-600 transition-colors">
+                        {name}
+                      </h3>
+                      {listType === "files" && (
+                        <p className="text-xs text-gray-500 mt-0.5 uppercase">
+                          {name.split(".").pop()} file
+                        </p>
+                      )}
+                    </div>
+
+                    {/* File type badge (optional, only in list view) */}
+                    {listType === "files" && (
+                      <div className="hidden md:block">
+                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full uppercase">
+                          {name.split(".").pop()}
+                        </span>
+                      </div>
+                    )}
+                  </Link>
+
+                  {/* Action Buttons - Always visible in list view */}
+                  <div className="absolute top-1/2 -translate-y-1/2 right-4 flex items-center gap-2">
+                    {listType === "files" && (
+                      <Link
+                        to={`${BaseUrl}/files/${id}?action=download`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-9 h-9 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors"
+                      >
+                        <FaDownload size={14} className="text-green-600" />
+                      </Link>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (
+                          isContextMenu.index === -1 ||
+                          isContextMenu.index !== index
+                        )
+                          setIsContextMenu({ index, listType });
+                        else setIsContextMenu({ index: -1, listType: null });
+                      }}
+                      className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                    >
+                      <BsThreeDotsVertical
+                        size={16}
+                        className="text-gray-600"
+                      />
+                    </button>
+                  </div>
+
+                  {/* Context Menu */}
+                  <ContextMenu
+                    isOpen={
+                      isContextMenu.index === index &&
+                      isContextMenu.listType === listType
+                    }
+                    setIsContextMenu={setIsContextMenu}
+                    id={id}
+                    setIsPortalOpen={setIsPortalOpen}
+                    name={name}
+                    setInputValue={setInputValue}
+                    listType={listType}
+                    setSelectedItemId={setSelectedItemId}
+                    createdAt={createdAt}
+                    updatedAt={updatedAt}
+                    size={viewSize(size)}
+                  />
+                </div>
+              );
+            }
+          )}
         </div>
       )}
     </div>

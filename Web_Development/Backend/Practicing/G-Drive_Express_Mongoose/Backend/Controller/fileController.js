@@ -36,9 +36,17 @@ export const getFile = async (req, res, next) => {
 
 export const uploadFile = async (req, res, next) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId.toString();
-  const fileName = req.headers.filename;
-  const cleanFileName = purify.sanitize(fileName);
-  const extension = path.extname(fileName);
+  const { filename, filesize } = req.headers;
+
+  if (!filesize || +filesize > 100 * 1000 * 1000) {
+    res.destroy();
+    return res
+      .status(413)
+      .json({ error: "File is Too big please upload below 100mb" });
+  }
+  const cleanFileName = purify.sanitize(filename);
+  const cleanFileSize = purify.sanitize(filesize);
+  const extension = path.extname(cleanFileName);
 
   try {
     const parentDirData = await Dir.findOne({
@@ -52,16 +60,32 @@ export const uploadFile = async (req, res, next) => {
     }
 
     const fileId = new mongoose.Types.ObjectId();
-  
+
     const fileFullName = `${fileId.toString()}${extension}`;
     const writeStream = createWriteStream(`./GDrive/${fileFullName}`);
 
-    req.pipe(writeStream);
+    let totalFileSize = 0;
+    let abortFileTransfer=false;
+    // req.pipe(writeStream);
+    req.on("data", (chunk) => {
+      if(abortFileTransfer) return 
+      const isEmpty = writeStream.write(chunk);
+      totalFileSize += chunk.length;
+      if (totalFileSize > filesize) {
+        abortFileTransfer=false;
+        req.destroy("File size not mathed");}
+      if (!isEmpty) req.pause();
+    });
+
+    writeStream.on("drain", () => {
+      req.resume();
+      // console.log("Draining..")
+    });
 
     req.on("error", async (error) => {
-      await rm(`./GDrive/${fileFullName}`);
-      writeStream.destroy();
-      req.destroy();
+      writeStream.close();
+        await rm(`./GDrive/${fileFullName}`);
+        req.destroy();
       return res.status(401).json({ error: "File Upload Cancelled" });
     });
 
@@ -72,6 +96,7 @@ export const uploadFile = async (req, res, next) => {
         name: cleanFileName,
         parentDirId,
         userId: req.user._id,
+        size: cleanFileSize,
       });
       res.json({ message: "File Uploaded Successfully" });
     });

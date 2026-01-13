@@ -15,6 +15,11 @@ const filesSchema = new Schema(
       type: Schema.Types.ObjectId,
       require: true
     },
+    size: {
+      type: BigInt,
+      required: true,
+      default: 0
+    },
     parentDirId: {
       type: Schema.Types.ObjectId,
       require: true,
@@ -22,6 +27,7 @@ const filesSchema = new Schema(
     },
   },
   {
+    timestamps: true,
     strict: "throw",
   }
 );

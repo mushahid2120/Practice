@@ -22,9 +22,9 @@ export const getAllDir = async (req, res) => {
     return res.status(404).json({ error: "You don't have any access" });
 
   const filesData = await Files
-    .find({ parentDirId: id }).lean();
+    .find({ parentDirId: id }).select("_id name size createdAt updatedAt").lean();
   const directoriesData = await Dir
-    .find({ parentDirId: id }).lean();
+    .find({ parentDirId: id }).select("_id name size createdAt updatedAt").lean();
   res.json({
     ...directoryData,
     files: filesData,

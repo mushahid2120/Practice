@@ -3,9 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import DirItemListing from "./Component/DirItemListing";
-import { RiFolderAddFill } from "react-icons/ri";
-import { FaUpload, FaUser } from "react-icons/fa";
-import { MdLogin, MdLogout } from "react-icons/md";
+
 import Portal from "./Component/Portal";
 import DOMPurify from "dompurify";
 
@@ -22,11 +20,12 @@ function App() {
   const [uploadingFiles, setUploadingFiles] = useState([]);
   const [isPortalOpen, setIsPortalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [renameId, setRenameId] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  const inputRef = useRef();
   const nav = useNavigate();
   const fileUploadRef = useRef();
   const { dirId } = useParams();
@@ -70,7 +69,7 @@ function App() {
   const handleRenameFile = async () => {
     try {
       const cleanInput = DOMPurify.sanitize(inputValue);
-      const res = await fetch(`${BaseUrl}/files/${renameId}`, {
+      const res = await fetch(`${BaseUrl}/files/${selectedItemId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -88,7 +87,7 @@ function App() {
   const handleRenameDir = async () => {
     try {
       const cleanInput = DOMPurify.sanitize(inputValue);
-      const res = await fetch(`${BaseUrl}/directory/${renameId}`, {
+      const res = await fetch(`${BaseUrl}/directory/${selectedItemId}`, {
         credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -105,7 +104,7 @@ function App() {
   //Delete Files
   const handleDeleteFile = async (id) => {
     try {
-      const response = await fetch(`${BaseUrl}/files/${id}`, {
+      const response = await fetch(`${BaseUrl}/files/${selectedItemId}`, {
         credentials: "include",
         method: "DELETE",
       });
@@ -119,7 +118,7 @@ function App() {
 
   //Delete Directory
   const handleDeleteDir = async (folderId) => {
-    const response = await fetch(`${BaseUrl}/directory/${folderId}`, {
+    const response = await fetch(`${BaseUrl}/directory/${selectedItemId}`, {
       credentials: "include",
       method: "DELETE",
     });
@@ -134,12 +133,12 @@ function App() {
     const uploadSingleFile = async (file) => {
       const controller = new AbortController();
 
+      const filename = file.name;
       setProgress((prevState) => ({
         ...prevState,
         [filename]: { dataTransfer: 0, controller },
       }));
 
-      const filename = file.name;
       console.log(file.name, file.type);
       try {
         const res = await axios.post(`${BaseUrl}/files/${dirId || ""}`, file, {
@@ -147,6 +146,7 @@ function App() {
           headers: {
             "Content-Type": file.type,
             filename: file.name,
+            filesize: file.size,
           },
           onUploadProgress: (e) => {
             const percent = Math.round((e.loaded * 100) / e.total);
@@ -278,7 +278,12 @@ function App() {
                 <>
                   {/* Create Folder Button */}
                   <button
-                    onClick={() => setIsPortalOpen("createDir")}
+                    onClick={() =>
+                      setIsPortalOpen({
+                        header: "Create Directory",
+                        submitBtn: "Create",
+                      })
+                    }
                     className="group relative px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
                   >
                     <svg
@@ -450,16 +455,44 @@ function App() {
       {isPortalOpen && (
         <Portal
           setIsPortalOpen={setIsPortalOpen}
+          isPortalOpen={isPortalOpen}
           inputValue={inputValue}
           setInputValue={setInputValue}
+          inputRef={inputRef}
           handleSubmit={
-            isPortalOpen === "createDir"
+            isPortalOpen.header === "Create Directory"
               ? handleCreateDir
-              : isPortalOpen === "directory"
+              : isPortalOpen.header === "Rename directory"
               ? handleRenameDir
-              : handleRenameFile
+              : isPortalOpen.header === "Rename files"
+              ? handleRenameFile
+              : isPortalOpen.header === "Delete directory"
+              ? handleDeleteDir
+              : handleDeleteFile
           }
-        />
+        >
+          <div>
+            <label
+              htmlFor="rename-input"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              New Name
+            </label>
+            <input
+              type="text"
+              name="input"
+              id="rename-input"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 text-gray-800 font-medium"
+              placeholder="Enter new name..."
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+              }}
+              ref={inputRef}
+              required
+            />
+          </div>
+        </Portal>
       )}
 
       {/* Main Content Area */}
@@ -539,10 +572,9 @@ function App() {
                 listType="directory"
                 isContextMenu={ContextMenu}
                 setIsContextMenu={setContextMenu}
-                handleDelete={handleDeleteDir}
                 setIsPortalOpen={setIsPortalOpen}
                 setInputValue={setInputValue}
-                setRenameId={setRenameId}
+                setSelectedItemId={setSelectedItemId}
               />
             )}
 
@@ -552,10 +584,9 @@ function App() {
                 listType="files"
                 isContextMenu={ContextMenu}
                 setIsContextMenu={setContextMenu}
-                handleDelete={handleDeleteFile}
                 setIsPortalOpen={setIsPortalOpen}
                 setInputValue={setInputValue}
-                setRenameId={setRenameId}
+                setSelectedItemId={setSelectedItemId}
               />
             )}
           </>

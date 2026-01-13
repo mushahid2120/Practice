@@ -5,7 +5,6 @@ import Users from "../Model/userModel.js";
 export default async function checkAuth(req, res, next) {
   try {
     const { sid } = req.signedCookies;
-
     //signature matched (true) if failed (false)
     if (sid === false)
       res.clearCookie("sid", { sameSite: "Lax", secure: true });
