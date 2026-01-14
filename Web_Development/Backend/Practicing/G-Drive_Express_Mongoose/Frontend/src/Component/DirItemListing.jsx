@@ -76,6 +76,7 @@ import { BaseUrl } from "../App";
 
 function DirItemListing({
   listingItem = [],
+  path,
   listType,
   isContextMenu,
   setIsContextMenu,
@@ -85,15 +86,15 @@ function DirItemListing({
 }) {
   const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
 
-    const viewSize=(itemSize)=>{
-    const KB=1024;
-    const MB=KB*1024;
-    const GB=MB*1024;
-    if(itemSize>=GB)  return `${Math.floor(itemSize/GB)} GB`;
-    else if(itemSize>=MB) return `${Math.floor(itemSize/MB)} MB`
-    else if(itemSize>=KB) return `${Math.floor(itemSize/KB)} KB`
-    return `${itemSize} Bytes`
-  }
+  const viewSize = (itemSize) => {
+    const KB = 1024;
+    const MB = KB * 1024;
+    const GB = MB * 1024;
+    if (itemSize >= GB) return `${Math.floor(itemSize / GB)} GB`;
+    else if (itemSize >= MB) return `${Math.floor(itemSize / MB)} MB`;
+    else if (itemSize >= KB) return `${Math.floor(itemSize / KB)} KB`;
+    return `${itemSize} Bytes`;
+  };
 
   // Get file extension for icon
   const getFileIcon = (fileName) => {
@@ -246,7 +247,7 @@ function DirItemListing({
           {listingItem.map(
             ({ name, _id: id, createdAt, updatedAt, size }, index) => {
               const iconStyle = listType === "files" ? getFileIcon(name) : null;
-
+              console.log(path);
               return (
                 <div
                   key={id}
@@ -352,6 +353,7 @@ function DirItemListing({
                     createdAt={createdAt}
                     updatedAt={updatedAt}
                     size={viewSize(size)}
+                    path={path}
                   />
                 </div>
               );
@@ -483,6 +485,7 @@ function DirItemListing({
                     createdAt={createdAt}
                     updatedAt={updatedAt}
                     size={viewSize(size)}
+                    path={path}
                   />
                 </div>
               );

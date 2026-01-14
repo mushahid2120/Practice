@@ -60,6 +60,7 @@ function ContextMenu({
   createdAt,
   updatedAt,
   size,
+  path
 }) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -195,7 +196,7 @@ function ContextMenu({
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-white">
-                      Folder Details
+                      {listType==="files" ? "File":"Folder"} Details
                     </h3>
                   </div>
                   <button
@@ -227,7 +228,7 @@ function ContextMenu({
                 <div className="space-y-4">
                   {/* Name */}
                   <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                    <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    <div className="text-xs font-semibold text-gray-600  tracking-wide mb-1">
                       Name :{" "}
                       <span className="text-sm font-medium text-gray-800 break-all">
                         {name}
@@ -237,17 +238,17 @@ function ContextMenu({
 
                   {/* Path */}
                   <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                    <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    <div className="text-xs font-semibold text-gray-600  tracking-wide mb-1">
                       Path :{" "}
                       <span className="text-sm font-medium text-gray-800 break-all">
-                        /home/user/documents
+                       {path && path.map(item=>item.name).join(' / ')}
                       </span>
                     </div>
                   </div>
 
                   {/* Size */}
                   <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                    <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    <div className="text-xs font-semibold text-gray-600  tracking-wide mb-1">
                       Size :{" "}
                       <span className="text-sm font-medium text-gray-800 break-all">
                         {size}
@@ -257,7 +258,7 @@ function ContextMenu({
 
                   {/* Created */}
                   <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    <span className="text-xs font-semibold text-gray-600  tracking-wide mb-1">
                       Created :{" "}
                       <span className="text-sm font-medium text-gray-800 break-all">
                         {new Date(createdAt).toLocaleString()}
@@ -267,35 +268,13 @@ function ContextMenu({
 
                   {/* Modified */}
                   <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                    <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    <div className="text-xs font-semibold text-gray-600  tracking-wide mb-1">
                       Modified : {"  "}
                       <span className="text-sm font-medium text-gray-800 break-all">
                         {new Date(updatedAt).toLocaleString()}
                       </span>
                     </div>
                   </div>
-
-                  {listType === "directory" && (
-                    <>
-                      <div className="flex items-center gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                        <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
-                          Files : {"  "}
-                          <span className="text-sm font-medium text-gray-800 break-all">
-                            {" "}
-                            24 files
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2 py-1 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                        <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
-                          Folders :{" "}
-                          <span className="text-sm font-medium text-gray-800 break-all">
-                            5 folders
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
             </div>

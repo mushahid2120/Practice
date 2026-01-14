@@ -1,10 +1,10 @@
-import { rm } from "fs/promises";
+import { rm, stat } from "fs/promises";
 import path from "path";
 import { createWriteStream } from "fs";
 import { ObjectId } from "mongodb";
 import Files from "../Model/fileModel.js";
 import Dir from "../Model/dirModel.js";
-import { purify } from "./dirController.js";
+import { purify, updateDirSize } from "./dirController.js";
 import mongoose from "mongoose";
 
 export const getFile = async (req, res, next) => {
@@ -34,6 +34,8 @@ export const getFile = async (req, res, next) => {
   }
 };
 
+
+
 export const uploadFile = async (req, res, next) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId.toString();
   const { filename, filesize } = req.headers;
@@ -51,7 +53,7 @@ export const uploadFile = async (req, res, next) => {
   try {
     const parentDirData = await Dir.findOne({
       _id: parentDirId,
-    }).lean();
+    }).select("userId path").lean();
 
     if (!parentDirData.userId.equals(req.user._id)) {
       return res
@@ -65,15 +67,16 @@ export const uploadFile = async (req, res, next) => {
     const writeStream = createWriteStream(`./GDrive/${fileFullName}`);
 
     let totalFileSize = 0;
-    let abortFileTransfer=false;
+    let abortFileTransfer = false;
     // req.pipe(writeStream);
     req.on("data", (chunk) => {
-      if(abortFileTransfer) return 
+      if (abortFileTransfer) return;
       const isEmpty = writeStream.write(chunk);
       totalFileSize += chunk.length;
       if (totalFileSize > filesize) {
-        abortFileTransfer=false;
-        req.destroy("File size not mathed");}
+        abortFileTransfer = false;
+        req.destroy("File size not mathed");
+      }
       if (!isEmpty) req.pause();
     });
 
@@ -84,8 +87,8 @@ export const uploadFile = async (req, res, next) => {
 
     req.on("error", async (error) => {
       writeStream.close();
-        await rm(`./GDrive/${fileFullName}`);
-        req.destroy();
+      await rm(`./GDrive/${fileFullName}`);
+      req.destroy();
       return res.status(401).json({ error: "File Upload Cancelled" });
     });
 
@@ -98,6 +101,7 @@ export const uploadFile = async (req, res, next) => {
         userId: req.user._id,
         size: cleanFileSize,
       });
+      await updateDirSize(parentDirData.path, +cleanFileSize);
       res.json({ message: "File Uploaded Successfully" });
     });
   } catch (err) {
@@ -132,18 +136,22 @@ export const deleteFile = async (req, res, next) => {
   const id = req.params?.id;
   const db = req.db;
   try {
-    const fileData = await Files.findById(id).lean();
+    const fileData = await Files.findById(id).select('parentDirId size extension').lean();
     if (!fileData)
       return res.status(404).json({ error: "Deleting File not Found" });
-    const parentDirData = await Dir.findById(fileData.parentDirId);
+    const parentDirData = await Dir.findById(fileData.parentDirId).select("path userId _id").lean();
+
     if (!parentDirData)
       return res.status(404).json({ error: "parent Directory is not found" });
     else if (!parentDirData.userId.equals(req.user._id))
       return res
         .status(403)
         .json({ error: "You don't have access to delete this file" });
+
+
     await rm(`./GDrive/${id}${fileData.extension}`);
     await Files.findByIdAndDelete(id);
+    await updateDirSize(parentDirData.path,-(fileData.size))
     return res.json({ message: "File Deleted" });
   } catch (error) {
     next(error);

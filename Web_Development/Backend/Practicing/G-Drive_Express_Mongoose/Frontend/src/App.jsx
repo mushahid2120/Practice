@@ -6,6 +6,7 @@ import DirItemListing from "./Component/DirItemListing";
 
 import Portal from "./Component/Portal";
 import DOMPurify from "dompurify";
+import Breadcrumb from "./Component/BreadCrumb";
 
 export const BaseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
@@ -496,7 +497,8 @@ function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 pt-1 pb-4">
+        <Breadcrumb path={driveContent.path} />
         {/* Upload Progress Section */}
         {Object.entries(progress).length > 0 && (
           <div className="mb-8 space-y-3">
@@ -569,6 +571,7 @@ function App() {
             {driveContent?.directories && (
               <DirItemListing
                 listingItem={driveContent.directories}
+                path={driveContent.path}
                 listType="directory"
                 isContextMenu={ContextMenu}
                 setIsContextMenu={setContextMenu}
@@ -581,6 +584,7 @@ function App() {
             {driveContent?.files && (
               <DirItemListing
                 listingItem={driveContent.files}
+                path={driveContent.path}
                 listType="files"
                 isContextMenu={ContextMenu}
                 setIsContextMenu={setContextMenu}

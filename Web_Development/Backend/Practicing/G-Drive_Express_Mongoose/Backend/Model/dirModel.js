@@ -19,6 +19,17 @@ const dirSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    path:{
+      type: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "directories",
+    }
+  ],
+      default: function(){
+        return [this._id]
+      }
+    }
   },
   {
     timestamps: true,

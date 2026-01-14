@@ -127,6 +127,12 @@ const dirResult = await db.command({
         userId: {
           bsonType: "objectId",
         },
+        path: {
+          bsonType: "array",
+          items: {
+            bsonType: "objectId",
+          },
+        },
         __v: {
           bsonType: "int",
         },
