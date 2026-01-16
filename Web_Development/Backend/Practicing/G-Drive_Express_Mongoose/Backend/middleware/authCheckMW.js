@@ -12,7 +12,7 @@ export default async function checkAuth(req, res, next) {
 
     const session = await Session.findById(sid);
     // const session=await redisClient.json.get(`session:${sid}`)
- 
+
     if (!session) {
       res.clearCookie("sid", { sameSite: "Lax", secure: true });
       return res
@@ -21,7 +21,9 @@ export default async function checkAuth(req, res, next) {
     }
 
     //finding User from database
-    const user = await Users.findOne({_id: session.userId,deleted: false}).lean();
+    const user = await Users.findOne({ _id: session.userId, deleted: false })
+      .populate({ path: "rootDirId" ,select: "_id size"})
+      .lean();
     if (!user) return res.status(401).json({ error: "Not Logged In" });
     req.user = user;
 
@@ -41,7 +43,7 @@ export const checkRole = (req, res, next) => {
 export const checkAdminUser = async (req, res, next) => {
   const userId = req.params?.userId;
   const user = await Users.findById(userId).lean();
-  console.log(user, user?.role !== "Admin");
+
   if (user?.role !== "Admin") {
     return next();
   } else {

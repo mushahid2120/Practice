@@ -40,12 +40,13 @@ const userSchema = new Schema(
     },
     capacity:{
       type: BigInt,
-      default: 1000*1000*50,
+      default: 1024*1024*50,
       required: true
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
       require: true,
+      ref: 'directories'
     },
   },
   {

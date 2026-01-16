@@ -156,6 +156,8 @@ export const getUser = (req, res) => {
     email: req.user.email,
     picture: req.user.picture,
     role: req.user.role,
+    capacity: req.user.capacity,
+    usedStorage: req.user.rootDirId.size
   });
 };
 

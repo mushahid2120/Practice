@@ -37,7 +37,7 @@ export const getFile = async (req, res, next) => {
 
 
 export const uploadFile = async (req, res, next) => {
-  const parentDirId = req.params.parentDirId || req.user.rootDirId.toString();
+  const parentDirId = req.params.parentDirId || req.user.rootDirId._id.toString();
   const { filename, filesize } = req.headers;
 
   if (!filesize || +filesize > 100 * 1000 * 1000) {

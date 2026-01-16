@@ -11,7 +11,7 @@ export const purify = DOMPurify(window);
 
 //Get Directory Items
 export const getAllDir = async (req, res) => {
-  const id = req.params?.id || req.user.rootDirId;
+  const id = req.params?.id || req.user.rootDirId._id;
   const userId = req.user._id;
 
   const directoryData = await Dir.findOne({
@@ -46,7 +46,7 @@ export const createDir = async (req, res, next) => {
   const parentDirId =
     req.params.parentDirId === "undefined" ||
     req.params.parentDirId === undefined
-      ? req.user.rootDirId
+      ? req.user.rootDirId._id
       : req.params.parentDirId;
 
   const foldername = req.body?.foldername || "untitle";

@@ -269,7 +269,7 @@ function App() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                {directoryName || "Your Drive"}
+                Your Drive
               </h1>
             </div>
 
@@ -403,6 +403,36 @@ function App() {
                           <p className="text-sm text-gray-600 mt-1">
                             {userDetail.email}
                           </p>
+                        </div>
+
+                        {/* progreass bar of stroge used */}
+                        <div className="px-6 py-3 border-t border-gray-200">
+                          {/* Progress Bar */}
+                          <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                            <div
+                              className="absolute inset-y-0 left-0 bg-blue-600 rounded-full transition-all duration-300"
+                              style={{
+                                width:
+                                  (userDetail.usedStorage * 100) /
+                                  userDetail.capacity,
+                              }}
+                            ></div>
+                          </div>
+
+                          {/* Storage Info */}
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            <span>
+                              {Math.floor(userDetail.usedStorage / 1024 / 1024)}{" "}
+                              MB of {Math.floor(userDetail.capacity / 1024 / 1024)} MB used
+                            </span>
+                            <span className="font-semibold text-blue-600">
+                              {Math.floor(
+                                (userDetail.usedStorage * 100) /
+                                  userDetail.capacity
+                              )}
+                              %
+                            </span>
+                          </div>
                         </div>
 
                         <div className="p-2 space-y-1">
