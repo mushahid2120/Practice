@@ -81,6 +81,9 @@ const fileResult = await db.command({
         userId: {
           bsonType: "objectId",
         },
+        isUploading:{
+          bsonType: "bool"
+        },
         createdAt: {
           bsonType: "date",
         },

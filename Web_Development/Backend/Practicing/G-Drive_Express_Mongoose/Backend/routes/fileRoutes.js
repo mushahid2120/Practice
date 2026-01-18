@@ -4,7 +4,8 @@ import {
   deleteFile,
   getFile,
   renameFile,
-  uploadFile,
+  uploadFileInit,
+  uploadFileComplete
 } from "../Controller/fileController.js";
 
 const router = express.Router();
@@ -14,8 +15,11 @@ router.param("parentDirId", validateId);
 //Read File
 router.get("/:id", getFile);
 
-//Upload File
-router.post("/{:parentDirId}", uploadFile);
+//Upload File Initate
+router.post("/init/{:parentDirId}", uploadFileInit);
+
+//Upload File Complete
+router.put("/complete/{:fileId}", uploadFileComplete);
 
 //Rename File
 router.patch("/:id", renameFile);

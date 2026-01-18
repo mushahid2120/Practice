@@ -20,6 +20,11 @@ const filesSchema = new Schema(
       required: true,
       default: 0
     },
+    isUploading: {
+      type: Boolean,
+      required: true,
+      default: true
+    },
     parentDirId: {
       type: Schema.Types.ObjectId,
       require: true,

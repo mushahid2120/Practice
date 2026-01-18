@@ -130,24 +130,41 @@ function App() {
 
   //Upload files
   const handleFileUpload = async (e) => {
-    axios.defaults.withCredentials = true;
-    const uploadSingleFile = async (file) => {
-      const controller = new AbortController();
+    //initiated
+    const uploadInit = async (file) => {
+      axios.defaults.withCredentials = true;
+      const filename = file.name;
+      try {
+        const res = await axios.post(
+          `${BaseUrl}/files/init/${dirId || ""}`,
+          {
+            filename: file.name,
+            filesize: file.size,
+            filetype:file.type
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (res.status !== 200) console.log(res);
+        return res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
+    //upload begin
+    const uploadSingleFile = async (uploadUrl, file) => {
+      const controller = new AbortController();
       const filename = file.name;
       setProgress((prevState) => ({
         ...prevState,
         [filename]: { dataTransfer: 0, controller },
       }));
 
-      console.log(file.name, file.type);
       try {
-        const res = await axios.post(`${BaseUrl}/files/${dirId || ""}`, file, {
+        const res = await axios.put(uploadUrl, file, {
           signal: controller.signal,
           headers: {
             "Content-Type": file.type,
-            filename: file.name,
-            filesize: file.size,
           },
           onUploadProgress: (e) => {
             const percent = Math.round((e.loaded * 100) / e.total);
@@ -158,7 +175,7 @@ function App() {
           },
         });
 
-        console.log(res);
+        console.log(res)
       } catch (error) {
         console.log(error);
         if (error.code === "ERR_CANCELED") {
@@ -171,18 +188,31 @@ function App() {
       }
     };
 
-    for (const file of e.target.files) {
-      const filename = file.name;
-      setProgress((prevState) => ({
-        ...prevState,
-        [filename]: 0,
-      }));
-    }
+    const uploadComplete = async (fileId, file) => {
+      const res=await axios.put(
+        `${BaseUrl}/files/complete/${fileId}`,
+        { filesize: file.size },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      console.log(res)
+    };
 
-    for (const file of e.target.files) {
-      await uploadSingleFile(file);
-    }
+    // for (const file of e.target.files) {
+    //   const filename = file.name;
+    //   setProgress((prevState) => ({
+    //     ...prevState,
+    //     [filename]: 0,
+    //   }));
+    // }
 
+    // for (const file of e.target.files) {
+    //   await uploadSingleFile(file);
+    // }
+
+    const uploadRes = await uploadInit(e.target.files[0]);
+    await uploadSingleFile(uploadRes.url, e.target.files[0]);
+    await uploadComplete(uploadRes.fileId,e.target.files[0])
+                
     fetchData();
     setProgress({});
   };
@@ -423,7 +453,9 @@ function App() {
                           <div className="flex items-center justify-between text-xs text-gray-600">
                             <span>
                               {Math.floor(userDetail.usedStorage / 1024 / 1024)}{" "}
-                              MB of {Math.floor(userDetail.capacity / 1024 / 1024)} MB used
+                              MB of{" "}
+                              {Math.floor(userDetail.capacity / 1024 / 1024)} MB
+                              used
                             </span>
                             <span className="font-semibold text-blue-600">
                               {Math.floor(
@@ -528,7 +560,6 @@ function App() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-6 pt-1 pb-4">
-        <Breadcrumb path={driveContent.path} />
         {/* Upload Progress Section */}
         {Object.entries(progress).length > 0 && (
           <div className="mb-8 space-y-3">
@@ -598,6 +629,7 @@ function App() {
 
         {userDetail !== null ? (
           <>
+            <Breadcrumb path={driveContent.path} />
             {driveContent?.directories && (
               <DirItemListing
                 listingItem={driveContent.directories}
@@ -635,156 +667,3 @@ function App() {
 }
 
 export default App;
-
-// (
-//   <div
-//     className="text-lg font-semibold px-4 py-2 min-h-screen bg-[#F9FAFB]"
-//     onClick={() => {
-//       setContextMenu(-1);
-//       setIsProfileOpen(false);
-//     }}
-//   >
-//     <header className="flex justify-between ">
-//       <h1 className="text-xl text-[#111827]">
-//         {directoryName || "Your Drive"}
-//       </h1>
-//       <div className="flex gap-4 justify-center items-center mr-6">
-//         {isAuthorized && (
-//           <RiFolderAddFill
-//             size={22}
-//             cursor="pointer"
-//             color="blue"
-//             onClick={() => {
-//               setIsPortalOpen("createDir");
-//             }}
-//           />
-//         )}
-//         {isPortalOpen && (
-//           <Portal
-//             setIsPortalOpen={setIsPortalOpen}
-//             inputValue={inputValue}
-//             setInputValue={setInputValue}
-//             handleSubmit={
-//               isPortalOpen === "createDir"
-//                 ? handleCreateDir
-//                 : isPortalOpen === "directory"
-//                 ? handleRenameDir
-//                 : handleRenameFile
-//             }
-//           />
-//         )}
-//         {isAuthorized && <FaUpload
-//           size={20}
-//           color="#2563EB"
-//           cursor="pointer"
-//           onClick={() => fileUploadRef.current.click()}
-//         />}
-//         <input
-//           type="file"
-//           name="file"
-//           multiple
-//           ref={fileUploadRef}
-//           onChange={(e) => {
-//             const arrayOfFiles = Array.from(e.target.files);
-//             setUploadingFiles(arrayOfFiles);
-//             handleFileUpload(e);
-//           }}
-//           hidden
-//         />
-//         <div className="relative z-10">
-//           <div
-//             onClick={(e) => {
-//               e.stopPropagation();
-//               setIsProfileOpen(!isProfileOpen);
-//             }}
-//           >
-//             {userDetail ?<img src={userDetail.picture} alt="userPic"  className="w-8 rounded-full cursor-pointer border-solid border-blue-200 border-2"/>:<FaUser size={20} color="#2563EB" cursor="pointer" />}
-//           </div>
-
-//           {isProfileOpen &&
-//             (userDetail === null ? (
-//               <Link
-//                 to="/login"
-//                 className="flex items-center gap-4 absolute top-7  right-0 px-2 text-white rounded-md bg-[#2563EB] hover:bg-[#1a17b0] w-28 cursor-pointer"
-//               >
-//                 <MdLogin size={20} cursor="pointer" />
-//                 Login
-//               </Link>
-//             ) : (
-//               <div className="absolute right-0 top-7 py-2 bg-white rounded-md font-normal whitespace-nowrap space-y-1">
-//                 <div className="leading-[10px] text-normal px-2">
-//                   <h4>{userDetail.name}</h4>
-//                   <p className="text-base font-light">{userDetail.email}</p>
-//                 </div>
-//                 <hr className="my-1" />
-//                 <button
-//                   className="flex items-center gap-4 px-2 text-white w-full rounded-md bg-[#eb2525] hover:bg-[#b01717]"
-//                   onClick={handleLogout}
-//                 >
-//                   <MdLogout size={20} cursor="pointer" />
-//                   Logout
-//                 </button>
-//                 <button
-//                   className="flex items-center gap-4 px-2 text-white w-full rounded-md bg-[#eb2525] hover:bg-[#b01717]"
-//                   onClick={handleLogoutAll}
-//                 >
-//                   <MdLogout size={20} cursor="pointer" />
-//                   Logout All
-//                 </button>
-//               </div>
-//             ))}
-//         </div>
-//       </div>
-
-//       {/* <div className="flex gap-2 text-sm font-normal text-blue-600">
-//         <Link to="/Login">Login</Link>
-//         <Link to="/SignUp">SignUp</Link>
-//       </div> */}
-//     </header>
-//     <hr />
-
-//     <main>
-//       {/* {uploadingFiles.map((file) => {
-//         console.log(file);
-//         return <div>{file.name}</div>;
-//       })} */}
-
-//       {Object.entries(progress).map(([filename, percent], i) => (
-//         <div
-//           className=" border-solid relative border-[#E5E7EB] border-[2px] pl-4 pr-2 pt-1 pb-4 my-2 bg-[#F5F7da] rounded-md font-semibold text-[#374151] text-[16px]  hover:bg-[#F5F7aa] transition-all ease-in-out"
-//           key={i}
-//         >
-//           {filename}
-//           <div className="text-[12px] text-center   bg-slate-200 h-1 leading-[10px] rounded-lg">
-//             <p
-//               className={`rounded-lg   font-semibold bg-blue-500 h-1 `}
-//               style={{ width: `${percent}%` }}
-//             ></p>
-//             {percent}%
-//           </div>
-//         </div>
-//       ))}
-
-//       <DirItemListing
-//         listingItem={driveContent.directories}
-//         listType="directory"
-//         isContextMenu={ContextMenu}
-//         setIsContextMenu={setContextMenu}
-//         handleDelete={handleDeleteDir}
-//         setIsPortalOpen={setIsPortalOpen}
-//         setInputValue={setInputValue}
-//         setRenameId={setRenameId}
-//       />
-//       <DirItemListing
-//         listingItem={driveContent.files}
-//         listType="files"
-//         isContextMenu={ContextMenu}
-//         setIsContextMenu={setContextMenu}
-//         handleDelete={handleDeleteFile}
-//         setIsPortalOpen={setIsPortalOpen}
-//         setInputValue={setInputValue}
-//         setRenameId={setRenameId}
-//       />
-//     </main>
-//   </div>
-// );
