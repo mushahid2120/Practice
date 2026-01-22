@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BaseUrl } from "../App";
+import Header from "../Component/Header";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -79,6 +80,8 @@ export default function UsersPage() {
   };
 
 return (
+  <>
+  <Header showProfileIcon={false}/>
   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 p-6">
     <div className="max-w-7xl mx-auto">
       {/* Header Section */}
@@ -284,6 +287,7 @@ return (
       )}
     </div>
   </div>
+  </>
 );
 }
 

@@ -1,4 +1,4 @@
-// import redisClient from "../config/redis.js";
+import { clearCookieConfig } from "../Controller/userController.js";
 import Session from "../Model/sessionModel.js";
 import Users from "../Model/userModel.js";
 
@@ -7,14 +7,14 @@ export default async function checkAuth(req, res, next) {
     const { sid } = req.signedCookies;
     //signature matched (true) if failed (false)
     if (sid === false)
-      res.clearCookie("sid", { sameSite: "Lax", secure: true });
+      res.clearCookie("sid", clearCookieConfig);
     if (!sid) return res.status(401).json({ error: "Not Logged In..." });
 
     const session = await Session.findById(sid);
     // const session=await redisClient.json.get(`session:${sid}`)
 
     if (!session) {
-      res.clearCookie("sid", { sameSite: "Lax", secure: true });
+      res.clearCookie("sid", clearCookieConfig);
       return res
         .status(401)
         .json({ error: "Session Expired or Invalid Session" });

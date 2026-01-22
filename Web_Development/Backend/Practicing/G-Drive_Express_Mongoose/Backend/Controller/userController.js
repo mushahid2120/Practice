@@ -11,6 +11,19 @@ import z from "zod";
 // import redisClient from "../config/redis.jsames";
 
 export const mySecret = process.env.SESSION_SECRET;
+export const cookieCofig = {
+      sameSite: process.env.COOKIE_SAMESITE,
+      signed: true,
+      secure: true,
+      path: "/",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    };
+
+export const clearCookieConfig={
+    sameSite: process.env.COOKIE_SAMESITE,
+    secure: true,
+  }
 
 export const signup = async (req, res, next) => {
   // const { name, email, password, otp } = req.body;
@@ -79,7 +92,7 @@ export const login = async (req, res, next) => {
     const { success, data, error } = loginSchema.safeParse(req.body);
     if (!success) return res.status(400).json({ error: z.flattenError(error) });
     const { email, password } = data;
-    
+
     const user = await Users.findOne({ email });
     if (!user) return res.status(401).json({ error: "Invalid Credentials" });
     if (user.deleted)
@@ -110,14 +123,7 @@ export const login = async (req, res, next) => {
     //   userId: user._id,
     // });
 
-    const cookieCofig = {
-      sameSite: "Lax",
-      signed: true,
-      secure: true,
-      path: "/",
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    };
+    
 
     res.cookie("sid", session.id, cookieCofig);
     return res.json({ message: "Login Successful" });
@@ -130,11 +136,7 @@ export const login = async (req, res, next) => {
 export const logout = async (req, res) => {
   const { sid } = req.signedCookies;
   await Session.findByIdAndDelete(sid);
-  res.clearCookie("sid", {
-    sameSite: "Lax",
-    secure: true,
-    // signed: true
-  });                     
+  res.clearCookie("sid", clearCookieConfig);
   res.json({ message: "Logout Successfull" });
 };
 
@@ -142,11 +144,7 @@ export const logoutAll = async (req, res) => {
   const { sid } = req.signedCookies;
   const session = await Session.findById(sid);
   await Session.deleteMany({ userId: session.userId });
-  res.clearCookie("sid", {
-    sameSite: "Lax",
-    secure: true,
-    // signed: true
-  });
+  res.clearCookie("sid", clearCookieConfig);
   res.json({ message: "Logout All Successfull" });
 };
 
@@ -157,7 +155,7 @@ export const getUser = (req, res) => {
     picture: req.user.picture,
     role: req.user.role,
     capacity: req.user.capacity,
-    usedStorage: req.user.rootDirId.size
+    usedStorage: req.user.rootDirId.size,
   });
 };
 
@@ -175,21 +173,13 @@ export const loginWithGoogle = async (req, res, next) => {
   if (dbUser) {
     if (dbUser.deleted)
       return res.status(402).json({
-        error: "You accout has been delted please contact for recovery",
+        error: "You accout has been deleted please contact for recovery",
       });
     const allSession = await Session.find({ userId: dbUser._id });
     if (allSession.length > 3) await allSession[0].deleteOne();
 
     const session = await Session.create({ userId: dbUser._id });
 
-    const cookieCofig = {
-      sameSite: "Lax",
-      signed: true,
-      secure: true,
-      path: "/",
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    };
 
     res.cookie("sid", session.id, cookieCofig);
     return res.json({ error: "Login but user already Exist" });
@@ -221,15 +211,6 @@ export const loginWithGoogle = async (req, res, next) => {
     );
 
     const session = await Session.create({ userId });
-
-    const cookieCofig = {
-      sameSite: "Lax",
-      signed: true,
-      secure: true,
-      path: "/",
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    };
 
     res.cookie("sid", session.id, cookieCofig);
 
@@ -271,6 +252,7 @@ export const logoutUserById = async (req, res, next) => {
     res.status(202).end();
   } catch (error) {
     console.log(error);
+    next(error)
   }
 };
 
@@ -284,16 +266,17 @@ export const hardDeleteUser = async (req, res, next) => {
     for await (const file of findfiles) {
       const fileName = file._id.toString() + file.extension;
       await rm(`./GDrive/${fileName}`);
+      const dirdeleteresult = await Dir.deleteMany({ userId });
     }
-    const deetefilereuslt = await Files.deleteMany({ userId });
-    const dirdeleteresult = await Dir.deleteMany({ userId });
-    const sessdeleteResult = await Session.deleteMany({ userId });
-    const userdeleteREsult = await Users.findByIdAndDelete(userId);
+    await Files.deleteMany({ userId });
+    await Session.deleteMany({ userId });
+    await Users.findByIdAndDelete(userId);
     session.commitTransaction();
     res.status(204).end();
   } catch (error) {
     session.abortTransaction();
     console.log(error);
+    next(error)
   }
 };
 
@@ -305,5 +288,6 @@ export const softDeleteUser = async (req, res, next) => {
     res.status(204).end();
   } catch (error) {
     console.log(error);
+    next(error)
   }
 };

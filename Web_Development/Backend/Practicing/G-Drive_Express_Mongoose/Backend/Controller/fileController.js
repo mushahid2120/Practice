@@ -1,13 +1,15 @@
-import { rm, stat } from "fs/promises";
 import path from "path";
-import { createWriteStream } from "fs";
 import { ObjectId } from "mongodb";
 import Files from "../Model/fileModel.js";
 import Dir from "../Model/dirModel.js";
 import { purify, updateDirSize } from "./dirController.js";
 import mongoose from "mongoose";
-import { HeadObjectCommand } from "@aws-sdk/client-s3";
-import { createPutSignUrl, verifyS3Object } from "../config/aws_s3.js";
+import {
+  createGetSignUrl,
+  createPutSignUrl,
+  deleteMultipleObjects,
+  verifyS3Object,
+} from "../config/aws_s3.js";
 
 //Get file
 export const getFile = async (req, res, next) => {
@@ -23,16 +25,15 @@ export const getFile = async (req, res, next) => {
     if (!fileData) {
       return res.status(404).send("File Not Found");
     }
-    if (req.query.action === "download")
-      return res.download(
-        `${process.cwd()}/GDrive/${id}${fileData.extension}`,
-        fileData.name
-      );
-    // res.set('Content-Disposition',`attachment;filename=${fileData.name}`)
-    return res
-      .status(200)
-      .sendFile(`${process.cwd()}/GDrive/${id}${fileData.extension}`);
+    const fileFullName = `${id}${fileData.extension}`;
+    if (req.query.action === "download") {
+      const getUrl = await createGetSignUrl(fileFullName, true, fileData.name);
+      return res.redirect(getUrl);
+    }
+    const getUrl = await createGetSignUrl(fileFullName, false, fileData.name);
+    return res.redirect(getUrl);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -44,16 +45,27 @@ export const uploadFileInit = async (req, res, next) => {
   const { filename, filesize, filetype } = req.body;
 
   if (!filesize || +filesize > 100 * 1000 * 1000) {
-    res.destroy();
     return res
       .status(413)
       .json({ error: "File is Too big please upload below 100mb" });
   }
-  const cleanFileName = purify.sanitize(filename);
-  const cleanFileSize = purify.sanitize(filesize);
-  const extension = path.extname(cleanFileName);
-
   try {
+    const rootDirData = await Dir.findOne({
+      userId: req.user._id,
+      parentDirId: null,
+    })
+      .select("size")
+      .lean();
+
+    const cleanFileName = purify.sanitize(filename);
+    const cleanFileSize = purify.sanitize(filesize);
+    const extension = path.extname(cleanFileName);
+
+    if (req.user.capacity - rootDirData.size < +cleanFileSize)
+      return res
+        .status(517)
+        .json({ error: "You don't have storage enough storage" });
+
     const parentDirData = await Dir.findOne({
       _id: parentDirId,
     })
@@ -79,52 +91,14 @@ export const uploadFileInit = async (req, res, next) => {
 
     const url = await createPutSignUrl(fileFullName, filetype);
     return res.status(200).json({ url, fileId: fileId.toString() });
-
-    // return res.status(200).json({message: "File uploading initiated"})
-
-    // const writeStream = createWriteStream(`./GDrive/${fileFullName}`);
-
-    // let totalFileSize = 0;
-    // let abortFileTransfer = false;
-    // // req.pipe(writeStream);
-    // req.on("data", (chunk) => {
-    //   if (abortFileTransfer) return;
-    //   const isEmpty = writeStream.write(chunk);
-    //   totalFileSize += chunk.length;
-    //   if (totalFileSize > filesize) {
-    //     abortFileTransfer = false;
-    //     req.destroy("File size not mathed");
-    //   }
-    //   if (!isEmpty) req.pause();
-    // });
-
-    // writeStream.on("drain", () => {
-    //   req.resume();
-    //   // console.log("Draining..")
-    // });
-
-    // req.on("error", async (error) => {
-    //   writeStream.close();
-    //   await rm(`./GDrive/${fileFullName}`);
-    //   req.destroy();
-    //   return res.status(401).json({ error: "File Upload Cancelled" });
-    // });
-
-    // req.on("end", async () => {
-    //   const fileCreated = await Files.insertOne({
-    //     _id: fileId,
-    //     extension,
-    //     name: cleanFileName,
-    //     parentDirId,
-    //     userId: req.user._id,
-    //     size: cleanFileSize,
-    //   });
-    //   await updateDirSize(parentDirData.path, +cleanFileSize);
-    //   res.json({ message: "File Uploaded Successfully" });
-    // });
-  } catch (err) {
-    console.log(err);
-    next(err);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const [errorFor] = Object.keys(error.errors);
+      const errorMessage = error.errors[errorFor].properties.message;
+      return res.status(401).json({ error: errorMessage });
+    }
+    console.log(error);
+    next(error);
   }
 };
 
@@ -132,8 +106,14 @@ export const uploadFileInit = async (req, res, next) => {
 export const uploadFileComplete = async (req, res, next) => {
   const { filesize } = req.body;
   const fileId = req.params?.fileId;
-  console.log({ fileId, filesize });
-  const fileData = await Files.findById(fileId);
+
+  const fileData = await Files.findById(fileId).select(
+    " extension userId _id parentDirId"
+  );
+  const parentDirData = await Dir.findById(fileData.parentDirId)
+    .select("path -_id")
+    .lean();
+
   if (!fileData.userId.equals(req.user._id))
     return res
       .status(403)
@@ -142,12 +122,13 @@ export const uploadFileComplete = async (req, res, next) => {
   try {
     const fileFullName = `${fileData._id}${fileData.extension}`;
     const objSize = await verifyS3Object(fileFullName);
+
     if (objSize !== filesize) {
       await fileData.deleteOne();
-      res.json({message: "File Size is match"})
+      res.json({ message: "File Size is match" });
     }
-    
     await fileData.updateOne({ isUploading: false });
+    updateDirSize(parentDirData.path, filesize);
     res.json({ message: "File Uploaded Successfully" });
   } catch (error) {
     await fileData.deleteOne();
@@ -157,7 +138,7 @@ export const uploadFileComplete = async (req, res, next) => {
 };
 
 //File Rename
-export const renameFile = async (req, res) => {
+export const renameFile = async (req, res,next) => {
   const id = req.params.id;
   const newFileName = req.body?.newfilename;
   const cleanNewFileName = purify.sanitize(newFileName);
@@ -175,6 +156,11 @@ export const renameFile = async (req, res) => {
       await Files.updateOne({ _id: id }, { name: cleanNewFileName });
     return res.json({ message: "File Renamed Successfully" });
   } catch (error) {
+    if (error.name === "ValidationError") {
+      const [errorFor] = Object.keys(error.errors);
+      const errorMessage = error.errors[errorFor].properties.message;
+      return res.status(401).json({ error: errorMessage });
+    }
     next(error);
   }
 };
@@ -200,7 +186,11 @@ export const deleteFile = async (req, res, next) => {
         .status(403)
         .json({ error: "You don't have access to delete this file" });
 
-    await rm(`./GDrive/${id}${fileData.extension}`);
+    // await rm(`./GDrive/${id}${fileData.extension}`);
+    const fileFullName = `${id}${fileData.extension}`;
+    const { Errors } = await deleteMultipleObjects([fileFullName]);
+    if (!Errors)
+      return res.status(400).json({ error: "File Could not delete" });
     await Files.findByIdAndDelete(id);
     await updateDirSize(parentDirData.path, -fileData.size);
     return res.json({ message: "File Deleted" });

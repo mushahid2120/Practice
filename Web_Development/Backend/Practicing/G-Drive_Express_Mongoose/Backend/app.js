@@ -29,15 +29,18 @@ const throtle = slowDown({
 const port = process.env.PORT || 4000;
 
 const app = express();
-// app.use(helmet());
+app.use(helmet());
 
-// app.use(rateLimiter,throtle);
+app.use(rateLimiter,throtle);
 app.use(express.json());
 app.use(cookieParser(mySecret));
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
 await connectDB();
 
+app.get("/",(req,res,next)=>{
+  res.end("Welcome to Your Drive")
+})
 app.use("/directory", checkAuth, dirRoutes);
 app.use("/files", checkAuth, fileRoutes);
 app.use("/auth", authRoutes);

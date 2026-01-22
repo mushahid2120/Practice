@@ -2,3 +2,4 @@ Storage
 node_modules
 GDrive
 .env
+private_key.pem

@@ -5,14 +5,15 @@ import App from "./App.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignUp from "./page/SingUp.jsx";
 import Login from "./page/Login.jsx";
+import HeroPage from "./page/HeroPage.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import Admin from './page/Admin.jsx' 
+import Admin from "./page/Admin.jsx";
 
-const clientId =import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/home",
     element: <App />,
   },
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
         <Login />{" "}
       </GoogleOAuthProvider>
     ),
+  },
+  {
+    path: "/",
+    element: <HeroPage />,
   },
 ]);
 

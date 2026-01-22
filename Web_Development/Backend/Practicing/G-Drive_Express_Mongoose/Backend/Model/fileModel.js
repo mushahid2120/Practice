@@ -6,6 +6,7 @@ const filesSchema = new Schema(
       type: String,
       require: true,
       minLength: 1,
+      maxLength: [50, "Directory Name must be less than 50 character"],
     },
     extension: {
       type: String,
@@ -13,17 +14,17 @@ const filesSchema = new Schema(
     },
     userId: {
       type: Schema.Types.ObjectId,
-      require: true
+      require: true,
     },
     size: {
       type: BigInt,
       required: true,
-      default: 0
+      default: 0,
     },
     isUploading: {
       type: Boolean,
       required: true,
-      default: true
+      default: true,
     },
     parentDirId: {
       type: Schema.Types.ObjectId,

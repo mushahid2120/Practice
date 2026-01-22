@@ -5,6 +5,7 @@ import Files from "../Model/fileModel.js";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import mongoose from "mongoose";
+import { deleteMultipleObjects } from "../config/aws_s3.js";
 
 const window = new JSDOM("").window;
 export const purify = DOMPurify(window);
@@ -68,12 +69,17 @@ export const createDir = async (req, res, next) => {
     });
     return res.json({ message: "Folder Created" });
   } catch (error) {
+        if (error.name === "ValidationError") {
+      const [errorFor] = Object.keys(error.errors);
+      const errorMessage = error.errors[errorFor].properties.message;
+      return res.status(401).json({ error: errorMessage });
+    }
     return res.json({ error });
     next(error);
   }
 };
 
-export const renameDir = async (req, res) => {
+export const renameDir = async (req, res,next) => {
   const folderId = req.params?.folderId;
   const newFolderName = req.body?.newfoldername;
   const cleanNewFolderName = purify.sanitize(newFolderName);
@@ -110,15 +116,17 @@ export const deleteDir = async (req, res, next) => {
     const filesData = await Files.find({
       _id: { $in: result.deletedFilesId },
     }).lean();
-    for await (const file of filesData) {
-      try {
-        const fileName = file._id.toString() + file.extension;
-        await rm(`./GDrive/${fileName}`);
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: `${fileName} Cannot Delete` });
-      }
-    }
+    // for await (const file of filesData) {
+    //   try {
+    //     const fileName = file._id.toString() + file.extension;
+    //     await rm(`./GDrive/${fileName}`);
+    //   } catch (error) {
+    //     console.log(error);
+    //     res.status(500).json({ error: `${fileName} Cannot Delete` });
+    //   }
+    // }
+    const deletableKeys=filesData.map((file)=>(file._id.toString() + file.extension))
+    if(deletableKeys.length!==0)  await deleteMultipleObjects(deletableKeys)
     await updateDirSize(parentDirData.path,-(parentDirData.size))
     await Dir.deleteMany({ _id: { $in: result.deletedDirIds } });
     await Files.deleteMany({ _id: { $in: result.deletedFilesId } });

@@ -1,6 +1,6 @@
 import mongoose, { model } from "mongoose";
 import { Schema } from "mongoose";
-import bcrypt from 'bcrypt' 
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -10,6 +10,7 @@ const userSchema = new Schema(
       minLength: [2, "name must atleast 2 character"],
       lowercase: true,
       trim: true,
+      maxLength: [50, "Directory Name must be less than 50 character"],
     },
     email: {
       type: String,
@@ -23,30 +24,32 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      minLength: [4, "Password must be alteast 4 character"],
+      minLength: [8, "Password must be  8-16 character"],
+      maxLength:[16, "Password must be  8-16 character"]
     },
     picture: {
       type: String,
-      default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYzrKwzB9qf6z1LUGt9CMjPzC5zBy87WL6Fw&s"
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYzrKwzB9qf6z1LUGt9CMjPzC5zBy87WL6Fw&s",
     },
     role: {
       type: String,
-      enum: ['Admin','Manager','User'],
-      default: 'User'
+      enum: ["Admin", "Manager", "User"],
+      default: "User",
     },
     deleted: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    capacity:{
+    capacity: {
       type: BigInt,
-      default: 1024*1024*50,
-      required: true
+      default: 1024 * 1024 * 50,
+      required: true,
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
       require: true,
-      ref: 'directories'
+      ref: "directories",
     },
   },
   {
@@ -55,12 +58,12 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return 
+  if (!this.isModified("password")) return;
   else this.password = await bcrypt.hash(this.password, 12);
 });
 
 userSchema.methods.comparePassword = async function (enterPassword) {
-  return bcrypt.compare(enterPassword,this.password);
+  return bcrypt.compare(enterPassword, this.password);
 };
 
 const Users = mongoose.models.User || mongoose.model("User", userSchema);

@@ -9,7 +9,7 @@ function Breadcrumb({ path = [] }) {
         <div className="flex items-center divide-x-2 divide-gray-200">
           {/* Home Icon */}
           <Link
-            to="/"
+            to="/home"
             className="flex items-center justify-center px-4 py-3 hover:bg-blue-50 transition-all duration-200 group flex-shrink-0"
           >
             <svg 
