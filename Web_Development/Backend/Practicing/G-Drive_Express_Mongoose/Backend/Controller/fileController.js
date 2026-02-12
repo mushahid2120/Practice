@@ -5,11 +5,11 @@ import Dir from "../Model/dirModel.js";
 import { purify, updateDirSize } from "./dirController.js";
 import mongoose from "mongoose";
 import {
-  createGetSignUrl,
   createPutSignUrl,
   deleteMultipleObjects,
   verifyS3Object,
 } from "../config/aws_s3.js";
+import cloudfrontSignedUrl from "../config/aws_cf.js";
 
 //Get file
 export const getFile = async (req, res, next) => {
@@ -27,11 +27,13 @@ export const getFile = async (req, res, next) => {
     }
     const fileFullName = `${id}${fileData.extension}`;
     if (req.query.action === "download") {
-      const getUrl = await createGetSignUrl(fileFullName, true, fileData.name);
-      return res.redirect(getUrl);
+      // const getUrl = await createGetSignUrl(fileFullName, true, fileData.name);
+      const cfSignedUrl=cloudfrontSignedUrl(fileFullName,fileData.name,true)
+      return res.redirect(cfSignedUrl);
     }
-    const getUrl = await createGetSignUrl(fileFullName, false, fileData.name);
-    return res.redirect(getUrl);
+    // const getUrl = await createGetSignUrl(fileFullName, false, fileData.name);
+    const cfSignedUrl=cloudfrontSignedUrl(fileFullName,fileData.name)
+    return res.redirect(cfSignedUrl);
   } catch (error) {
     console.log(error);
     next(error);
