@@ -6,7 +6,7 @@ export  function generateStaticParams(){
 }
 
 // export const  dynamicParams=false;
-
+export const dynamic = "force-dynamic";
 
 
 export default async function Blog({params}) {
@@ -15,6 +15,13 @@ export default async function Blog({params}) {
 
     if(blogid==='test')
       notFound()
+    
+    const randomNumber=Math.random()*10
+    console.log(randomNumber)
+    if(blogid==='error'){
+      if(randomNumber<=8)
+        throw new Error ('this is An error page')
+    }
       
   return (
     <>
