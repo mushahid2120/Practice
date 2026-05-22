@@ -1,0 +1,155 @@
+[2026-05-22 21:39:12.395 +0530] INFO (8796): Get Request on /
+    id: "73c8acf7-579d-41dc-a568-7ddedb3bffa1"
+    method: "GET"
+    path: "/"
+    headers: {
+      "host": "localhost:4000",
+      "connection": "keep-alive",
+      "cache-control": "max-age=0",
+      "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-US,en;q=0.9",
+      "cookie": "g_state={\"i_l\":0,\"i_ll\":1779036843968,\"i_e\":{\"enable_itp_optimization\":0},\"i_et\":1778595506419,\"i_b\":\"3ArDfuGgDto3Un4BeowveAG9SBuqmRRWAk6vWAYyE/A\"}; grafana_session=37d7cc18a38dff8621a0d8e0cbddd5d9; grafana_session_expiry=1779382513"
+    }
+[2026-05-22 21:40:23.901 +0530] INFO (8796): Request on Post route
+    id: "53aed83a-5956-42e6-a563-c07d09fbcb17"
+    method: "POST"
+    path: "/posts"
+    headers: {
+      "user-agent": "PostmanRuntime/7.54.0",
+      "accept": "*/*",
+      "postman-token": "7d63020f-f554-40a3-81d5-e1186f2e416d",
+      "host": "localhost:4000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "0"
+    }
+[2026-05-22 21:42:43.117 +0530] WARN (8316):
+    id: "27a43b89-f0b6-4c3d-8c83-ec7b339c028f"
+    method: "POST"
+    path: "/failed"
+    headers: {
+      "user-agent": "PostmanRuntime/7.54.0",
+      "accept": "*/*",
+      "postman-token": "07c26bf6-0967-45f9-b1a2-e4222134ffe9",
+      "host": "localhost:4000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "0"
+    }
+    success: false
+[2026-05-22 22:02:47.353 +0530] INFO (8016): Get Request on /
+    id: "2d9eff01-675b-48d2-972c-f0d14455d508"
+    method: "GET"
+    path: "/"
+    headers: {
+      "host": "localhost:4000",
+      "connection": "keep-alive",
+      "cache-control": "max-age=0",
+      "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-US,en;q=0.9",
+      "cookie": "g_state={\"i_l\":0,\"i_ll\":1779036843968,\"i_e\":{\"enable_itp_optimization\":0},\"i_et\":1778595506419,\"i_b\":\"3ArDfuGgDto3Un4BeowveAG9SBuqmRRWAk6vWAYyE/A\"}; grafana_session=37d7cc18a38dff8621a0d8e0cbddd5d9; grafana_session_expiry=1779382513"
+    }
+[2026-05-22 22:03:15.415 +0530] INFO (8124): Get Request on /
+    id: "c12c58fa-2a4e-43ed-a081-2eff8ae2285b"
+    method: "GET"
+    path: "/"
+    headers: {
+      "host": "localhost:4000",
+      "connection": "keep-alive",
+      "cache-control": "max-age=0",
+      "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-US,en;q=0.9",
+      "cookie": "g_state={\"i_l\":0,\"i_ll\":1779036843968,\"i_e\":{\"enable_itp_optimization\":0},\"i_et\":1778595506419,\"i_b\":\"3ArDfuGgDto3Un4BeowveAG9SBuqmRRWAk6vWAYyE/A\"}; grafana_session=37d7cc18a38dff8621a0d8e0cbddd5d9; grafana_session_expiry=1779382513"
+    }
+[2026-05-22 22:03:15.427 +0530] INFO (8124):
+    id: "c12c58fa-2a4e-43ed-a081-2eff8ae2285b"
+    method: "GET"
+    path: "/"
+    headers: {
+      "host": "localhost:4000",
+      "connection": "keep-alive",
+      "cache-control": "max-age=0",
+      "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-US,en;q=0.9",
+      "cookie": "g_state={\"i_l\":0,\"i_ll\":1779036843968,\"i_e\":{\"enable_itp_optimization\":0},\"i_et\":1778595506419,\"i_b\":\"3ArDfuGgDto3Un4BeowveAG9SBuqmRRWAk6vWAYyE/A\"}; grafana_session=37d7cc18a38dff8621a0d8e0cbddd5d9; grafana_session_expiry=1779382513"
+    }
+    resData: {
+      "responseTime": -1779467591434.8262,
+      "statusCode": 200
+    }
+    statusCode: 200
+[2026-05-22 22:19:59.095 +0530] INFO (5260): request completed
+    req: {
+      "id": 1,
+      "method": "GET",
+      "url": "/",
+      "query": {},
+      "params": {},
+      "headers": {
+        "host": "localhost:4000",
+        "connection": "keep-alive",
+        "cache-control": "max-age=0",
+        "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "sec-fetch-site": "none",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-user": "?1",
+        "sec-fetch-dest": "document",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US,en;q=0.9",
+        "cookie": "g_state={\"i_l\":0,\"i_ll\":1779036843968,\"i_e\":{\"enable_itp_optimization\":0},\"i_et\":1778595506419,\"i_b\":\"3ArDfuGgDto3Un4BeowveAG9SBuqmRRWAk6vWAYyE/A\"}; grafana_session=37d7cc18a38dff8621a0d8e0cbddd5d9; grafana_session_expiry=1779382513"
+      },
+      "remoteAddress": "::1",
+      "remotePort": 55637
+    }
+    res: {
+      "statusCode": 200,
+      "headers": {
+        "x-powered-by": "Express"
+      }
+    }
+    responseTime: 30
