@@ -4,17 +4,16 @@ import { pinoHttp } from "pino-http";
 
 
 
-
 const app = express();
 const PORT = 4000;
 
-const httpLogger=pinoHttp({logger,customizingLevel:(req,res,next)=>{
+const httpLogger=pinoHttp({logger,customLogLevel:(req,res,next)=>{
     if(res.statusCode>=500){
         return "error"
     }
     else if(res.statusCode>=400){
         return "warn"
-    }else return "info  "
+    }else return "info"
 }})
 
 app.use(httpLogger)

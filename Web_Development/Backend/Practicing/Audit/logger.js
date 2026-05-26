@@ -10,6 +10,13 @@ const logger = pino({
           mkdir: true,
         },
       },
+      // {
+      //   target: "pino-loki",
+      //   options:{
+      //     host: "http://localhost:3100",
+      //     labels:{app: "express-app"}
+      //   }
+      // },
       {
         target:"pino-pretty",
         options:{
