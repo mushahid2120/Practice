@@ -1,5 +1,7 @@
 import pino from "pino";
 
+// Metrics // Logs // Traces
+
 const logger = pino({
   transport: {
     targets: [
