@@ -2,18 +2,23 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
-from chatbot import answering_prompt, initialize
+from chatbot import answering_prompt, get_message_history, history_generator, initialize
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import aiofiles
+import aiosqlite
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
+    app.state.db = await aiosqlite.connect("agent_memory.db")
+    if app.state.db:
+        print("DB Connection Stablished")
     await initialize()
     print("Chatbot initialized")
     yield
+    await app.state.db.close()
     print("Shutting down")
 
 
@@ -28,41 +33,62 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Thread-ID", "Cache-Control"],
 )
 
 
 class Message(BaseModel):
     message: str = Field(description="user prompt")
+    thread_id: str | None = Field(
+        default=None, description="thread Id of the conversation"
+    )
 
 
-@app.middleware("http")
-async def verify_cookie_middleware(request: Request, call_next):
-    session_token = request.cookies.get("session_token")
-    print("session_token: ", session_token)
-
-    # 3. Modify the request state if you want to pass data to your endpoints
-    request.state.user_session = session_token
-
-    # 4. Pass the request forward to the endpoint
-    response = await call_next(request)
-    return response
+class ThreadState(BaseModel):
+    thread_id: str = Field(description="thread id of the conversation")
 
 
 @app.post("/generate")
 async def generate(message: Message, response: Response, request: Request):
-    print(request.state)
+    print(message)
+
+    if message.thread_id=="None" or message.thread_id==None:
+        message.thread_id=uuid.uuid4()   
+        print("message: ",message.thread_id)
+    
+    header = {
+        "X-Thread-ID": str(message.thread_id),
+        "Cache-Control": "no-cache",
+    }
+ 
+        
     stream = StreamingResponse(
-        answering_prompt(message.message),
+        answering_prompt(message.message, message.thread_id),
         media_type="text/plain",
+        headers=header,
     )
 
-    if not request.state.user_session:
-        user_id = str(uuid.uuid4())
-
-        stream.set_cookie(
-            key="session_token",
-            value=user_id,
-            httponly=True,
-            max_age=60 * 60 * 24 * 7,  # 7 days
-        )
     return stream
+
+
+@app.get("/all-thread")
+async def GetAllThread():
+    async with app.state.db.execute("""
+        SELECT DISTINCT thread_id FROM checkpoints;
+    """) as cursor:
+        list = await cursor.fetchall()
+
+    final_list = [l[0] for l in list]
+    return {"thread_id_list": final_list}
+
+
+@app.post("/get-chat-by-thread-id")
+async def GetChatByThreadID(thread: ThreadState):
+    try:
+        return StreamingResponse(
+            history_generator(await get_message_history(thread_id=thread.thread_id)),
+            media_type="text/event-stream",
+        )
+
+    except Exception as error:
+        return error

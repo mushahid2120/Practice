@@ -2,16 +2,85 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import ReactMarkdown from "react-markdown";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useNavigate, useParams } from "react-router";
 
 function App() {
   const [inputfield, setInputField] = useState("");
   const [chatData, setChatdata] = useState([]);
   const [thinking, setThinking] = useState(false);
-  const [conversations, setConversations] = useState([]);
   const [activeConvId, setActiveConvId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [threadIdList, setThreadIdList] = useState([]);
   const bottomRef = useRef(null);
   const containerRef = useRef(null);
+  const navigate = useNavigate();
+  const { thread_id: threadId } = useParams();
+  const [fetchingController,setFetchingController]=useState(null)
+
+  useEffect(() => {
+
+    getAllThreadId();
+  }, []);
+
+  useEffect(() => {
+
+    if(fetchingController )
+      fetchingController.abort()
+    const controller = new AbortController();
+    const { signal } = controller;
+    setFetchingController(controller)
+    setActiveConvId(threadId)
+    setChatdata([])
+    if(threadId)
+    getConversation(threadId,signal);
+  }, [threadId]);
+
+  const getConversation = async (thread_id,signal) => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/get-chat-by-thread-id",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ thread_id }),
+          signal:signal
+        },
+      );
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        setChatdata((prev)=>{
+          const temp=[...prev]
+          temp.push(JSON.parse(decoder.decode(value)))
+          return temp
+        })
+        // break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllThreadId = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/all-thread");
+      const data = await response.json();
+      if (data.thread_id_list.length !== 0) {
+        setThreadIdList(data.thread_id_list);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+console.log(chatData)
 
   const handleGenerate = async () => {
     try {
@@ -26,22 +95,19 @@ function App() {
         temp.push({ question: inputfield });
         return temp;
       });
-      // update current conversation
-      setConversations((prev) => {
-        if (activeConvId == null) return prev;
-        return prev.map((c) =>
-          c.id === activeConvId
-            ? { ...c, messages: [...c.messages, { question: inputfield }] }
-            : c,
-        );
-      });
+
       setInputField("");
       const response = await fetch("http://localhost:8000/generate", {
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: inputfield }),
+        body: JSON.stringify({ message: inputfield ,thread_id:activeConvId}),
       });
+      const threadId = response.headers.get("X-Thread-ID");
+      console.log(threadId)
+      if(!activeConvId)
+        navigate(`/${threadId}`)
+
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -55,22 +121,6 @@ function App() {
           const temp = [...prevState];
           temp[prevState.length - 1].answer = text;
           return temp;
-        });
-        // update active conversation answer in parallel
-        setConversations((prev) => {
-          if (activeConvId == null) return prev;
-          return prev.map((c) => {
-            if (c.id !== activeConvId) return c;
-            const msgs = [...c.messages];
-            if (msgs.length === 0)
-              msgs.push({ question: inputfield, answer: text });
-            else
-              msgs[msgs.length - 1] = {
-                ...msgs[msgs.length - 1],
-                answer: text,
-              };
-            return { ...c, messages: msgs };
-          });
         });
         // auto-scroll as text streams in
         if (bottomRef.current)
@@ -93,17 +143,9 @@ function App() {
       bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [chatData]);
 
-  const newConversation = () => {
-    const id = Date.now();
-    const conv = { id, title: "New Conversation", messages: [] };
-    setConversations((prev) => [conv, ...prev]);
-    setActiveConvId(id);
-    setChatdata([]);
-  };
 
-  const openConversation = (conv) => {
-    setActiveConvId(conv.id);
-    setChatdata(conv.messages || []);
+  const openConversation = (thread) => {
+    navigate(`/${thread}`);
   };
 
   return (
@@ -124,7 +166,7 @@ function App() {
               </button>
             </div>
             <button
-              onClick={newConversation}
+              // onClick={newConversation}
               className={`w-full bg-white text-black py-2 rounded mb-3 ${sidebarOpen ? "" : "hidden"}`}
             >
               New Conversation
@@ -133,25 +175,16 @@ function App() {
               className="space-y-2 overflow-y-auto scrollbar-thin"
               style={{ maxHeight: "calc(100vh - 140px)" }}
             >
-              {conversations.length === 0 && (
+              {threadIdList.length === 0 && (
                 <p className="text-sm text-neutral-400">No conversations yet</p>
               )}
-              {conversations.map((conv) => (
+              {threadIdList.map((thread) => (
                 <div
-                  key={conv.id}
-                  className={`p-2 rounded cursor-pointer hover:bg-neutral-700 ${conv.id === activeConvId ? "bg-neutral-700" : ""}`}
-                  onClick={() => openConversation(conv)}
+                  key={thread}
+                  className={`p-2 rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
+                  onClick={() => openConversation(thread)}
                 >
-                  <div className="text-sm font-medium">
-                    {conv.title || "Conversation"}
-                  </div>
-                  <div className="text-xs text-neutral-400 truncate">
-                    {conv.messages &&
-                    conv.messages[0] &&
-                    conv.messages[0].question
-                      ? conv.messages[0].question.slice(0, 50)
-                      : ""}
-                  </div>
+                  {thread}
                 </div>
               ))}
             </div>
