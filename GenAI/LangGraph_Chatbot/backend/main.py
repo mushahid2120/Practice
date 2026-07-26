@@ -1,12 +1,20 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
-from chatbot import answering_prompt, get_message_history, history_generator, initialize
+from chatbot import (
+    answering_prompt,
+    get_message_history,
+    history_generator,
+    initialize,
+    running_tasks,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 import uuid
-import aiofiles
 import aiosqlite
+
+serde = JsonPlusSerializer()
 
 
 @asynccontextmanager
@@ -50,18 +58,16 @@ class ThreadState(BaseModel):
 
 @app.post("/generate")
 async def generate(message: Message, response: Response, request: Request):
-    print(message)
 
-    if message.thread_id=="None" or message.thread_id==None:
-        message.thread_id=uuid.uuid4()   
-        print("message: ",message.thread_id)
-    
+
+    if message.thread_id == "None" or message.thread_id == None:
+        message.thread_id = uuid.uuid4()
+
     header = {
         "X-Thread-ID": str(message.thread_id),
         "Cache-Control": "no-cache",
     }
- 
-        
+
     stream = StreamingResponse(
         answering_prompt(message.message, message.thread_id),
         media_type="text/plain",
@@ -73,12 +79,31 @@ async def generate(message: Message, response: Response, request: Request):
 
 @app.get("/all-thread")
 async def GetAllThread():
+    final_list = []
     async with app.state.db.execute("""
         SELECT DISTINCT thread_id FROM checkpoints;
     """) as cursor:
         list = await cursor.fetchall()
 
-    final_list = [l[0] for l in list]
+    async with app.state.db.execute("""
+                            SELECT DISTINCT thread_id,type, checkpoint 
+                            FROM CHECKPOINTS
+                            GROUP BY thread_id 
+                                    """) as mycursor:
+        message = await mycursor.fetchall()
+
+        for row in message:
+            checkpoint = serde.loads_typed((row[1], row[2]))
+            if "__start__" in checkpoint["channel_values"]:
+                final_list.append(
+                    {
+                        row[0]: checkpoint["channel_values"]["__start__"]["message"][
+                            0
+                        ].content
+                    }
+                )
+    print(final_list)
+    # final_list = [l[0] for l in list]
     return {"thread_id_list": final_list}
 
 
@@ -87,8 +112,20 @@ async def GetChatByThreadID(thread: ThreadState):
     try:
         return StreamingResponse(
             history_generator(await get_message_history(thread_id=thread.thread_id)),
-            media_type="text/event-stream",
+            media_type="application/x-ndjson",
         )
 
     except Exception as error:
         return error
+
+
+@app.post("/stop/{thread_id}")
+async def stop_generation(thread_id: str):
+    task = running_tasks.get(thread_id)
+    print(task)
+    if task is None:
+        raise HTTPException(
+            status_code=404, detail="No active generation for this thread."
+        )
+    task.cancel()
+    return {"success": True, "message": "Generation cancelled."}

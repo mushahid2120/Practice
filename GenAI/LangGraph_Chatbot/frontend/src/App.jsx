@@ -15,27 +15,24 @@ function App() {
   const containerRef = useRef(null);
   const navigate = useNavigate();
   const { thread_id: threadId } = useParams();
-  const [fetchingController,setFetchingController]=useState(null)
+  const [fetchingController, setFetchingController] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-
     getAllThreadId();
   }, []);
 
   useEffect(() => {
-
-    if(fetchingController )
-      fetchingController.abort()
+    if (fetchingController) fetchingController.abort();
     const controller = new AbortController();
     const { signal } = controller;
-    setFetchingController(controller)
-    setActiveConvId(threadId)
-    setChatdata([])
-    if(threadId)
-    getConversation(threadId,signal);
+    setFetchingController(controller);
+    setActiveConvId(threadId);
+    setChatdata([]);
+    if (threadId) getConversation(threadId, signal);
   }, [threadId]);
 
-  const getConversation = async (thread_id,signal) => {
+  const getConversation = async (thread_id, signal) => {
     try {
       const response = await fetch(
         "http://localhost:8000/get-chat-by-thread-id",
@@ -45,23 +42,24 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ thread_id }),
-          signal:signal
+          signal: signal,
         },
       );
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      
+      let buffer = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        setChatdata((prev)=>{
-          const temp=[...prev]
-          temp.push(JSON.parse(decoder.decode(value)))
-          return temp
-        })
-        // break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // keep incomplete JSON
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          setChatdata((prev) => [...prev, JSON.parse(line)]);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -80,7 +78,25 @@ function App() {
     }
   };
 
-console.log(chatData)
+  const stopGenerating = async () => {
+    if (!isGenerating) return;
+    try {
+      const response = await fetch(`http://localhost:8000/stop/${threadId}`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.success) setChatdata((prev) => {
+        let temp=[...prev]
+        temp.pop();
+        return temp
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
 
   const handleGenerate = async () => {
     try {
@@ -89,7 +105,7 @@ console.log(chatData)
         return;
       }
       setThinking(true);
-      console.log(inputfield);
+      setIsGenerating(true);
       setChatdata((prevState) => {
         const temp = [...prevState];
         temp.push({ question: inputfield });
@@ -101,13 +117,10 @@ console.log(chatData)
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: inputfield ,thread_id:activeConvId}),
+        body: JSON.stringify({ message: inputfield, thread_id: activeConvId }),
       });
       const threadId = response.headers.get("X-Thread-ID");
-      console.log(threadId)
-      if(!activeConvId)
-        navigate(`/${threadId}`)
-
+      if (!activeConvId) navigate(`/${threadId}`);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -129,20 +142,20 @@ console.log(chatData)
             block: "end",
           });
       }
-      console.log(response);
     } catch (error) {
       console.log(error);
     } finally {
       setThinking(false);
+      setIsGenerating(false);
     }
   };
 
-  // Auto-scroll when chatData changes (e.g., new message appended)
+  console.log(chatData)
+
   useEffect(() => {
     if (bottomRef.current)
       bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [chatData]);
-
 
   const openConversation = (thread) => {
     navigate(`/${thread}`);
@@ -178,15 +191,18 @@ console.log(chatData)
               {threadIdList.length === 0 && (
                 <p className="text-sm text-neutral-400">No conversations yet</p>
               )}
-              {threadIdList.map((thread) => (
-                <div
-                  key={thread}
-                  className={`p-2 rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
-                  onClick={() => openConversation(thread)}
-                >
-                  {thread}
-                </div>
-              ))}
+              {threadIdList.map((thread) => {
+                const [thread_id, title] = Object.entries(thread)[0];
+                return (
+                  <div
+                    key={thread_id}
+                    className={`p-2 rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
+                    onClick={() => openConversation(thread_id)}
+                  >
+                    {title}
+                  </div>
+                );
+              })}
             </div>
           </aside>
         </div>
@@ -206,14 +222,15 @@ console.log(chatData)
           id="chat-container"
           ref={containerRef}
         >
-          <div className="pb-60 ">
+          {/* prompt and generated Text */}
+          <div >
             {chatData.map(({ question, answer }, index) => (
               <div key={index}>
                 <p className="my-6 bg-neutral-800 p-3 rounded-xl ml-auto max-w-fit">
                   {question}
                 </p>
                 {answer && (
-                  <div className="max-w-150 bg-neutral-700 rounded-xl div-3 p-2 mr-2">
+                  <div className=" bg-neutral-700 rounded-xl div-3 p-2 lg:mr-32 md:mr-20 mr-10">
                     <ReactMarkdown>{answer}</ReactMarkdown>
                   </div>
                 )}
@@ -222,12 +239,14 @@ console.log(chatData)
             {thinking && (
               <p className="text-purple-600 animate-pulse">Thinking...</p>
             )}
-            <div ref={bottomRef} />
+            <div ref={bottomRef} className="pb-40"/>
           </div>
 
+          {/* Text Box  Input Field*/}
           <div
             className={`fixed  bottom-0 flex items-center justify-center bg-neutral-900`}
             style={{ left: sidebarOpen ? "18rem" : "0", right: 0 }}
+
           >
             <div className="bg-neutral-800 p-2 rounded-3xl  mb-3 mx-2 w-full lg:w-full md:w-full sm:w-full lg:max-w-4xl md:max-w-2xl sm:max-w-xl  ">
               <textarea
@@ -249,9 +268,12 @@ console.log(chatData)
                 <button
                   id="ask"
                   className="bg-white px-4 py-1 text-black rounded-full cursor-pointer hover:bg-gray-300"
-                  onClick={handleGenerate}
+                  onClick={() => {
+                    if (isGenerating) stopGenerating();
+                    else handleGenerate();
+                  }}
                 >
-                  Ask
+                  {isGenerating ? "Stop" : "Ask"}
                 </button>
               </div>
             </div>

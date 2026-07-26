@@ -10,6 +10,7 @@ from langgraph.graph.message import add_messages
 from langchain_google_genai import ChatGoogleGenerativeAI
 import aiosqlite
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.types import interrupt
 from dotenv import load_dotenv
 import asyncio
 
@@ -17,6 +18,7 @@ load_dotenv()
 
 model = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 
+running_tasks: dict[str, asyncio.Task] = {}
 _saver_context = None
 chatbot = None
 
@@ -27,6 +29,14 @@ class ChatState(TypedDict):
 
 async def chat_node(state: ChatState):
     messages = state["message"]
+    # decision = interrupt(
+    #     {
+    #         "type": "approval",
+    #         "reason": "Model is about to answer a user question",
+    #         "question": messages,
+    #         "instruction": "Approve this question ? Yes / No",
+    #     }
+    # )
     response = await model.ainvoke(messages)
     return {"message": [response]}
 
@@ -48,18 +58,24 @@ async def initialize():
 
 
 async def answering_prompt(question, thread_id):
-    global _saver_context, chatbot
-    print("Generating answer.....", _saver_context, chatbot)
+    global _saver_context, chatbot, running_tasks
     config = {"configurable": {"thread_id": thread_id}}
-    async for item in chatbot.astream(
-        {"message": [HumanMessage(content=question)]},
-        config=config,
-        stream_mode="messages",
-        version="v2",
-    ):
-        if item["type"] == "messages" and len(item["data"][0].content) != 0:
-            yield item["data"][0].content[0]["text"]
-            # print(item['data'][0].content[0]['text'])
+    running_tasks[thread_id] = asyncio.current_task()
+    try:
+        async for item in chatbot.astream(
+            {"message": [HumanMessage(content=question)]},
+            config=config,
+            stream_mode="messages",
+            version="v2",
+        ):
+            if item["type"] == "messages" and len(item["data"][0].content) != 0:
+                yield item["data"][0].content[0]["text"]
+                # print(item['data'][0].content[0]['text'])
+    except asyncio.CancelledError:
+        print(f"Generation cancelled for {thread_id}")
+        raise
+    finally:
+        running_tasks.pop(thread_id, None)
 
 
 async def get_message_history(thread_id):
@@ -90,18 +106,16 @@ def history_generator(messages):
     while current_index <= thread_length:
         # print(question.content)
         if current_index + 1 < len(messages):
-            yield json.dumps(
-                {
+            payload={
                     "question": messages[current_index].content,
                     "answer": messages[current_index + 1].content[0]["text"],
                 }
-            )
             current_index += 2
         else:
-            yield json.dumps({"question": messages[current_index].content})
-            current_index += 1 
-        sleep(1)
-
+            payload={"question": messages[current_index].content}
+            current_index += 1
+        yield json.dumps(payload) + "\n" 
+ 
 
 async def main():
     await initialize()
