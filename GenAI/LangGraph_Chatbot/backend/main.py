@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from chatbot import (
     answering_prompt,
+    delete_thread,
     get_message_history,
     history_generator,
     initialize,
@@ -81,11 +82,6 @@ async def generate(message: Message, response: Response, request: Request):
 async def GetAllThread():
     final_list = []
     async with app.state.db.execute("""
-        SELECT DISTINCT thread_id FROM checkpoints;
-    """) as cursor:
-        list = await cursor.fetchall()
-
-    async with app.state.db.execute("""
                             SELECT DISTINCT thread_id,type, checkpoint 
                             FROM CHECKPOINTS
                             GROUP BY thread_id 
@@ -129,3 +125,16 @@ async def stop_generation(thread_id: str):
         )
     task.cancel()
     return {"success": True, "message": "Generation cancelled."}
+
+
+@app.delete("/delete-thread/{thread_id}")
+async def delete_by_thread(thread_id:str):
+        print(thread_id)
+        if(not thread_id):
+                    raise HTTPException(
+            status_code=404, detail="Invalid thread_id"
+        )
+        res=await delete_thread(thread_id)
+        print(res)
+        return {"success":True,"message": "Thread Deleted Successfully"}
+        

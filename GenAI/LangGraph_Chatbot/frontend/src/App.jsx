@@ -3,6 +3,7 @@ import "./App.css";
 import ReactMarkdown from "react-markdown";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
+import { Trash2 } from "lucide-react";
 
 function App() {
   const [inputfield, setInputField] = useState("");
@@ -70,6 +71,7 @@ function App() {
     try {
       const response = await fetch("http://localhost:8000/all-thread");
       const data = await response.json();
+      console.log(data);
       if (data.thread_id_list.length !== 0) {
         setThreadIdList(data.thread_id_list);
       }
@@ -85,18 +87,18 @@ function App() {
         method: "POST",
       });
       const data = await response.json();
-      if (data.success) setChatdata((prev) => {
-        let temp=[...prev]
-        temp.pop();
-        return temp
-      });
+      if (data.success)
+        setChatdata((prev) => {
+          let temp = [...prev];
+          temp.pop();
+          return temp;
+        });
     } catch (error) {
       console.log(error);
     } finally {
       setIsGenerating(false);
     }
   };
-
 
   const handleGenerate = async () => {
     try {
@@ -150,7 +152,25 @@ function App() {
     }
   };
 
-  console.log(chatData)
+  const handleDeleteThread = async (thread_id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/delete-thread/${thread_id}`,
+        {
+          method: "DELETE",
+        },
+      );
+      const data = await response.json();
+      if (data.success) {
+        if (thread_id == threadId) navigate("/");
+        getAllThreadId();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(chatData);
 
   useEffect(() => {
     if (bottomRef.current)
@@ -179,8 +199,11 @@ function App() {
               </button>
             </div>
             <button
-              // onClick={newConversation}
-              className={`w-full bg-white text-black py-2 rounded mb-3 ${sidebarOpen ? "" : "hidden"}`}
+              onClick={() => {
+                setActiveConvId(null);
+                navigate("/");
+              }}
+              className={`w-full bg-white cursor-pointer text-black py-2 rounded mb-3 ${sidebarOpen ? "" : "hidden"}`}
             >
               New Conversation
             </button>
@@ -196,10 +219,18 @@ function App() {
                 return (
                   <div
                     key={thread_id}
-                    className={`p-2 rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
+                    className={`flex justify-between items-center p-2 truncate rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
                     onClick={() => openConversation(thread_id)}
                   >
-                    {title}
+                    <div>{title}</div>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteThread(thread_id);
+                      }}
+                    >
+                      <Trash2 />
+                    </span>
                   </div>
                 );
               })}
@@ -223,7 +254,7 @@ function App() {
           ref={containerRef}
         >
           {/* prompt and generated Text */}
-          <div >
+          <div>
             {chatData.map(({ question, answer }, index) => (
               <div key={index}>
                 <p className="my-6 bg-neutral-800 p-3 rounded-xl ml-auto max-w-fit">
@@ -239,14 +270,13 @@ function App() {
             {thinking && (
               <p className="text-purple-600 animate-pulse">Thinking...</p>
             )}
-            <div ref={bottomRef} className="pb-40"/>
+            <div ref={bottomRef} className="pb-40" />
           </div>
 
           {/* Text Box  Input Field*/}
           <div
             className={`fixed  bottom-0 flex items-center justify-center bg-neutral-900`}
             style={{ left: sidebarOpen ? "18rem" : "0", right: 0 }}
-
           >
             <div className="bg-neutral-800 p-2 rounded-3xl  mb-3 mx-2 w-full lg:w-full md:w-full sm:w-full lg:max-w-4xl md:max-w-2xl sm:max-w-xl  ">
               <textarea

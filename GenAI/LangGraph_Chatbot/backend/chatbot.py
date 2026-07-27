@@ -21,6 +21,7 @@ model = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 running_tasks: dict[str, asyncio.Task] = {}
 _saver_context = None
 chatbot = None
+saver=None
 
 
 class ChatState(TypedDict):
@@ -49,7 +50,7 @@ graph.add_edge("chat_node", END)
 
 async def initialize():
     print("initialzation.....")
-    global _saver_context, chatbot
+    global _saver_context, chatbot,saver
     _saver_context = AsyncSqliteSaver.from_conn_string("agent_memory.db")
 
     saver = await _saver_context.__aenter__()
@@ -104,7 +105,6 @@ def history_generator(messages):
     thread_length = len(messages) - 1
     current_index = 0
     while current_index <= thread_length:
-        # print(question.content)
         if current_index + 1 < len(messages):
             payload={
                     "question": messages[current_index].content,
@@ -115,10 +115,19 @@ def history_generator(messages):
             payload={"question": messages[current_index].content}
             current_index += 1
         yield json.dumps(payload) + "\n" 
- 
 
-async def main():
+
+async def delete_thread(thread_id:str):
+    global saver
+    print((thread_id))
+    response=await saver.adelete_thread(thread_id=thread_id) 
+    return response
+            
+            
+
+async def main(): 
     await initialize()
+    # await delete_thread('thread-2')
     # await answering_prompt(
     #     "write essay in 200 words in topic of Indian economy"
     # )
