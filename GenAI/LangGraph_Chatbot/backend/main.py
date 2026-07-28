@@ -4,11 +4,15 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from chatbot import (
     answering_prompt,
+    build_model,
+    build_tools,
     delete_thread,
     get_message_history,
     history_generator,
     initialize,
+    resume_generation,
     running_tasks,
+    init_mcp
 )
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
@@ -20,11 +24,14 @@ serde = JsonPlusSerializer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
+    await init_mcp()
+    build_tools()
+    build_model()
     app.state.db = await aiosqlite.connect("agent_memory.db")
     if app.state.db:
         print("DB Connection Stablished")
     await initialize()
+    
     print("Chatbot initialized")
     yield
     await app.state.db.close()
@@ -56,6 +63,10 @@ class Message(BaseModel):
 class ThreadState(BaseModel):
     thread_id: str = Field(description="thread id of the conversation")
 
+class ResumeRequest(BaseModel):
+    thread_id: str
+    approved: bool
+
 
 @app.post("/generate")
 async def generate(message: Message, response: Response, request: Request):
@@ -71,12 +82,29 @@ async def generate(message: Message, response: Response, request: Request):
 
     stream = StreamingResponse(
         answering_prompt(message.message, message.thread_id),
-        media_type="text/plain",
+        media_type="text/event-stream",
         headers=header,
     )
 
     return stream
 
+@app.post("/resume")
+async def resume(req: ResumeRequest):
+    
+    header = {
+        "X-Thread-ID": str(req.thread_id),
+        "Cache-Control": "no-cache",
+    }
+
+
+    return StreamingResponse(
+        resume_generation(
+            req.thread_id,
+            req.approved,
+        ),
+        media_type="text/event-stream",
+        headers=header,
+    )
 
 @app.get("/all-thread")
 async def GetAllThread():
@@ -90,13 +118,14 @@ async def GetAllThread():
 
         for row in message:
             checkpoint = serde.loads_typed((row[1], row[2]))
+            # print(checkpoint) 
             if "__start__" in checkpoint["channel_values"]:
                 final_list.append(
                     {
-                        row[0]: checkpoint["channel_values"]["__start__"]["message"][
+                        row[0]: checkpoint["channel_values"]["__start__"]["messages"][
                             0
                         ].content
-                    }
+                    } 
                 )
     print(final_list)
     # final_list = [l[0] for l in list]

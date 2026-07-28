@@ -18,12 +18,14 @@ function App() {
   const { thread_id: threadId } = useParams();
   const [fetchingController, setFetchingController] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [approvalDialog, setApprovalDialog] = useState(null);
 
   useEffect(() => {
     getAllThreadId();
   }, []);
 
   useEffect(() => {
+    if (activeConvId == threadId) return;
     if (fetchingController) fetchingController.abort();
     const controller = new AbortController();
     const { signal } = controller;
@@ -32,6 +34,8 @@ function App() {
     setChatdata([]);
     if (threadId) getConversation(threadId, signal);
   }, [threadId]);
+
+  console.log(threadId, activeConvId);
 
   const getConversation = async (thread_id, signal) => {
     try {
@@ -113,7 +117,8 @@ function App() {
         temp.push({ question: inputfield });
         return temp;
       });
-
+      // console.log(chatData);
+      setThinking(true);
       setInputField("");
       const response = await fetch("http://localhost:8000/generate", {
         method: "POST",
@@ -121,36 +126,177 @@ function App() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ message: inputfield, thread_id: activeConvId }),
       });
-      const threadId = response.headers.get("X-Thread-ID");
-      if (!activeConvId) navigate(`/${threadId}`);
+      const thread_id = response.headers.get("X-Thread-ID");
+      if (!activeConvId && thread_id) {
+        setActiveConvId(thread_id);
+        navigate(`/${thread_id}`);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let text = "";
+
+      let buffer = "";
+      let answer = "";
 
       while (true) {
         const { done, value } = await reader.read();
+
         if (done) break;
-        text += decoder.decode(value);
-        setChatdata((prevState) => {
-          const temp = [...prevState];
-          temp[prevState.length - 1].answer = text;
-          return temp;
-        });
-        // auto-scroll as text streams in
-        if (bottomRef.current)
-          bottomRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "end",
-          });
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Each SSE message ends with \n\n
+        const events = buffer.split("\n\n");
+
+        // Keep the incomplete event in the buffer
+        buffer = events.pop() || "";
+
+        for (const rawEvent of events) {
+          if (!rawEvent.trim()) continue;
+
+          let eventName = "";
+          let data = "";
+
+          for (const line of rawEvent.split("\n")) {
+            if (line.startsWith("event:")) {
+              eventName = line.substring(6).trim();
+            }
+
+            if (line.startsWith("data:")) {
+              data = line.substring(5).trim();
+            }
+          }
+
+          const payload = JSON.parse(data);
+
+          switch (eventName) {
+            case "text":
+              answer += payload.content;
+
+              setChatdata((prev) => {
+                const temp = [...prev];
+                temp[temp.length - 1].answer = answer;
+                return temp;
+              });
+
+              if (bottomRef.current) {
+                bottomRef.current.scrollIntoView({
+                  behavior: "smooth",
+                  block: "end",
+                });
+              }
+              break;
+
+            case "approval":
+              console.log("Approval Required", payload);
+
+              setApprovalDialog(payload);
+              break;
+
+            case "done":
+              console.log("Generation completed");
+              break;
+          }
+        }
       }
+      setIsGenerating(false);
     } catch (error) {
-      console.log(error);
-    } finally {
       setThinking(false);
       setIsGenerating(false);
+      console.log(error);
     }
   };
+
+  async function approve(approved) {
+    try {
+      setApprovalDialog(null);
+      setThinking(true);
+      setIsGenerating(true);
+      const response = await fetch("http://localhost:8000/resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          thread_id: activeConvId,
+          approved,
+        }),
+      });
+      setThinking(false);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      let buffer = "";
+      let answer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Each SSE message ends with \n\n
+        const events = buffer.split("\n\n");
+
+        // Keep the incomplete event in the buffer
+        buffer = events.pop() || "";
+
+        for (const rawEvent of events) {
+          if (!rawEvent.trim()) continue;
+
+          let eventName = "";
+          let data = "";
+
+          for (const line of rawEvent.split("\n")) {
+            if (line.startsWith("event:")) {
+              eventName = line.substring(6).trim();
+            }
+
+            if (line.startsWith("data:")) {
+              data = line.substring(5).trim();
+            }
+          }
+
+          const payload = JSON.parse(data);
+
+          switch (eventName) {
+            case "text":
+              answer += payload.content;
+
+              setChatdata((prev) => {
+                const temp = [...prev];
+                temp[temp.length - 1].answer = answer;
+                return temp;
+              });
+
+              if (bottomRef.current) {
+                bottomRef.current.scrollIntoView({
+                  behavior: "smooth",
+                  block: "end",
+                });
+              }
+              break;
+
+            case "approval":
+              console.log("Approval Required", payload);
+
+              setApprovalDialog(payload);
+              break;
+
+            case "done":
+              console.log("Generation completed");
+              break;
+          }
+        }
+      }
+      setIsGenerating(false);
+    } catch (error) {
+      setThinking(false);
+      setIsGenerating(false);
+      console.log(error);
+    }
+  }
 
   const handleDeleteThread = async (thread_id) => {
     try {
@@ -202,6 +348,7 @@ function App() {
               onClick={() => {
                 setActiveConvId(null);
                 navigate("/");
+                setChatdata([]);
               }}
               className={`w-full bg-white cursor-pointer text-black py-2 rounded mb-3 ${sidebarOpen ? "" : "hidden"}`}
             >
@@ -267,6 +414,63 @@ function App() {
                 )}
               </div>
             ))}
+            {approvalDialog && (
+              <div className="mx-4 my-4 rounded-xl border border-amber-500/30 bg-zinc-900 shadow-lg overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-2 border-b border-zinc-800 bg-amber-500/10 px-4 py-3">
+                  <span className="text-xl">⚠️</span>
+                  <div>
+                    <h3 className="font-semibold text-amber-300">
+                      Tool Approval Required
+                    </h3>
+                    <p className="text-sm text-zinc-400">
+                      {approvalDialog.message}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tool Calls */}
+                <div className="space-y-4 p-4">
+                  {approvalDialog.tool_calls.map((tool) => (
+                    <div
+                      key={tool.id}
+                      className="rounded-lg border border-zinc-800 bg-zinc-950"
+                    >
+                      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
+                        <span className="font-medium text-blue-400">
+                          {tool.name}
+                        </span>
+
+                        <span className="rounded-full bg-zinc-800 px-2 py-1 text-xs text-zinc-400">
+                          MCP Tool
+                        </span>
+                      </div>
+
+                      <pre className="overflow-x-auto p-4 text-sm text-zinc-300">
+                        {JSON.stringify(tool.args, null, 2)}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3 border-t border-zinc-800 bg-zinc-900 px-4 py-3">
+                  <button
+                    onClick={() => approve(false)}
+                    className="rounded-lg border border-red-500 px-4 py-2 text-red-400 transition hover:bg-red-500/10"
+                  >
+                    Reject
+                  </button>
+
+                  <button
+                    onClick={() => approve(true)}
+                    className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-500"
+                  >
+                    Approve
+                  </button>
+                </div>
+              </div>
+            )}
             {thinking && (
               <p className="text-purple-600 animate-pulse">Thinking...</p>
             )}
