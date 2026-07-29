@@ -1,23 +1,25 @@
+from langgraph.types import interrupt
 from email import message
 import json
 from time import sleep
 from click import BOOL
 from fastapi import sse
 from langgraph.graph import StateGraph, START, END
-from typing import NotRequired, TypedDict, Annotated
+from typing import TypedDict, Annotated
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
     AIMessageChunk,
     AIMessage,
     ToolMessage,
+    SystemMessage
 )
 from langgraph.graph.message import add_messages
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import ToolNode
-from langgraph.types import interrupt,Command
+from langgraph.types import interrupt, Command
 from dotenv import load_dotenv
 from tavily import AsyncTavilyClient
 from langchain_core.tools import tool
@@ -33,11 +35,18 @@ running_tasks: dict[str, asyncio.Task] = {}
 _saver_context = None
 chatbot = None
 saver = None
-mcp_tools=None
-model=None
+mcp_tools = None
+model = None
+tool_node = None
+all_tools = None
+graph = None
+tools = None
+add_file_data = {}
+
 
 def sse(event: str, data: dict):
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
 
 @tool
 async def web_search(query: str) -> str:
@@ -49,9 +58,10 @@ async def web_search(query: str) -> str:
         result.append(content["content"])
     return "\n".join(item["content"] for item in response["results"])
 
+
 async def init_mcp():
-        global mcp_tools
-        client = MultiServerMCPClient(
+    global mcp_tools
+    client = MultiServerMCPClient(
         {
             "expense_tracker": {
                 "transport": "http",
@@ -62,29 +72,52 @@ async def init_mcp():
                 },
             }
         }
-        )
+    )
 
-        mcp_tools = await client.get_tools()
+    mcp_tools = await client.get_tools()
 
-def build_tools():
-    global tools
 
-    tools = [
+def build_all_tool():
+    global all_tools
+    all_tools = [
         web_search,
         *mcp_tools,
     ]
 
+
+async def build_tools(tool_list: list[str] | None):
+    global tools, all_tools, chatbot, tool_node, saver
+    if tool_node and set([*tool_node.tools_by_name]) == set(tool_list):
+        return
+
+    if not tool_list:
+        tools = []
+    else:
+        tools = [tool for tool in all_tools if tool.name in tool_list]
+        build_model()
+        graph = build_graph()
+
+        chatbot = graph.compile(
+            checkpointer=saver
+        )
+
+
 def build_model():
     global model
 
-    model = ChatGoogleGenerativeAI(
-        model="gemini-3.1-flash-lite"
-    ).bind_tools(tools)
+    if tools:
+        print("with tool", tools)
+        model = ChatGoogleGenerativeAI(
+            model="gemini-3.1-flash-lite").bind_tools(tools)
+    else:
+        print("without tools")
+        model = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 
 
 class ChatState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
-    approved:bool
+    approved: bool
+
 
 async def chat_node(state: ChatState):
     print("chatnode ....")
@@ -101,8 +134,6 @@ async def chat_node(state: ChatState):
     return {"messages": [response]}
 
 
-from langgraph.types import interrupt
-
 async def approval_node(state: ChatState):
     print("Approval node.....")
     last = state["messages"][-1]
@@ -111,22 +142,17 @@ async def approval_node(state: ChatState):
         {
             "type": "tool_approval",
             "tool_calls": tool_calls,
-            "message": "Approve tool execution?"
+            "message": "Approve tool execution?",
         }
     )
     if decision["approved"]:
-        return {
-            "approved": True
-        }
+        return {"approved": True}
 
     return {
         "approved": False,
-        "messages": [
-            AIMessage(
-                content="Tool execution was rejected by the user."
-            )
-        ]
+        "messages": [AIMessage(content="Tool execution was rejected by the user.")],
     }
+
 
 def approval_router(state: ChatState):
     print("Approval Router ....")
@@ -135,23 +161,26 @@ def approval_router(state: ChatState):
     if last.tool_calls:
         return "approval"
 
-    print("END") 
+    print("END")
     return END
+
 
 def after_approval_router(state: ChatState):
     if state.get("approved"):
         return "tool"
     return END
 
-def build_graph(): 
+
+def build_graph():
+    global tool_node, graph
 
     tool_node = ToolNode(tools)
- 
+
     graph = StateGraph(ChatState)
 
     graph.add_node("chat_node", chat_node)
     graph.add_node("tool", tool_node)
-    graph.add_node("approval",approval_node)
+    graph.add_node("approval", approval_node)
 
     graph.add_edge(START, "chat_node")
 
@@ -171,7 +200,7 @@ def build_graph():
             END: END,
         },
     )
-    graph.add_edge("tool","chat_node")
+    graph.add_edge("tool", "chat_node")
     return graph
 
 
@@ -182,15 +211,12 @@ async def initialize():
 
     saver = await _saver_context.__aenter__()
     await saver.setup()
-    graph=build_graph()
+    graph = build_graph()
     chatbot = graph.compile(checkpointer=saver)
 
-async def resume_generation(thread_id:str,is_approved:bool):
-    config = {
-        "configurable": {
-            "thread_id": thread_id
-        }
-    }
+
+async def resume_generation(thread_id: str, is_approved: bool):
+    config = {"configurable": {"thread_id": thread_id}}
 
     async for item in chatbot.astream(
         Command(resume={"approved": is_approved}),
@@ -220,29 +246,44 @@ async def resume_generation(thread_id:str,is_approved:bool):
     snapshot = await chatbot.aget_state(config)
 
     if snapshot.next:
-
         interrupt = snapshot.tasks[0].interrupts[0]
 
-        yield sse(
-            "approval",
-            interrupt.value
-        )
+        yield sse("approval", interrupt.value)
 
     else:
-
-        yield sse(
-            "done",
-            {}
-        )           
+        yield sse("done", {})
 
 
 async def answering_prompt(question, thread_id):
     global _saver_context, chatbot, running_tasks
+    if hasattr(add_file_data, thread_id):
+        context = add_file_data['thread_id']
+        summaries = "\n\n".join(
+            f""" File: {f["name"]}
+                    Summary:
+                        {f["summary"]}
+                """
+            for f in add_file_data
+        )
+        prompt = [SystemMessage(content=f"""
+            The user has uploaded the following files.
+
+            {summaries}
+
+            If the user's question is likely answered by one of these files,
+            call the search_docs tool before answering.
+
+            Otherwise answer normally.
+            """
+        ), HumanMessage(content=question)]
+    else:
+        prompt = [HumanMessage(content=question)]
+
     config = {"configurable": {"thread_id": thread_id}}
     running_tasks[thread_id] = asyncio.current_task()
     try:
         async for item in chatbot.astream(
-            {"messages": [HumanMessage(content=question)]},
+            {"messages": prompt},
             config=config,
             stream_mode="messages",
             version="v2",
@@ -256,12 +297,9 @@ async def answering_prompt(question, thread_id):
             ):
                 text = item["data"][0].content[0]["text"]
 
-                yield sse(
-                    "text",
-                    {"content":text}
-                )
+                yield sse("text", {"content": text})
 
-         # Graph finished streaming
+        # Graph finished streaming
         snapshot = await chatbot.aget_state(config)
 
         for task in snapshot.tasks:
@@ -325,12 +363,15 @@ def history_generator(messages):
                     if isinstance(block, dict) and block.get("type") == "text"
                 )
 
-            yield json.dumps(
-                {
-                    "question": current_question,
-                    "answer": answer,
-                }
-            ) + "\n"
+            yield (
+                json.dumps(
+                    {
+                        "question": current_question,
+                        "answer": answer,
+                    }
+                )
+                + "\n"
+            )
 
             current_question = None
 
@@ -342,21 +383,30 @@ async def delete_thread(thread_id: str):
     return response
 
 
+def get_tool_list():
+    # print('hellow')
+    t = [tool.name for tool in all_tools]
+    return t
+
+
 async def main():
     # await web_search("genz protest in the world")
     await init_mcp()
-    build_tools()
-    build_model()
-    await initialize()
-    async for item in resume_generation("a6345744-070d-4563-8d8f-20ac510c535c",True):
-        print(item)
+    build_all_tool()
+    build_tools([])
+    # build_model()
+    # build_graph()
+    get_tool_list()
+    # await initialize()
+    # async for item in resume_generation("a6345744-070d-4563-8d8f-20ac510c535c",True):
+    #     print(item)
     # await delete_thread('thread-2')
     # async for item in answering_prompt(
     #     "total expense of this month 2026-07-07",
     #     "a6345744-070d-4563-8d8f-20ac510c535c",
     # ):
     #     print(item)
-    
+
     # messages = await get_message_history(
     #     "27f1249b-1f40-46e4-8086-d4b6890fc4ab",
     # )

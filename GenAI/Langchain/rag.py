@@ -7,11 +7,12 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableParallel,RunnableLambda,RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-
 load_dotenv()
+
 
 model = ChatGoogleGenerativeAI(model="gemini-3.5-flash")
 embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2-preview")
+
 vector_store = Chroma(
     collection_name="test",
     embedding_function=embeddings,

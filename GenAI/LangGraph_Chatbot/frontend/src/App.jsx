@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 function App() {
   const [inputfield, setInputField] = useState("");
@@ -19,9 +20,51 @@ function App() {
   const [fetchingController, setFetchingController] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [approvalDialog, setApprovalDialog] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const fileInputRef = useRef(null);
+  const [tools, setTools] = useState([]);
+  const [activeTools, setActiveTools] = useState([]);
+
+  const toggleTool = (toolName) => {
+    setActiveTools((prev) => {
+      const temp = [...prev];
+      const presentIndex = temp.indexOf(toolName);
+      console.log(presentIndex);
+      if (presentIndex !== -1) temp.splice(presentIndex);
+      else temp.push(toolName);
+      return temp;
+    });
+  };
+
+  console.log(activeTools);
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+    setMenuOpen(false);
+  };
+
+  const handleUploadFiles = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("Uploaded files:", files);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const response = await fetch("http://localhost:8000/upload-file", {
+        method: "POST",
+        body: formData, // No manual headers needed
+      });
+      const data = await response.json();
+      console.log(data);
+      setMenuOpen(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     getAllThreadId();
+    getAllTools();
   }, []);
 
   useEffect(() => {
@@ -35,7 +78,15 @@ function App() {
     if (threadId) getConversation(threadId, signal);
   }, [threadId]);
 
-  console.log(threadId, activeConvId);
+  const getAllTools = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/get-all-tools");
+      const data = await response.json();
+      if (data?.list) setTools(data.list);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getConversation = async (thread_id, signal) => {
     try {
@@ -124,13 +175,19 @@ function App() {
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: inputfield, thread_id: activeConvId }),
+        body: JSON.stringify({
+          message: inputfield,
+          thread_id: activeConvId,
+          tool_list: activeTools,
+        }),
       });
       const thread_id = response.headers.get("X-Thread-ID");
       if (!activeConvId && thread_id) {
         setActiveConvId(thread_id);
         navigate(`/${thread_id}`);
       }
+
+      setThinking(false);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -222,9 +279,10 @@ function App() {
           approved,
         }),
       });
-      setThinking(false);
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+
+      setThinking(false);
 
       let buffer = "";
       let answer = "";
@@ -369,7 +427,7 @@ function App() {
                     className={`flex justify-between items-center p-2 truncate rounded cursor-pointer  hover:bg-neutral-400 ${thread === activeConvId ? "bg-neutral-400" : "bg-neutral-600"} `}
                     onClick={() => openConversation(thread_id)}
                   >
-                    <div>{title}</div>
+                    <div className="truncate">{title}</div>
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
@@ -474,7 +532,7 @@ function App() {
             {thinking && (
               <p className="text-purple-600 animate-pulse">Thinking...</p>
             )}
-            <div ref={bottomRef} className="pb-40" />
+            <div ref={bottomRef} className="pb-60" />
           </div>
 
           {/* Text Box  Input Field*/}
@@ -482,9 +540,62 @@ function App() {
             className={`fixed  bottom-0 flex items-center justify-center bg-neutral-900`}
             style={{ left: sidebarOpen ? "18rem" : "0", right: 0 }}
           >
-            <div className="bg-neutral-800 p-2 rounded-3xl  mb-3 mx-2 w-full lg:w-full md:w-full sm:w-full lg:max-w-4xl md:max-w-2xl sm:max-w-xl  ">
+            <div className="bg-neutral-800 p-2 rounded-3xl mb-3 mx-2 w-full lg:w-full md:w-full sm:w-full lg:max-w-4xl md:max-w-2xl sm:max-w-xl relative">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleUploadFiles}
+              />
+
+              <div className="absolute left-4 bottom-2 z-20">
+                {menuOpen && (
+                  <div className="mb-2 w-64 rounded-2xl border border-neutral-700 bg-neutral-900 shadow-lg">
+                    <button
+                      type="button"
+                      onClick={handleUploadClick}
+                      className="w-full text-left px-4 py-3 text-sm text-white hover:bg-neutral-800"
+                    >
+                      Upload image & files
+                    </button>
+                    <div className="border-t border-neutral-700 px-4 py-3">
+                      <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 mb-2">
+                        Tools
+                      </p>
+                      <div className="space-y-2">
+                        {tools.map((tool) => (
+                          <div
+                            key={tool}
+                            className="flex items-center justify-between rounded-xl bg-neutral-800 px-3 py-2 text-sm text-white"
+                          >
+                            <span>{tool}</span>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="peer sr-only"
+                                checked={activeTools.includes(tool)}
+                                onChange={() => toggleTool(tool)}
+                              />
+                              <div className="w-11 h-6 rounded-full bg-neutral-700 peer-checked:bg-emerald-500 transition-colors" />
+                              <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transform transition-transform peer-checked:translate-x-5" />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((open) => !open)}
+                  className="text-white bg-neutral-700 border border-neutral-600 rounded-xl w-9 h-9 flex items-center justify-center shadow-sm hover:bg-neutral-600"
+                >
+                  <Plus />
+                </button>
+              </div>
+
               <textarea
-                className="w-full  resize-none outline-0 p-3 bg-neutral-900 text-white rounded-2xl"
+                className="w-full resize-none outline-0 p-3 pb-16 bg-neutral-900 text-white rounded-2xl"
                 rows="2"
                 id="input"
                 value={inputfield}
