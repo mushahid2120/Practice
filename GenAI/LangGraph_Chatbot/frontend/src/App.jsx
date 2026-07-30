@@ -52,6 +52,7 @@ function App() {
     try {
       const response = await fetch("http://localhost:8000/upload-file", {
         method: "POST",
+        headers:{threadId: activeConvId ?? ""},
         body: formData, // No manual headers needed
       });
       const data = await response.json();
@@ -61,6 +62,8 @@ function App() {
       console.log(error);
     }
   };
+
+  console.log(activeConvId)
 
   useEffect(() => {
     getAllThreadId();

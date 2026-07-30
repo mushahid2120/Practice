@@ -26,6 +26,8 @@ from langchain_core.tools import tool
 import os
 import asyncio
 
+from rag import search_docs
+
 load_dotenv()
 
 tavily_client = AsyncTavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
@@ -57,6 +59,7 @@ async def web_search(query: str) -> str:
     for content in response["results"]:
         result.append(content["content"])
     return "\n".join(item["content"] for item in response["results"])
+
 
 
 async def init_mcp():
@@ -91,9 +94,10 @@ async def build_tools(tool_list: list[str] | None):
         return
 
     if not tool_list:
-        tools = []
+        tools = [search_docs]
     else:
         tools = [tool for tool in all_tools if tool.name in tool_list]
+        tools.append(search_docs)
         build_model()
         graph = build_graph()
 
@@ -157,12 +161,15 @@ async def approval_node(state: ChatState):
 def approval_router(state: ChatState):
     print("Approval Router ....")
     last = state["messages"][-1]
+    if not last.tool_calls:
+        return END
+    elif(last.tool_calls[0]['name']=="search_docs"):
+        return "search_docs"
 
-    if last.tool_calls:
+    else:
         return "approval"
+    
 
-    print("END")
-    return END
 
 
 def after_approval_router(state: ChatState):
@@ -188,10 +195,11 @@ def build_graph():
         "chat_node",
         approval_router,
         {
+            "search_docs":"tool",
             "approval": "approval",
             END: END,
         },
-    )
+    )     
     graph.add_conditional_edges(
         "approval",
         after_approval_router,
@@ -256,15 +264,17 @@ async def resume_generation(thread_id: str, is_approved: bool):
 
 async def answering_prompt(question, thread_id):
     global _saver_context, chatbot, running_tasks
-    if hasattr(add_file_data, thread_id):
-        context = add_file_data['thread_id']
-        summaries = "\n\n".join(
-            f""" File: {f["name"]}
+    if str(thread_id) in add_file_data:
+        print("having system message....")
+        context = add_file_data[thread_id]
+        summaries = "\n\n".join(  
+            f""" File: {f['name']}  
                     Summary:
-                        {f["summary"]}
-                """
-            for f in add_file_data
+                        {f['summary']}
+                """ 
+            for f in context
         )
+        print("summaries: ",summaries)
         prompt = [SystemMessage(content=f"""
             The user has uploaded the following files.
 
@@ -273,9 +283,13 @@ async def answering_prompt(question, thread_id):
             If the user's question is likely answered by one of these files,
             call the search_docs tool before answering.
 
+            if you go to the search_docs tool and don't get the clarity of by looking the tool result 
+            then don't hallucinate simply say - 'I don't know the answer'
+
             Otherwise answer normally.
-            """
+            """ 
         ), HumanMessage(content=question)]
+        print("prompt: ",prompt)
     else:
         prompt = [HumanMessage(content=question)]
 

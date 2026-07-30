@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
-from embedding_file_loading import db_storing_embedding
+from rag import db_storing_embedding, init_vector_store
 from chatbot import (
     answering_prompt,
     build_all_tool,
@@ -16,8 +16,11 @@ from chatbot import (
     initialize,
     resume_generation,
     running_tasks,
+    add_file_data,
     init_mcp,
 )
+
+
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 import uuid
@@ -25,11 +28,12 @@ import aiosqlite
 
 serde = JsonPlusSerializer()
 
-UPLOAD_DIR="uploaded_files"
+UPLOAD_DIR = "uploaded_files"
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    init_vector_store()
     await init_mcp()
     build_all_tool()
     await build_tools([])
@@ -82,7 +86,7 @@ async def generate(message: Message, response: Response, request: Request):
 
     if message.tool_list:
         await build_tools(message.tool_list)
-        
+
     if message.thread_id == "None" or message.thread_id == None:
         message.thread_id = uuid.uuid4()
 
@@ -181,15 +185,19 @@ def GetAllTool():
 
 
 @app.post("/upload-file/")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(request: Request, file: UploadFile = File(...)):
+    threadId = request.headers.get("threadId")
+    if str(threadId) not in add_file_data:
+        init_vector_store(str(threadId))
+         
     # 1. Validate the file extension
     file_extension = file.filename.split(".")[-1].lower()
     # if file_extension not in ALLOWED_EXTENSIONS:
     #     raise HTTPException(
-    #         status_code=400, 
+    #         status_code=400,
     #         detail=f"Invalid file type. Allowed types: {ALLOWED_EXTENSIONS}"
     #     )
-    
+
     # 2. Define the destination file path
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     # 3. Read and save the file asynchronously
@@ -198,11 +206,12 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(content)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save file: {str(e)}")
     finally:
-        await file.close() 
+        await file.close()
 
-    await db_storing_embedding(file.filename)
+    await db_storing_embedding(file.filename,threadId)
     return {
         "filename": file.filename,
         "saved_path": file_path,
