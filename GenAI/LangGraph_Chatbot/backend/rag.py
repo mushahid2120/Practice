@@ -41,7 +41,7 @@ async def db_storing_embedding(file_name:str,thread_id:str):
     chain=model | parser
     summary=chain.invoke(f"Give  me short 40 words summary of this text  what these text all about- {chunks}")
     print(summary)
-    if not hasattr(add_file_data,thread_id):
+    if str(thread_id) not in add_file_data:
         add_file_data[thread_id]=[]
     add_file_data[thread_id].append({"name":file_name,"summary":summary})
     print(add_file_data)

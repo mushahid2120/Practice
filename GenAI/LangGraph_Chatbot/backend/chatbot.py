@@ -1,9 +1,6 @@
-from langgraph.types import interrupt
-from email import message
 import json
 from time import sleep
 from click import BOOL
-from fastapi import sse
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_core.messages import (
@@ -59,7 +56,6 @@ async def web_search(query: str) -> str:
     for content in response["results"]:
         result.append(content["content"])
     return "\n".join(item["content"] for item in response["results"])
-
 
 
 async def init_mcp():
@@ -126,17 +122,14 @@ class ChatState(TypedDict):
 async def chat_node(state: ChatState):
     print("chatnode ....")
     messages = state["messages"]
-    # decision = interrupt(
-    #     {
-    #         "type": "approval",
-    #         "reason": "Model is about to answer a user question",
-    #         "question": messages,
-    #         "instruction": "Approve this question ? Yes / No",
-    #     }
-    # )
     response = await model.ainvoke(messages)
+    # print(response.content[0],type(response))
+    # print(response.tool_calls,type(response)) 
+    # final_response = {
+    #     "content": response.content[0]['text'], "tool_calls": response.content[0]["tool_calls"]}
+    # print(final_response) 
     return {"messages": [response]}
-
+ 
 
 async def approval_node(state: ChatState):
     print("Approval node.....")
@@ -163,13 +156,11 @@ def approval_router(state: ChatState):
     last = state["messages"][-1]
     if not last.tool_calls:
         return END
-    elif(last.tool_calls[0]['name']=="search_docs"):
+    elif (last.tool_calls[0]['name'] == "search_docs"):
         return "search_docs"
 
     else:
         return "approval"
-    
-
 
 
 def after_approval_router(state: ChatState):
@@ -195,11 +186,11 @@ def build_graph():
         "chat_node",
         approval_router,
         {
-            "search_docs":"tool",
+            "search_docs": "tool",
             "approval": "approval",
             END: END,
         },
-    )     
+    )
     graph.add_conditional_edges(
         "approval",
         after_approval_router,
@@ -267,14 +258,14 @@ async def answering_prompt(question, thread_id):
     if str(thread_id) in add_file_data:
         print("having system message....")
         context = add_file_data[thread_id]
-        summaries = "\n\n".join(  
+        summaries = "\n\n".join(
             f""" File: {f['name']}  
                     Summary:
                         {f['summary']}
-                """ 
+                """
             for f in context
         )
-        print("summaries: ",summaries)
+        print("summaries: ", summaries)
         prompt = [SystemMessage(content=f"""
             The user has uploaded the following files.
 
@@ -287,9 +278,9 @@ async def answering_prompt(question, thread_id):
             then don't hallucinate simply say - 'I don't know the answer'
 
             Otherwise answer normally.
-            """ 
+            """
         ), HumanMessage(content=question)]
-        print("prompt: ",prompt)
+        print("prompt: ", prompt)
     else:
         prompt = [HumanMessage(content=question)]
 
@@ -359,6 +350,8 @@ async def get_message_history(thread_id):
 
 def history_generator(messages):
     current_question = None
+
+    # print(messages)
 
     for message in messages:
         if not message.content:

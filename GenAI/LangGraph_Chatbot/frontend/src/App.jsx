@@ -30,7 +30,7 @@ function App() {
       const temp = [...prev];
       const presentIndex = temp.indexOf(toolName);
       console.log(presentIndex);
-      if (presentIndex !== -1) temp.splice(presentIndex);
+      if (presentIndex !== -1) temp.splice(presentIndex,1);
       else temp.push(toolName);
       return temp;
     });
@@ -56,6 +56,10 @@ function App() {
         body: formData, // No manual headers needed
       });
       const data = await response.json();
+      if (!activeConvId && data?.thread_id) {
+        setActiveConvId(data.thread_id);
+        navigate(`/${data.thread_id}`);
+      }
       console.log(data);
       setMenuOpen(false);
     } catch (error) {

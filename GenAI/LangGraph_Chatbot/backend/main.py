@@ -187,18 +187,13 @@ def GetAllTool():
 @app.post("/upload-file/")
 async def upload_file(request: Request, file: UploadFile = File(...)):
     threadId = request.headers.get("threadId")
+    if not threadId or threadId=="None":
+        threadId = uuid.uuid4()
+    print(threadId)
     if str(threadId) not in add_file_data:
         init_vector_store(str(threadId))
          
-    # 1. Validate the file extension
     file_extension = file.filename.split(".")[-1].lower()
-    # if file_extension not in ALLOWED_EXTENSIONS:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail=f"Invalid file type. Allowed types: {ALLOWED_EXTENSIONS}"
-    #     )
-
-    # 2. Define the destination file path
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     # 3. Read and save the file asynchronously
     try:
@@ -216,5 +211,6 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
         "filename": file.filename,
         "saved_path": file_path,
         "content_type": file.content_type,
-        "status": "success"
+        "status": "success",
+        "thread_id":threadId
     }
