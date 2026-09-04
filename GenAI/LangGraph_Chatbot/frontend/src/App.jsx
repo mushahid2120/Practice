@@ -30,7 +30,7 @@ function App() {
       const temp = [...prev];
       const presentIndex = temp.indexOf(toolName);
       console.log(presentIndex);
-      if (presentIndex !== -1) temp.splice(presentIndex,1);
+      if (presentIndex !== -1) temp.splice(presentIndex, 1);
       else temp.push(toolName);
       return temp;
     });
@@ -52,7 +52,7 @@ function App() {
     try {
       const response = await fetch("http://localhost:8000/upload-file", {
         method: "POST",
-        headers:{threadId: activeConvId ?? ""},
+        headers: { threadId: activeConvId ?? "" },
         body: formData, // No manual headers needed
       });
       const data = await response.json();
