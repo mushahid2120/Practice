@@ -8,9 +8,11 @@
 public class RotateLeftByK {
     public static void main(String[] args) {
         int[]nums={1,2,3,4,5,6,7};
-        int k=3;
+        int k=100000;
         int lastElement;
-        for(int i=0;i<k;i++){
+        int finalK=k%nums.length;
+        System.out.println(finalK);
+        for(int i=0;i<finalK;i++){
             lastElement=nums[nums.length-1];
             for(int j=nums.length-1;j>0;j--){
                 nums[j]=nums[j-1];
