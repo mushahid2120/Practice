@@ -20,27 +20,26 @@ import java.util.TreeSet;
 public class LogestSubArrayPos {
     public static void main(String[] args) {
         int []nums={1,2,3};
-        int k=3,sum=0,left=0,right=0;
-        ArrayList<Integer> subArrayLenght=new ArrayList<>();
+        int k=3,sum=0,start=0,count=0;
         for(int i=0;i<nums.length;i++){
-            if(sum+nums[i]<k){
-                sum+=nums[i];
-                right++;
+            while(sum>k){
+                sum-=nums[start++];
             }
-            else if(sum+nums[i]>k){
-                sum-=nums[left];
-                left++;
-                sum+=nums[i];
-                right++;
+            while(sum<k){
+                sum+=nums[i++];
             }
-            
-            if(sum+nums[i]==k){
-                right=i;
-                subArrayLenght.add(right-left+1);
-                left=i;
-                sum=nums[i];
+            if(sum==k){
+                sum-=nums[start++];
+                count++;
             }
         }
-        System.out.println(subArrayLenght);
+        while(sum>k){
+            sum-=nums[start++];
+        }
+        if(sum==k){
+            count++;
+        }
+        System.out.println(count);
+
     }
 }
