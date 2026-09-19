@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 int BruteFroce(vector<int> &arr)
@@ -29,25 +30,63 @@ int BruteFroce(vector<int> &arr)
     return maxSum;
 }
 
-int Optimal(vector<int> &arr){
-    int n=arr.size();
-    int maxSum=arr[0],sum=0;
-    for(int i=0;i<n;i++){
-        sum+=arr[i];
-        if(sum>maxSum){
-            maxSum=sum;
+int Optimal(vector<int> &arr)
+{
+    int n = arr.size();
+    int maxSum = arr[0], sum = 0;
+    for (int i = 0; i < n; i++)
+    {
+        sum += arr[i];
+        if (sum > maxSum)
+        {
+            maxSum = sum;
         }
-        if(sum<0){
-            sum=0;
+        if (sum < 0)
+        {
+            sum = 0;
         }
     }
     return maxSum;
 }
+
+vector<int> OptimalforSubarray(vector<int> &arr)
+{
+    long sum = 0, maxSum =0,n=arr.size();
+    int first = 0, last = 0,start=0,length=0,maxlength=0;
+    for (int i = 0; i < n; i++)
+    {
+        if (sum == 0)
+        {
+            start = i;
+        }
+        sum += arr[i];
+        if (maxSum < sum)
+        {
+            maxSum = sum;
+            first = start;
+            last=i+1;
+        }
+        if(sum==maxSum && first==start){
+            last=i+1;
+        }
+        if (arr[i]<0)
+        {
+            sum = 0;
+        }
+    }
+    if(last<=first){
+        return {-1};
+    }
+        return vector<int>(arr.begin()+first,arr.begin()+last);
+}
+
 int main()
 {
-    vector<int> arr = {-2};
+    vector<int> arr = {-838, -329};
     // int result=BruteFroce(arr);
-    int result=Optimal(arr);
-    cout<<result;
+    vector<int> result= OptimalforSubarray(arr);
+    for(int i:result){
+        cout <<i<<", ";
+    }
     return 0;
 }
