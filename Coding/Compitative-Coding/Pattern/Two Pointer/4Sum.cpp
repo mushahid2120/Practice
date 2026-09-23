@@ -66,12 +66,17 @@ vector<vector<int>> Optimal(vector<int> &arr,int target)
             continue;
         for (int j = i + 1; j < n - 2; j++)
         {
-            long long fixed = arr[i]+arr[j];
+            if(j!=i+1 && arr[j]==arr[j-1]) continue;
+            long long fixed = 0;
+            fixed+=arr[i];
+            fixed+=arr[j];
             int left = j + 1;
             int right = n - 1;
             while (left < right)
             {
-                long long sum = (long long)(arr[left] + arr[right]);
+                long long sum = 0;
+                sum+=arr[left];
+                sum += arr[right];
                 if (sum + fixed > target)
                     --right;
                 else if (sum + fixed < target)
@@ -82,11 +87,11 @@ vector<vector<int>> Optimal(vector<int> &arr,int target)
                     --right;
                     ++left;
                 }
-                while (left < right && arr[left] == arr[left - 1])
+                while (left<right && left !=j+1 && arr[left] == arr[left - 1])
                 {
                     left++;
                 }
-                while (right > left && arr[right] == arr[right + 1])
+                while (left<right && right !=n-1 && arr[right] == arr[right + 1])
                 {
                     right--;
                 }
@@ -98,8 +103,8 @@ vector<vector<int>> Optimal(vector<int> &arr,int target)
 
 int main()
 {
-    vector<int> arr = {0,0,0,0,0,0,0};
-    int target = 0;
+    vector<int> arr = {2,2,2,2,2};
+    int target = 8;
     vector<vector<int>> result = Optimal(arr, target);
     for (auto v : result)
     {

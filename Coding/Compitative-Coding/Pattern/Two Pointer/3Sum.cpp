@@ -1,3 +1,16 @@
+// Given an integer array nums, return all the triplets [nums[i], nums[j],
+// nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+// Notice that the solution set must not contain duplicate triplets.
+// Example 1:
+// Input: nums = [-1,0,1,2,-1,-4]
+// Output: [[-1,-1,2],[-1,0,1]]
+// Explanation:
+// nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
+// nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
+// nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.
+// The distinct triplets are [-1,0,1] and [-1,-1,2].
+// Notice that the order of the output and the order of the triplets does not matter.
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -44,18 +57,12 @@ vector<vector<int>> Optimal(vector<int> &arr)
     {
         int fixed = arr[i];
         if (i > 0 && arr[i] == arr[i - 1])
-        continue;
+            continue;
         int left = i + 1;
         int right = n - 1;
         while (left < right)
         {
             long long sum = (long long)(arr[left] + arr[right]);
-                            while (left < right && arr[left] == arr[left - 1]) {
-                    left++;
-                }
-                while (right >left && arr[right] == arr[right + 1]) {
-                    right--;
-                }
             if (sum + fixed > 0)
                 --right;
             else if (sum + fixed < 0)
@@ -66,13 +73,23 @@ vector<vector<int>> Optimal(vector<int> &arr)
                 --right;
                 ++left;
             }
+            while (left !=i+1 && arr[left] == arr[left - 1])
+            {
+                left++;
+            }
+            while (right!=n-1 && arr[right] == arr[right + 1])
+            {
+                right--;
+            }
         }
     }
     return vector<vector<int>>(result.begin(), result.end());
 }
+
+
 int main()
 {
-    vector<int> arr = {1,2,0,1,0,0,0,0};
+    vector<int> arr = {1, 2, 0, 1, 0, 0, 0, 0};
     vector<vector<int>> result = Optimal(arr);
     for (auto v : result)
     {
