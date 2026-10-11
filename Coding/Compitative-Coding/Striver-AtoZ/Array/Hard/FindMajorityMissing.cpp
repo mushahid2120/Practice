@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 using namespace std;
 
 vector<int> BruteForce(vector<int> arr)
@@ -57,77 +58,38 @@ vector<int> Better(vector<int> arr)
 
 vector<int> Optimal(vector<int> arr)
 {
-    int n = arr.size(), c1 = 1, v1 = arr[0];
-    if (n == 1)
-        return {v1};
-    int c2 = 1, v2 = arr[1], starting = 1;
-    while (starting < n && arr[starting] == v1)
-    {
-        starting++;
+   int c1=0,c2=0,v1,v2,n=arr.size();
+   for(int i=0;i<n;i++){
+    // cout<<i<<"="<<v1<<"->"<<c1<<" "<<v2<<"->"<<c2<<"\n";
+    if(c1==0 && v2!=arr[i]){
+        v1=arr[i];
         c1++;
+    }else if(c2==0 && v1!=arr[i]){
+        v2=arr[i];
+        c2++;
+    }else if(v1==arr[i]) c1++;
+    else if(v2==arr[i]) c2++;            
+    else {
+        --c1;
+        --c2;
     }
-    v2 = arr[starting];
-    for (int i = starting + 1; i < n; i++)
-    {
-        if (arr[i] == v1)
-            ++c1;
-        else if (arr[i] == v2)
-            ++c2;
-        else
-        {
-            --c1;
-            --c2;
-        }
-
-        if (c1 == -1)
-        {
-            v1 = arr[i];
-            c1 = 1;
-        }
-        if (c2 == -1)
-        {
-            while (i < n && arr[i] == v1)
-            {
-                ++i;
-                ++c1;
-            }
-            if (i == n)
-            {
-                break;
-            }
-            if (v2 == arr[i])
-                c2 = 2;
-            else
-                c1 = 1;
-            v2 = arr[i];
-        }
+}
+    c1=0,c2=0;
+    for(int i:arr){
+        if(i==v1) c1++;
+        if(i==v2) c2++;
     }
-
-    c1 = 0;
-    c2 = 0;
-    for (int i : arr)
-    {
-        if (i == v1)
-            c1++;
-        else if (i == v2)
-            c2++;
-    }
-    cout << v1 << ", " << v2;
-    if (c2 <= n / 3 && c1 <= n / 3)
-        return {};
-    if (c2 <= n / 3)
-        return {v1};
-    if (c1 <= n / 3)
-        return {v2};
-
-    if (v1 > v2)
-        swap(v1, v2);
-    return {v1, v2};
+    // cout<<v2<<","<<v1<<","<<c1<<","<<c2;
+    vector<int> result;
+    if(c1>n/3) result.push_back(v1);
+    if(c2>n/3) result.push_back(v2);
+    sort(result.begin(),result.end());
+    return result;
 }
 
 int main()
 {
-    vector<int> arr = {1, 1, 2, 3, 4, 1, 1, 5, 6, 7, 1, 1, 8, 9, 10, 1, 11, 12, 13, 14};
+    vector<int> arr = {1,2,1,2,2,3,3,1};
     vector<int> result = Optimal(arr);
     for (int i : result)
     {
