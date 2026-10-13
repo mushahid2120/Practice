@@ -24,20 +24,12 @@ int Optimal(vector<int> arr, int target)
     int n = arr.size(), low = 0, high = n - 1, mid = 0;
     while (low <= high)
     {
-        mid = (low + high) / 2;
-        if(arr[mid]==target) return mid;
-        if (target < arr[mid])
-            if (arr[mid] < arr[low] || arr[low] <= target)
-                high = mid - 1;
-            else
-                low = mid + 1;
-        else
-        {
-            if (arr[mid] > arr[high] || arr[high] >= target)
-                low = mid + 1;
-            else
-                high = mid - 1;
-        }
+        if(low==high) return arr[low];
+        else if(arr[low]<=arr[mid]){    //Checking first half(low to mid) is sorted or not 
+            if(arr[low]<arr[high]) return arr[low];  //
+            else low=mid+1;
+        }else if(arr[mid]<arr[mid-1]) return mid;
+        else high=mid-1;
     }
     return -1;
 }
@@ -45,8 +37,7 @@ int Optimal(vector<int> arr, int target)
 int main()
 {
     vector<int> arr = {4,5,6,7,0,1,2};
-    int target = 4;
-    int result = Optimal(arr, target);
+    int result = Optimal(arr);
     cout << result;
     return 0;
 }

@@ -23,7 +23,7 @@ vector<int> Optimal(vector<int> arr, int target)
     while (low <= high)
     {
         mid = (low + high) / 2;
-        if (arr[mid] == target)
+        if (arr[mid] == target)   //If you got the desired number than break that is the answer itself
             break;
         if (arr[mid] > target)
             high = mid - 1;
@@ -31,7 +31,7 @@ vector<int> Optimal(vector<int> arr, int target)
             low = mid + 1;
     }
 
-    if (low <= high)
+    if (low <= high)          // if not that mean low -> Ceil and low-1 is the floor
         return {arr[mid], arr[mid]};
     else
         return {arr[low-1], arr[low]};

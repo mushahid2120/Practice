@@ -12,6 +12,11 @@
 #include <vector>
 using namespace std;
 
+
+// Solution: Go to the mid and check the sum of number in left and numbers in right you got the answer
+// go where the count of is odd 
+
+
 int Optimal(vector<int> arr){
     int n=arr.size(),low=0,high=n-1,mid=0,ml=0,mr=0;
     // cout<<n;
