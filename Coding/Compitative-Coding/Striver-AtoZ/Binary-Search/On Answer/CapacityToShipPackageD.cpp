@@ -18,35 +18,44 @@
 
 #include <iostream>
 #include <vector>
-#include<numeric>
+#include <numeric>
+#include <algorithm>
 using namespace std;
 
-int Optimal(vector<int> arr,int day){
-    long long totalSum = accumulate(arr.begin(),arr.end(),0);
-    int n =arr.size(),low=1,high=totalSum,mid;
-    while(low<=high){
-        mid=(low+high)/2;
-        int nod=0;
-        long sum =0;
-        for(int i:arr){
-            sum+=i;
-            if(sum>mid){
-                sum=i;
+int Optimal(vector<int> arr, int day)
+{
+    int max = *max_element(arr.begin(), arr.end()), totalSum = accumulate(arr.begin(), arr.end(), 0);
+    int n = arr.size(), lowcap = max, highcap = totalSum, capacity = 0, ans;
+    while (lowcap <= highcap)
+    {
+        capacity = (lowcap + highcap) / 2;
+        int nod = 1, perdaycap = 0;
+        for(int i=0;i<n;i++){
+            if(perdaycap+arr[i]>capacity){
+                perdaycap=arr[i];
                 nod++;
+            }else{
+                perdaycap+=arr[i];
             }
-            if(nod>=day) break;
         }
-        if(nod==day) return mid+1;
-        if(nod>day) low=mid+1;
-        else high=mid-1;
+        if (nod <= day)
+        {
+            ans = capacity  ;
+            highcap = capacity - 1;
+        }
+        else
+        {
+            lowcap = capacity + 1;
+        }
     }
-return mid+1;
-}
 
-int main(){
-    vector<int> arr={3,2,2,4,1,4};
-    int day=3;
-    int result=Optimal(arr,day);
-    cout<<result;
+    return ans;
+}
+int main()
+{
+    vector<int> arr = {1,2,3,4,5,6,7,8,9,10};
+    int day = 5;
+    int result = Optimal(arr, day);
+    cout << result;
     return 0;
 }

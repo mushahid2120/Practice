@@ -24,19 +24,30 @@ bool Optimal(vector<int> arr, int target)
     int n = arr.size(), low = 0, high = n - 1, mid = 0;
     while (low <= high)
     {
-        mid=(low+high)/2;
-        while(low<high && arr[low]==arr[mid] && arr[mid]==arr[high]) {
-            cout<<low<<" "<<mid<<" "<<high<<"\n";
+        mid = (low + high) / 2;
+        while (low < high && arr[low] == arr[mid] && arr[mid] == arr[high])
+        {
+            cout << low << " " << mid << " " << high << "\n";
             --high;
             ++low;
         }
-        if(arr[mid]==target) return true;
-        else if(arr[low]<=arr[mid]){    
-            if(arr[low]<=target && arr[mid]>target) high=mid-1;
-            else  low=mid+1;
-        }else {
-            if(arr[high]>=target && arr[mid]<target) low=mid+1;
-            else high=mid-1;
+        if (arr[mid] == target)
+            return true;
+        // Checking the left side is sorted or not
+        else if (arr[low] <= arr[mid])
+        {
+            // Left side is sorted then check it is in the range or not and choose to side to search wisely
+            if (arr[low] <= target && arr[mid] > target)
+                high = mid - 1;
+            else
+                low = mid + 1;
+        }
+        else
+        {
+            if (arr[high] >= target && arr[mid] < target)
+                low = mid + 1;
+            else
+                high = mid - 1;
         }
     }
     return false;
@@ -44,9 +55,9 @@ bool Optimal(vector<int> arr, int target)
 
 int main()
 {
-    vector<int> arr = {3,2,2};
-    int target=3;
-    bool result = Optimal(arr,target);
+    vector<int> arr = {3, 2, 2};
+    int target = 3;
+    bool result = Optimal(arr, target);
     cout << result;
     return 0;
 }

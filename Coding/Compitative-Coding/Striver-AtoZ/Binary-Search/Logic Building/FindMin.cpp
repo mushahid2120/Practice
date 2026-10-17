@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 int Optimal(vector<int> arr)
@@ -52,10 +53,29 @@ int Optimal(vector<int> arr)
     return -1;
 }
 
+int BetterThanOptimal(vector<int> arr){
+    int n=arr.size(),low=0,high=n-1,mid=0,ans=INT_MAX;
+    while(low<=high){
+        mid=(low+high)/2;
+        if(arr[low]<arr[high]){
+            ans=min(arr[low],ans);
+            break;
+        }
+        if(arr[mid]>=arr[low]){
+            ans=min(arr[low],ans);
+            low=mid+1;
+        }else{
+            ans=min(arr[mid],ans);
+            high=mid-1;
+        }
+    }
+    return ans;
+}
+
 int main()
 {
-    vector<int> arr = {3, 4, 5, 1, 2};
-    int result = Optimal(arr);
+    vector<int> arr = {4,5,8,9,1,3};
+    int result = BetterThanOptimal(arr);
     cout << result;
     return 0;
 }

@@ -40,24 +40,7 @@ int MaxMin(vector<int> arr)
 
 int Optimal(vector<int> arr, int t)
 {
-    int max = MaxMin(arr);
-    int n = arr.size(), low = 1, high = max, mid;
-    if (low == high)
-        return arr[0] / t;
-    while (low <= high)
-    {
-        mid = (low + high) / 2;
-        long sum = 0;
-        for (int i = 0; i < n; i++)
-        {
-            sum += ceil(arr[i] / (float)mid);
-        }
-        if (sum <= t)
-            high = mid - 1;
-        else
-            low = mid + 1;
-    }
-    return low;
+https://leetcode.com/problems/find-the-smallest-divisor-given-a-threshold/description/
 }
 
 int main()

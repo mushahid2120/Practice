@@ -17,20 +17,27 @@
 using namespace std;
 
 int Optimal(vector<int> arr,int k){
-    int n=arr.size(),low=1,high=n-1;
-    if(arr[n-1]<k) return k+n;
+
+    int n=arr.size(),low=0,high=n-1,answer=k;
     while(low<=high){
-        int mid=(low+high)/2;
-        if(arr[mid]==k) return k+mid+1;
-        if(arr[mid]>k) high=mid-1;
-        else low=mid+1;
+        int mid=(high+low)/2;
+
+        if(arr[mid]<=answer){
+            //When you encounter something smaller than answer then change the answet extend the high value.
+            answer=mid+k+1;
+            low=mid+1;
+            high=n-1;
+        }
+        else {
+            high=mid-1;
+        }
     }
-    return k+low+1;
+    return answer;
 }
 
 int main(){
-    vector<int> arr={1,2,3,4};
-    int k=2;
+    vector<int> arr={3,4,9,10,12,19,24,25,27,30};
+    int k=8;
     int result=Optimal(arr,k);
     cout<<result;
     return 0;

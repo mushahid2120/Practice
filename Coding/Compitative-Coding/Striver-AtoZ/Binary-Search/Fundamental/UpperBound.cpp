@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 int Optimal(vector<int> arr, int target)
@@ -23,20 +24,20 @@ int Optimal(vector<int> arr, int target)
     if (target<arr[0]) return 0;
     while(low<=high){
         mid=(low+high)/2;
-        if(arr[mid]==target){
-            while(mid<n && arr[mid]==target) ++mid;
-            return mid;
-        }
-        else if(arr[mid]>target) high=mid-1;
-        else low=mid+1;
+        if(target>=arr[mid])
+            low=mid+1;
+        else high=mid-1;
     }
-    return low;
+    return arr[high];
+
+    return *lower_bound(arr.begin(),arr.end(),target);
+
 }
 
 int main()
 {
-    vector<int> arr = {2, 3, 7, 10, 11, 11, 25};
-    int target = 9;
+    vector<int> arr = {2, 3,7, 10, 11, 11, 25};
+    int target = 26;
     int result = Optimal(arr, target);
     cout << result;
     return 0;

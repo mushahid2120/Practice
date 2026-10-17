@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 int Optimal(vector<int> arr, int target)
@@ -23,19 +24,13 @@ int Optimal(vector<int> arr, int target)
         return n;
     while (low <= high)
     {
-        mid = (low + high) / 2;
-        if (arr[mid] == target)
-        {
-            while (mid >= 0 && target == arr[mid])
-                --mid;
-            return mid + 1;
-        }
-        else if (arr[mid] > target)
-            high = mid - 1;
-        else
-            low = mid + 1;
+        mid=(low+high)/2;
+        if(arr[mid]>=target) high=mid-1;
+        else low=mid+1;
     }
     return low;
+
+    return lower_bound(arr.begin(),arr.end(),target)-arr.begin();
 }
 
 int main()
