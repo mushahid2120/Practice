@@ -26,35 +26,34 @@ int Optimal(vector<int> arr, int k)
     while (low <= high)
     {
         mid = (low + high) / 2;
-        int first = arr[0], no_of_cows = 1;
+        int start = 0, no_of_cows = 1;
+        bool isBigGap = false;
         cout << mid << "--";
         for (int i = 1; i < n; i++)
         {
             cout << arr[i] << ",";
-            if (arr[i] - first >= mid)
+            if (arr[i] - arr[start] >= mid)
             {
-                cout << " ";
-            }
-
-            if (arr[i] - first == mid)
-            {
+                cout << "    ";
+                start = i;
                 no_of_cows++;
-                first = arr[i];
-            }
-            else if (arr[i] - first > mid)
-            {
-                no_of_cows++;
-                if (arr[i - 1] == first)
-                    first = arr[i];
-                else first = arr[i - 1];
             }
         }
+        // if (isBigGap)
+        // {
+        //     low = mid + 1;
+        //     cout << "---" << no_of_cows << "\n";
+        //     continue;
+        // }
+        // else if (start != n - 1)
+        // {
+        //     no_of_cows++;
+        // }
 
         cout << "---" << no_of_cows << "\n";
-        if (no_of_cows == k)
-        {
-            ans = mid;
-            high = mid - 1;
+        if(no_of_cows==k){
+            ans=mid;
+            low=mid+1;
         }
         else if (no_of_cows < k)
         {
@@ -62,6 +61,7 @@ int Optimal(vector<int> arr, int k)
         }
         else
         {
+            ans=mid;
             low = mid + 1;
         }
     }
@@ -70,8 +70,8 @@ int Optimal(vector<int> arr, int k)
 
 int main()
 {
-    vector<int> arr = {6, 4, 3, 16, 20, 7, 18, 10};
-    int k = 5;
+    vector<int> arr = {10, 1, 2, 7, 5};
+    int k = 3;
     int result = Optimal(arr, k);
     cout << result;
     return 0;
