@@ -13,27 +13,37 @@ using namespace std;
 
 int Optimal(vector<int> arr1, vector<int> arr2, int k)
 {
-    int n = arr1.size(), m = arr2.size(), low = 0, high = n, mid;
-    if(k>m+n) return -1;
+    int n = arr1.size(), m = arr2.size(), low = 0, high = n;
+    if (k > m + n)
+        return -1;
     if (m < n)
         return Optimal(arr2, arr1, k);
     if (n == 0)
-        return arr2[k + 1];
+        return arr2[k - 1];
 
     while (low <= high)
     {
         int cut1 = low + (high - low) / 2;
-        int cut2 = abs(k - cut1);
+        if(cut1>k){
+            //If cut1 is bigger than k than how cut1+something give me my desire answer
+            high=cut1-1;
+            continue;
+        }
+        int cut2 = k - cut1;
+        if (cut2 > m)
+        {
+            //if cut1 is very small, thus cut2 is bigger than size of the array than it will exceed the index size
+            low = cut1 + 1;
+            continue;
+        }
         int left1 = cut1 == 0 ? INT_MIN : arr1[cut1 - 1];
         int right1 = cut1 == n ? INT_MAX : arr1[cut1];
         int left2 = cut2 == 0 ? INT_MIN : arr2[cut2 - 1];
         int right2 = cut2 == m ? INT_MAX : arr2[cut2];
 
-        // cout << left1 << " " << right1 << " " << left2 << " " << right2 << "\n";
-
-        if (left1 > right2)
+        if (left1 >= right2)
             high = cut1 - 1;
-        else if (left2 > right1)
+        else if (left2 >= right1)
             low = cut1 + 1;
         else
         {
@@ -44,8 +54,8 @@ int Optimal(vector<int> arr1, vector<int> arr2, int k)
 
 int main()
 {
-    vector<int> arr1 = {1, 4, 8, 10, 12}, arr2 = {};
-    int k = 6;
+    vector<int> arr1 = {2, 3, 6, 7, 9},arr2={1, 4, 8, 10};
+    int k = 2;
     int result = Optimal(arr1, arr2, k);
     cout << result;
     return 0;
