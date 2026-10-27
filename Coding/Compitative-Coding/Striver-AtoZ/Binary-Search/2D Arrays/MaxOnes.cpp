@@ -14,28 +14,14 @@
 #include <algorithm>
 using namespace std;
 
-int find_total_One(vector<int>arr){
-    int n=arr.size(),low=0,high=n-1,ans=0;
-    while(low<=high){
-        int mid=(low+high)/2;
-        if(arr[mid]==1){
-            ans=mid+1;
-            low=mid+1;
-        }else{
-            high=mid-1;
-        }
-    }
-    cout<<"one count="<<ans<<"\n";
-    return ans;
-}
 
 int Optimal(vector<vector<int>> arr){
     int n=arr.size(),m=arr[0].size();
     int maxOneCount=0,maxOneIndex=0;
     for(int i=0;i<n;i++){
-        cout<<"row="<<i<<" ";
-        int currentOneCount=m-*lower_bound(arr[i].begin(),arr[i].end(),1);
-        cout<<"LOWER_BOUND="<<currentOneCount<<" ";
+        // cout<<"row="<<i<<" ";
+        int currentOneCount=arr[i].end()-lower_bound(arr[i].begin(),arr[i].end(),1);
+        // cout<<"LOWER_BOUND="<<currentOneCount<<" ";
         if(currentOneCount>maxOneCount){
             maxOneCount=currentOneCount;
             maxOneIndex=i;
@@ -46,7 +32,7 @@ int Optimal(vector<vector<int>> arr){
 }
 
 int main(){
-    vector<vector<int>> arr={{0,0,0},{0,0,1},{0,1,1}};
+    vector<vector<int>> arr={{0,1,1},{1,1,1},{0,1,1}};
     int result=Optimal(arr);
     cout<<result;
     return 0;
